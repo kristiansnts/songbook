@@ -7,12 +7,13 @@ import { columns } from './components/columns'
 import { DataTable } from './components/data-table'
 import { SongsDialogs } from './components/songs-dialogs'
 import { SongsPrimaryButtons } from './components/songs-primary-buttons'
-import SongsProvider from './context/songs-context'
-import { songs } from './data/songs'
+import SongsProvider, { useSongs } from './context/songs-context'
 
-export default function Songs() {
+function SongsContent() {
+  const { songs } = useSongs()
+  
   return (
-    <SongsProvider>
+    <>
       <Header fixed>
         <Search />
         <div className='ml-auto flex items-center space-x-4'>
@@ -37,6 +38,14 @@ export default function Songs() {
       </Main>
 
       <SongsDialogs />
+    </>
+  )
+}
+
+export default function Songs() {
+  return (
+    <SongsProvider>
+      <SongsContent />
     </SongsProvider>
   )
 }

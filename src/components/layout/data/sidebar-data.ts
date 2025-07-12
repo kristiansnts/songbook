@@ -1,21 +1,15 @@
 import {
-  IconBrowserCheck,
   IconChecklist,
   IconHelp,
   IconLayoutDashboard,
-  IconNotification,
-  IconPalette,
-  IconSettings,
-  IconTool,
-  IconUserCog,
   IconUsers,
 } from '@tabler/icons-react'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
   user: {
-    name: 'satnaing',
-    email: 'satnaingdev@gmail.com',
+    name: 'kristian',
+    email: 'epafroditus.kristian@gmail.com',
     avatar: '/avatars/shadcn.jpg',
   },
   navGroups: [

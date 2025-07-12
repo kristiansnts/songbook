@@ -56,7 +56,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       } else {
         toast.error('Invalid credentials. Use admin@gmail.com / admin')
       }
-    } catch (error) {
+    } catch {
       toast.error('Login failed')
     } finally {
       setIsLoading(false)
