@@ -18,7 +18,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 const DUMMY_USER = {
   email: 'admin@gmail.com',
-  password: 'admin',
+  password: 'password',
   name: 'Admin User'
 }
 
