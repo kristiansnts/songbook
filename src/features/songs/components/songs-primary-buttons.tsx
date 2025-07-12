@@ -1,9 +1,9 @@
 import { IconDownload, IconPlus } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
-import { useTasks } from '../context/tasks-context'
+import { useSongs } from '../context/songs-context'
 
-export function TasksPrimaryButtons() {
-  const { setOpen } = useTasks()
+export function SongsPrimaryButtons() {
+  const { setOpen } = useSongs()
   return (
     <div className='flex gap-2'>
       <Button

@@ -39,7 +39,7 @@ interface Props {
   onOpenChange: (open: boolean) => void
 }
 
-export function TasksImportDialog({ open, onOpenChange }: Props) {
+export function SongsImportDialog({ open, onOpenChange }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { file: undefined },
@@ -71,7 +71,7 @@ export function TasksImportDialog({ open, onOpenChange }: Props) {
     >
       <DialogContent className='gap-2 sm:max-w-sm'>
         <DialogHeader className='text-left'>
-          <DialogTitle>Import Tasks</DialogTitle>
+          <DialogTitle>Import Songs</DialogTitle>
           <DialogDescription>
             Import tasks quickly from a CSV file.
           </DialogDescription>

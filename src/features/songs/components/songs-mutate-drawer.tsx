@@ -23,12 +23,12 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { Task } from '../data/schema'
+import { Song } from '../data/schema'
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  currentRow?: Task
+  currentRow?: Song
 }
 
 const formSchema = z.object({
@@ -37,12 +37,12 @@ const formSchema = z.object({
   label: z.string().min(1, 'Please select a label.'),
   priority: z.string().min(1, 'Please choose a priority.'),
 })
-type TasksForm = z.infer<typeof formSchema>
+type SongsForm = z.infer<typeof formSchema>
 
-export function TasksMutateDrawer({ open, onOpenChange, currentRow }: Props) {
+export function SongsMutateDrawer({ open, onOpenChange, currentRow }: Props) {
   const isUpdate = !!currentRow
 
-  const form = useForm<TasksForm>({
+  const form = useForm<SongsForm>({
     resolver: zodResolver(formSchema),
     defaultValues: currentRow ?? {
       title: '',
@@ -52,7 +52,7 @@ export function TasksMutateDrawer({ open, onOpenChange, currentRow }: Props) {
     },
   })
 
-  const onSubmit = (data: TasksForm) => {
+  const onSubmit = (data: SongsForm) => {
     // do something with the form data
     onOpenChange(false)
     form.reset()
@@ -69,7 +69,7 @@ export function TasksMutateDrawer({ open, onOpenChange, currentRow }: Props) {
     >
       <SheetContent className='flex flex-col'>
         <SheetHeader className='text-left'>
-          <SheetTitle>{isUpdate ? 'Update' : 'Create'} Task</SheetTitle>
+          <SheetTitle>{isUpdate ? 'Update' : 'Create'} Song</SheetTitle>
           <SheetDescription>
             {isUpdate
               ? 'Update the task by providing necessary info.'

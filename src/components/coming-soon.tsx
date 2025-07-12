@@ -5,10 +5,16 @@ export default function ComingSoon() {
     <div className='h-svh'>
       <div className='m-auto flex h-full w-full flex-col items-center justify-center gap-2'>
         <IconPlanet size={72} />
-        <h1 className='text-4xl leading-tight font-bold'>Coming Soon 👀</h1>
+        <h1 className='text-4xl leading-tight font-bold'>Developer Contact</h1>
         <p className='text-muted-foreground text-center'>
-          This page has not been created yet. <br />
-          Stay tuned though!
+          Please contact epafroditus.kristian@gmail.com for consultation. <br />
+          or visit{' '}
+          <a
+            href='https://kristiansnts.dev'
+            className='text-primary underline'
+            target='_blank'
+            rel='noopener noreferrer'
+          >kristiansnts.dev</a>
         </p>
       </div>
     </div>
