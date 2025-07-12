@@ -1,8 +1,10 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { showSubmittedData } from '@/utils/show-submitted-data'
+import { parseLyricsAndChords, richTextToPlainText, getAvailableChords } from '@/utils/lyrics-parser'
+import { useSongs } from '../context/songs-context'
 import { Button } from '@/components/ui/button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Form,
   FormControl,
@@ -12,17 +14,17 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { TagsInput } from '@/components/ui/tags-input'
+import { HtmlEditor } from '@/components/ui/html-editor'
 import {
-  Sheet,
-  SheetClose,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
-import { SelectDropdown } from '@/components/select-dropdown'
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Song } from '../data/schema'
 
 interface Props {
@@ -33,124 +35,114 @@ interface Props {
 
 const formSchema = z.object({
   title: z.string().min(1, 'Title is required.'),
-  status: z.string().min(1, 'Please select a status.'),
-  label: z.string().min(1, 'Please select a label.'),
-  priority: z.string().min(1, 'Please choose a priority.'),
+  artist: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  baseChord: z.string().optional(),
+  lyricAndChords: z.string().optional(),
 })
 type SongsForm = z.infer<typeof formSchema>
 
-export function SongsMutateDrawer({ open, onOpenChange, currentRow }: Props) {
+export function SongsMutateDialog({ open, onOpenChange, currentRow }: Props) {
   const isUpdate = !!currentRow
+  const { addSong, updateSong } = useSongs()
 
   const form = useForm<SongsForm>({
     resolver: zodResolver(formSchema),
-    defaultValues: currentRow ?? {
-      title: '',
-      status: '',
-      label: '',
-      priority: '',
+    defaultValues: {
+      title: currentRow?.title ?? '',
+      artist: currentRow?.artist ?? '',
+      tags: currentRow?.tags ?? [],
+      baseChord: currentRow?.baseChord ?? '',
+      lyricAndChords: currentRow?.lyricAndChords ?? '',
     },
   })
 
+
   const onSubmit = (data: SongsForm) => {
-    // do something with the form data
-    onOpenChange(false)
-    form.reset()
-    showSubmittedData(data)
+    
+    // Parse lyrics and chords if provided
+    const lyricsAndChordsHtml = data.lyricAndChords || '' // Keep HTML from rich editor
+    
+    // Convert HTML to plain text for parsing
+    const plainText = richTextToPlainText(lyricsAndChordsHtml)
+    
+    const parsed = parseLyricsAndChords(plainText)
+    
+    // Create the processed data structure
+    const processedData = {
+      title: data.title,
+      artist: data.artist,
+      tags: data.tags || [],
+      status: 'todo', // Default status for new songs
+      label: 'song', // Default label
+      lyric: parsed.lyrics,
+      chords: parsed.chords.join(','), // Convert array to comma-separated string
+      lyricAndChords: lyricsAndChordsHtml,
+      baseChord: data.baseChord || (parsed.chords.length > 0 ? parsed.chords[0] : undefined)
+    }
+
+    try {
+      if (isUpdate && currentRow) {
+        // TODO: Will implement update to database when backend is ready
+        updateSong(currentRow.id, processedData)
+      } else {
+        // TODO: Will implement add to database when backend is ready
+        addSong(processedData)
+      }
+      
+      onOpenChange(false)
+      form.reset()
+    } catch (_error) {
+      // Handle error - could show a toast notification in the future
+      // For now, silently fail and close the dialog
+    }
   }
 
   return (
-    <Sheet
+    <Dialog
       open={open}
       onOpenChange={(v) => {
         onOpenChange(v)
         form.reset()
       }}
     >
-      <SheetContent className='flex flex-col'>
-        <SheetHeader className='text-left'>
-          <SheetTitle>{isUpdate ? 'Update' : 'Create'} Song</SheetTitle>
-          <SheetDescription>
+      <DialogContent className="w-[98vw] sm:w-[95vw] sm:max-w-[600px] max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isUpdate ? 'Update' : 'Create'} Song</DialogTitle>
+          <DialogDescription>
             {isUpdate
-              ? 'Update the task by providing necessary info.'
-              : 'Add a new task by providing necessary info.'}
+              ? 'Update the song by providing necessary info.'
+              : 'Add a new song by providing necessary info.'}
             Click save when you&apos;re done.
-          </SheetDescription>
-        </SheetHeader>
+          </DialogDescription>
+        </DialogHeader>
         <Form {...form}>
           <form
-            id='tasks-form'
+            id='songs-form'
             onSubmit={form.handleSubmit(onSubmit)}
-            className='flex-1 space-y-5 px-4'
+            className='space-y-4'
           >
             <FormField
               control={form.control}
               name='title'
               render={({ field }) => (
                 <FormItem className='space-y-1'>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Song title</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder='Enter a title' />
+                    <Input {...field} placeholder='Enter a song title' />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
+             <FormField
               control={form.control}
-              name='status'
+              name='artist'
               render={({ field }) => (
                 <FormItem className='space-y-1'>
-                  <FormLabel>Status</FormLabel>
-                  <SelectDropdown
-                    defaultValue={field.value}
-                    onValueChange={field.onChange}
-                    placeholder='Select dropdown'
-                    items={[
-                      { label: 'In Progress', value: 'in progress' },
-                      { label: 'Backlog', value: 'backlog' },
-                      { label: 'Todo', value: 'todo' },
-                      { label: 'Canceled', value: 'canceled' },
-                      { label: 'Done', value: 'done' },
-                    ]}
-                  />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name='label'
-              render={({ field }) => (
-                <FormItem className='relative space-y-3'>
-                  <FormLabel>Label</FormLabel>
+                  <FormLabel>Artist</FormLabel>
                   <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className='flex flex-col space-y-1'
-                    >
-                      <FormItem className='flex items-center space-y-0 space-x-3'>
-                        <FormControl>
-                          <RadioGroupItem value='documentation' />
-                        </FormControl>
-                        <FormLabel className='font-normal'>
-                          Documentation
-                        </FormLabel>
-                      </FormItem>
-                      <FormItem className='flex items-center space-y-0 space-x-3'>
-                        <FormControl>
-                          <RadioGroupItem value='feature' />
-                        </FormControl>
-                        <FormLabel className='font-normal'>Feature</FormLabel>
-                      </FormItem>
-                      <FormItem className='flex items-center space-y-0 space-x-3'>
-                        <FormControl>
-                          <RadioGroupItem value='bug' />
-                        </FormControl>
-                        <FormLabel className='font-normal'>Bug</FormLabel>
-                      </FormItem>
-                    </RadioGroup>
+                    <Input {...field} placeholder='Enter a Artist of the song' />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -158,35 +150,58 @@ export function SongsMutateDrawer({ open, onOpenChange, currentRow }: Props) {
             />
             <FormField
               control={form.control}
-              name='priority'
+              name="tags"
               render={({ field }) => (
-                <FormItem className='relative space-y-3'>
-                  <FormLabel>Priority</FormLabel>
+                <FormItem>
+                  <FormLabel>Tags</FormLabel>
                   <FormControl>
-                    <RadioGroup
+                    <TagsInput
+                      value={field.value ?? []}
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className='flex flex-col space-y-1'
-                    >
-                      <FormItem className='flex items-center space-y-0 space-x-3'>
-                        <FormControl>
-                          <RadioGroupItem value='high' />
-                        </FormControl>
-                        <FormLabel className='font-normal'>High</FormLabel>
-                      </FormItem>
-                      <FormItem className='flex items-center space-y-0 space-x-3'>
-                        <FormControl>
-                          <RadioGroupItem value='medium' />
-                        </FormControl>
-                        <FormLabel className='font-normal'>Medium</FormLabel>
-                      </FormItem>
-                      <FormItem className='flex items-center space-y-0 space-x-3'>
-                        <FormControl>
-                          <RadioGroupItem value='low' />
-                        </FormControl>
-                        <FormLabel className='font-normal'>Low</FormLabel>
-                      </FormItem>
-                    </RadioGroup>
+                      placeholder="Enter tags (e.g., rock, pop)"
+                    />
+                  </FormControl>
+                  
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="baseChord"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Base Chord</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select base chord (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAvailableChords().map((chord) => (
+                          <SelectItem key={chord.value} value={chord.value}>
+                            {chord.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name='lyricAndChords'
+              render={({ field }) => (
+                <FormItem className='space-y-2'>
+                  <FormLabel>Lyrics and Chords</FormLabel>
+                  <FormControl>
+                    <HtmlEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Enter song lyrics and chords..."
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -194,15 +209,15 @@ export function SongsMutateDrawer({ open, onOpenChange, currentRow }: Props) {
             />
           </form>
         </Form>
-        <SheetFooter className='gap-2'>
-          <SheetClose asChild>
-            <Button variant='outline'>Close</Button>
-          </SheetClose>
-          <Button form='tasks-form' type='submit'>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant='outline'>Cancel</Button>
+          </DialogClose>
+          <Button form='songs-form' type='submit'>
             Save changes
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }

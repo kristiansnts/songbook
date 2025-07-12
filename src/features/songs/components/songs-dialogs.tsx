@@ -1,35 +1,37 @@
 import { showSubmittedData } from '@/utils/show-submitted-data'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { useSongs } from '../context/songs-context'
-import { SongsImportDialog } from './songs-import-dialog'
-import { SongsMutateDrawer } from './songs-mutate-drawer'
+import { SongsMutateDialog } from './songs-mutate-drawer'
+import { SongViewDialog } from './song-view-dialog'
 
 export function SongsDialogs() {
-  const { open, setOpen, currentRow, setCurrentRow } = useSongs()
+  const { open, setOpen, currentRow, setCurrentRow, viewDialogOpen, setViewDialogOpen, viewSong } = useSongs()
   return (
     <>
-      <SongsMutateDrawer
+      <SongsMutateDialog
         key='song-create'
         open={open === 'create'}
-        onOpenChange={() => setOpen('create')}
+        onOpenChange={(isOpen) => setOpen(isOpen ? 'create' : null)}
       />
 
-      <SongsImportDialog
-        key='songs-import'
-        open={open === 'import'}
-        onOpenChange={() => setOpen('import')}
+      <SongViewDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        song={viewSong}
       />
 
       {currentRow && (
         <>
-          <SongsMutateDrawer
+          <SongsMutateDialog
             key={`song-update-${currentRow.id}`}
             open={open === 'update'}
-            onOpenChange={() => {
-              setOpen('update')
-              setTimeout(() => {
-                setCurrentRow(null)
-              }, 500)
+            onOpenChange={(isOpen) => {
+              setOpen(isOpen ? 'update' : null)
+              if (!isOpen) {
+                setTimeout(() => {
+                  setCurrentRow(null)
+                }, 500)
+              }
             }}
             currentRow={currentRow}
           />
@@ -38,11 +40,13 @@ export function SongsDialogs() {
             key='song-delete'
             destructive
             open={open === 'delete'}
-            onOpenChange={() => {
-              setOpen('delete')
-              setTimeout(() => {
-                setCurrentRow(null)
-              }, 500)
+            onOpenChange={(isOpen) => {
+              setOpen(isOpen ? 'delete' : null)
+              if (!isOpen) {
+                setTimeout(() => {
+                  setCurrentRow(null)
+                }, 500)
+              }
             }}
             handleConfirm={() => {
               setOpen(null)

@@ -13,10 +13,13 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import SidebarNav from './components/sidebar-nav'
+import { SettingsProvider } from './context/settings-context'
+import { SettingsDialogs } from './components/settings-dialogs'
+import { SettingsModalButtons } from './components/settings-modal-buttons'
 
 export default function Settings() {
   return (
-    <>
+    <SettingsProvider>
       {/* ===== Top Heading ===== */}
       <Header>
         <Search />
@@ -39,13 +42,18 @@ export default function Settings() {
         <div className='flex flex-1 flex-col space-y-2 overflow-hidden md:space-y-2 lg:flex-row lg:space-y-0 lg:space-x-12'>
           <aside className='top-0 lg:sticky lg:w-1/5'>
             <SidebarNav items={sidebarNavItems} />
+            <div className='mt-6'>
+              <SettingsModalButtons />
+            </div>
           </aside>
           <div className='flex w-full overflow-y-hidden p-1'>
             <Outlet />
           </div>
         </div>
       </Main>
-    </>
+      
+      <SettingsDialogs />
+    </SettingsProvider>
   )
 }
 

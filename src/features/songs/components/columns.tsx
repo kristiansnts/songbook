@@ -1,119 +1,83 @@
 import { ColumnDef } from '@tanstack/react-table'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { labels, priorities, statuses } from '../data/data'
 import { Song } from '../data/schema'
 import { DataTableColumnHeader } from './data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
+import { parseLyricsAndChords, richTextToPlainText } from '@/utils/lyrics-parser'
+import { ViewButton } from './view-button'
+
+// Helper function to get base chord from lyrics
+function getBaseChord(song: Song): string {
+  // First priority: use explicitly set baseChord
+  if (song.baseChord) {
+    return song.baseChord
+  }
+  
+  // Second priority: get from stored chords string
+  if (song.chords) {
+    const chordsArray = song.chords.split(',').map(c => c.trim()).filter(c => c)
+    if (chordsArray.length > 0) return chordsArray[0]
+  }
+  
+  // Fallback to parsing lyricAndChords
+  if (!song.lyricAndChords) return '-'
+  
+  const plainText = richTextToPlainText(song.lyricAndChords)
+  const parsed = parseLyricsAndChords(plainText)
+  
+  return parsed.chords.length > 0 ? parsed.chords[0] : '-'
+}
 
 export const columns: ColumnDef<Song>[] = [
   {
-    id: 'select',
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label='Select all'
-        className='translate-y-[2px]'
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label='Select row'
-        className='translate-y-[2px]'
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: 'id',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Task' />
-    ),
-    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('id')}</div>,
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
     accessorKey: 'title',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Title' />
+      <DataTableColumnHeader column={column} title='Song Title' />
     ),
-    cell: ({ row }) => {
-      const label = labels.find((label) => label.value === row.original.label)
-
-      return (
-        <div className='flex space-x-2'>
-          {label && <Badge variant='outline'>{label.label}</Badge>}
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
-            {row.getValue('title')}
-          </span>
+    cell: ({ row }) => (
+      <div className='min-w-0 flex-1'>
+        <div className='truncate font-medium text-sm sm:text-base max-w-[120px] sm:max-w-[200px] md:max-w-[300px]'>
+          {row.getValue('title')}
         </div>
-      )
-    },
+      </div>
+    ),
+    size: 40, // Percentage width
   },
   {
-    accessorKey: 'status',
+    accessorKey: 'artist',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
+      <DataTableColumnHeader column={column} title='Artist' />
     ),
-    cell: ({ row }) => {
-      const status = statuses.find(
-        (status) => status.value === row.getValue('status')
-      )
-
-      if (!status) {
-        return null
-      }
-
-      return (
-        <div className='flex w-[100px] items-center'>
-          {status.icon && (
-            <status.icon className='text-muted-foreground mr-2 h-4 w-4' />
-          )}
-          <span>{status.label}</span>
+    cell: ({ row }) => (
+      <div className='min-w-0 flex-1'>
+        <div className='truncate text-sm sm:text-base max-w-[100px] sm:max-w-[150px] md:max-w-[200px]'>
+          {row.getValue('artist') || '-'}
         </div>
-      )
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
+      </div>
+    ),
+    size: 30, // Percentage width
   },
   {
-    accessorKey: 'priority',
+    id: 'baseChord',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Priority' />
+      <DataTableColumnHeader column={column} title='Key' />
     ),
-    cell: ({ row }) => {
-      const priority = priorities.find(
-        (priority) => priority.value === row.getValue('priority')
-      )
-
-      if (!priority) {
-        return null
-      }
-
-      return (
-        <div className='flex items-center'>
-          {priority.icon && (
-            <priority.icon className='text-muted-foreground mr-2 h-4 w-4' />
-          )}
-          <span>{priority.label}</span>
-        </div>
-      )
-    },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
+    cell: ({ row }) => (
+      <span className='font-mono font-medium text-sm whitespace-nowrap'>
+        {getBaseChord(row.original)}
+      </span>
+    ),
+    size: 15, // Percentage width
   },
   {
     id: 'actions',
-    cell: ({ row }) => <DataTableRowActions row={row} />,
+    header: 'Actions',
+    cell: ({ row }) => (
+      <div className="flex items-center gap-1 justify-end">
+        <ViewButton song={row.original} />
+        <DataTableRowActions row={row} />
+      </div>
+    ),
+    enableSorting: false,
+    size: 15, // Percentage width
   },
 ]

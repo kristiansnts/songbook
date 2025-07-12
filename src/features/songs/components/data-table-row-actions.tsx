@@ -28,7 +28,7 @@ export function DataTableRowActions<TData>({
 }: DataTableRowActionsProps<TData>) {
   const song = songSchema.parse(row.original)
 
-  const { setOpen, setCurrentRow } = useSongs()
+  const { openModal, setCurrentRow } = useSongs()
 
   return (
     <DropdownMenu modal={false}>
@@ -45,7 +45,7 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem
           onClick={() => {
             setCurrentRow(song)
-            setOpen('update')
+            openModal('update')
           }}
         >
           Edit
@@ -69,7 +69,7 @@ export function DataTableRowActions<TData>({
         <DropdownMenuItem
           onClick={() => {
             setCurrentRow(song)
-            setOpen('delete')
+            openModal('delete')
           }}
         >
           Delete
