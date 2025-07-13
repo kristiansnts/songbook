@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Song } from '../data/schema'
-import { parseLyricsAndChords, richTextToPlainText, transposeLyricsAndChords, getAvailableChords, transposeChord, calculateSemitones } from '@/utils/lyrics-parser'
+import { parseLyricsAndChords, richTextToPlainText, transposeLyricsAndChords, getAvailableChords, calculateSemitones } from '@/utils/lyrics-parser'
 import React from 'react'
 
 interface Props {
@@ -98,28 +98,11 @@ export function SongViewDialog({ open, onOpenChange, song }: Props) {
         
         <div className="mt-6">
           <div 
-            className="prose prose-sm max-w-none font-mono whitespace-pre-wrap leading-relaxed"
+            className="prose prose-sm max-w-none font-mono break-all whitespace-pre-line leading-relaxed text-xs sm:text-sm overflow-hidden"
             dangerouslySetInnerHTML={{ __html: transposedContent }}
           />
         </div>
-        
-        {chordsArray.length > 0 && (
-          <div className="mt-6 pt-4 border-t">
-            <div className="text-sm font-medium mb-2">Chords used:</div>
-            <div className="flex flex-wrap gap-2">
-              {chordsArray.map((chord, index) => {
-                const transposedChord = transposeValue === 0 
-                  ? chord 
-                  : transposeChord(chord, transposeValue)
-                return (
-                  <span key={index} className="px-2 py-1 bg-muted rounded text-sm font-mono">
-                    {transposedChord}
-                  </span>
-                )
-              })}
-            </div>
-          </div>
-        )}
+
       </DialogContent>
     </Dialog>
   )
