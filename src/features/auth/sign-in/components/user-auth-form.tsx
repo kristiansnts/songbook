@@ -52,9 +52,14 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
       const success = await login(data.email, data.password)
       if (success) {
         toast.success('Login successful!')
-        navigate({ to: '/' })
+        navigate({ to: '/dashboard' })
       } else {
-        toast.error('Invalid credentials. Use admin@gmail.com / admin')
+        toast.error('Invalid credentials. Please contact administrator.', {
+          action: {
+            label: 'x',
+            onClick: () => toast.dismiss()
+          }
+        })
       }
     } catch {
       toast.error('Login failed')

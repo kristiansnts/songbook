@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import axios from 'axios'
 
 interface User {
   email: string
@@ -16,12 +17,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-const DUMMY_USER = {
-  email: 'admin@gmail.com',
-  password: 'password',
-  name: 'Admin User'
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -36,18 +31,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    if (email === DUMMY_USER.email && password === DUMMY_USER.password) {
-      const userData = { email: DUMMY_USER.email, name: DUMMY_USER.name }
-      setUser(userData)
-      localStorage.setItem('auth-user', JSON.stringify(userData))
-      return true
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_APP_URL_API || 'http://localhost:3000/api'}/auth/login`, { 
+        email, 
+        password 
+      })
+      
+      if (response.data.code === 200) {
+        const userData = response.data.data.user
+        setUser({ email: userData.email, name: userData.email })
+        localStorage.setItem('auth-user', JSON.stringify({ email: userData.email, name: userData.email }))
+        localStorage.setItem('auth-token', response.data.data.token)
+        return true
+      }
+      return false
+    } catch (error) {
+      return false
     }
-    return false
   }
 
   const logout = () => {
     setUser(null)
     localStorage.removeItem('auth-user')
+    localStorage.removeItem('auth-token')
     navigate({ to: '/sign-in' })
   }
 

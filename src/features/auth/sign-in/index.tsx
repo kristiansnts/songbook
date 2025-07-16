@@ -1,6 +1,7 @@
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
@@ -13,6 +14,9 @@ export default function SignIn() {
       <Card className='gap-4'>
         <CardHeader>
           <CardTitle className='text-lg tracking-tight text-center'>Login</CardTitle>
+          <CardDescription className='text-sm text-muted-foreground text-center'>
+            Please use email and password from sisko.levelupgen.com
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <UserAuthForm />
