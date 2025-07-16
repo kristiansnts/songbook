@@ -1,22 +1,20 @@
-# Shadcn Admin Dashboard
+# Songbook Admin Dashboard
 
 Admin Dashboard UI crafted with Shadcn and Vite. Built with responsiveness and accessibility in mind.
 
-![alt text](public/images/shadcn-admin.png)
-
-I've been creating dashboard UIs at work and for my personal projects. I always wanted to make a reusable collection of dashboard UI for future projects; and here it is now. While I've created a few custom components, some of the code is directly adapted from ShadcnUI examples.
-
-> This is not a starter project (template) though. I'll probably make one in the future.
+This is a customized version of the Shadcn Admin Dashboard, tailored for songbook management with streamlined features.
 
 ## Features
 
 - Light/dark mode
 - Responsive
 - Accessible
-- With built-in Sidebar component
-- Global Search Command
-- 10+ pages
-- Extra custom components
+- Built-in Sidebar component
+- Authentication system
+- Song management with CRUD operations
+- User management system
+- Error handling pages
+- Help center
 
 ## Tech Stack
 
@@ -32,7 +30,7 @@ I've been creating dashboard UIs at work and for my personal projects. I always 
 
 **Icons:** [Tabler Icons](https://tabler.io/icons)
 
-**Auth (partial):** [Clerk](https://go.clerk.com/GttUAaK)
+**Auth:** Custom authentication with localStorage
 
 ## Installation & Development
 
@@ -44,8 +42,8 @@ I've been creating dashboard UIs at work and for my personal projects. I always 
 
 1. **Clone the project**
 ```bash
-git clone https://github.com/satnaing/shadcn-admin.git
-cd shadcn-admin
+git clone <your-repository-url>
+cd songbook
 ```
 
 2. **Install dependencies**
@@ -96,6 +94,31 @@ For development, use these credentials:
 - **Email**: `admin@gmail.com`
 - **Password**: `password`
 
+The authentication system uses localStorage to persist user sessions and includes:
+- Custom auth context (`/src/lib/auth.tsx`)
+- Route protection with redirects
+- Automatic session restoration
+- Logout functionality
+
+## Songbook Features
+
+### Song Management
+- **CRUD Operations**: Create, read, update, and delete songs
+- **Data Table**: Sortable, filterable song listing
+- **Search**: Global search across song titles, artists, and lyrics
+- **Import/Export**: Bulk song operations
+- **Categories**: Song categorization and filtering
+
+### User Management
+- **User CRUD**: Complete user management system
+- **Role Management**: User roles and permissions
+- **User Profiles**: Individual user profile management
+
+### Dashboard
+- **Overview**: Key metrics and statistics
+- **Recent Activity**: Latest songs and user actions
+- **Quick Actions**: Fast access to common operations
+
 ## Project Structure
 
 ```
@@ -104,16 +127,15 @@ src/
 │   ├── ui/             # ShadcnUI components
 │   └── layout/         # Layout components & navigation
 ├── features/           # Feature-based modules
-│   ├── auth/           # Authentication pages
+│   ├── auth/           # Authentication (sign-in only)
 │   ├── dashboard/      # Dashboard & overview
-│   ├── tasks/          # Task management with CRUD
+│   ├── songs/          # Song management with CRUD
 │   ├── users/          # User management with CRUD
-│   ├── settings/       # User settings pages
-│   └── errors/         # Error pages
+│   └── errors/         # Error pages (401, 403, 404, 500, 503)
 ├── routes/             # File-based routing (TanStack Router)
+│   ├── (auth)/         # Authentication routes
+│   └── _authenticated/ # Protected routes
 ├── lib/                # Utilities & configurations
-├── context/            # React contexts
-├── hooks/              # Custom React hooks
 └── stores/             # Zustand state stores
 ```
 
@@ -163,7 +185,7 @@ The project includes 24 pre-built UI components based on Radix UI primitives:
 
 ## CRUD Implementation Guide
 
-The project demonstrates CRUD operations in the **Tasks** and **Users** features. Here's how to implement CRUD for a new entity:
+The project demonstrates CRUD operations in the **Songs** and **Users** features. Here's how to implement CRUD for a new entity:
 
 ### 1. Define Data Schema
 
@@ -372,19 +394,17 @@ Add to sidebar navigation:
 - **Nested Layouts**: Shared layout components
 - **Type Safety**: Full TypeScript support
 
-## Sponsoring this project ❤️
+## Contributing
 
-If you find this project helpful or use this in your own work, consider [sponsoring me](https://github.com/sponsors/satnaing) to support development and maintenance. You can [buy me a coffee](https://buymeacoffee.com/satnaing) as well. Don’t worry, every penny helps. Thank you! 🙏
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-For questions or sponsorship inquiries, feel free to reach out at [contact@satnaing.dev](mailto:contact@satnaing.dev).
+## Original Project
 
-### Current Sponsor
-
-- [Clerk](https://go.clerk.com/GttUAaK) - for backing the implementation of Clerk in this project
-
-## Author
-
-Crafted with 🤍 by [@satnaing](https://github.com/satnaing)
+This project is based on the excellent [Shadcn Admin Dashboard](https://github.com/satnaing/shadcn-admin) by [@satnaing](https://github.com/satnaing). The original project demonstrates a comprehensive admin dashboard implementation with ShadcnUI components.
 
 ## License
 
