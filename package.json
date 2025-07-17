@@ -11,7 +11,8 @@
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "knip": "knip",
-    "generate:resource": "node scripts/generate-resource.cjs"
+    "generate:resource": "node scripts/generate-resource.cjs",
+    "generate:panel": "node scripts/generate-panel.cjs"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.32.1",

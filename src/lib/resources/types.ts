@@ -142,21 +142,28 @@ export abstract class Resource<T = any> {
   }
 
   // Navigation helpers
-  protected navigateToCreate() {
-    // Implementation depends on your routing system
-    console.log(`Navigate to ${this.getRoute()}/create`)
+  navigateToCreate() {
+    if (typeof window !== 'undefined') {
+      window.location.href = `${this.getRoute()}/create`
+    }
   }
 
-  protected navigateToEdit(id: string) {
-    console.log(`Navigate to ${this.getRoute()}/edit/${id}`)
+  navigateToEdit(id: string) {
+    if (typeof window !== 'undefined') {
+      window.location.href = `${this.getRoute()}/edit/${id}`
+    }
   }
 
-  protected navigateToView(id: string) {
-    console.log(`Navigate to ${this.getRoute()}/view/${id}`)
+  navigateToView(id: string) {
+    if (typeof window !== 'undefined') {
+      window.location.href = `${this.getRoute()}/view/${id}`
+    }
   }
 
-  protected navigateToList() {
-    console.log(`Navigate to ${this.getRoute()}`)
+  navigateToList() {
+    if (typeof window !== 'undefined') {
+      window.location.href = this.getRoute()
+    }
   }
 
   // Lifecycle hooks
