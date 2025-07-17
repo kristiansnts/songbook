@@ -12,6 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm run format` - Format code with Prettier
 - `npm run format:check` - Check code formatting
 - `npm run knip` - Find unused dependencies and exports
+- `npm run generate:panel -- --name PanelName` - Generate new admin panel with layout and routes
 
 ### Build Process
 The build process requires both TypeScript compilation and Vite bundling. Always run the full build command to ensure the TanStack Router generates the route tree properly.
@@ -109,3 +110,44 @@ Use the dummy credentials for development:
 - Password: `password`
 
 The authentication system is designed to be replaced with a real auth provider (Clerk is partially integrated but not fully implemented).
+
+## Panel Generator System
+
+### Generate Panel Command
+```bash
+npm run generate:panel -- --name PanelName
+```
+
+### Memory: Panel Generator Fixes Applied
+- **Import Path Fix**: Layout components use `../../config/panel-config`, pages use `../config/panel-config`
+- **Route Structure**: Uses `_authenticated/{panelname}` directory structure for TanStack Router (fixed from `(panelname)` which caused conflicts)
+- **Build Integration**: Automatically runs `npm run build` to regenerate route tree
+- **TypeScript Support**: Fully typed components with proper interfaces
+- **Route Conflicts**: Fixed route conflicts by placing panels under `_authenticated` instead of root level
+- **UI Improvements**: Enhanced sidebar with branding, better dashboard layout, removed duplicate header, modern card design
+
+### Panel Structure Generated
+```
+src/panels/{panelName}/
+├── config/{panelName}-config.ts     # Panel configuration
+├── components/layout/
+│   └── {Name}Sidebar.tsx            # Branded sidebar component
+├── pages/
+│   └── {Name}Dashboard.tsx          # Enhanced dashboard page
+├── {Name}Layout.tsx                 # Improved layout wrapper
+└── index.ts                         # Export index
+
+src/routes/_authenticated/{panelName}/
+├── route.tsx                        # Main panel route
+├── dashboard.tsx                    # Dashboard route
+└── index.tsx                        # Redirect to dashboard
+```
+
+### Post-Generation Steps
+1. Run `npm run build` to regenerate route tree if build fails during generation
+2. Panel accessible at `http://localhost:5173/{panelname}`
+
+### Import Path Reference
+- **Layout Components** (in `components/layout/`): Use `../../config/{panelname}-config`
+- **Pages** (in `pages/`): Use `../config/{panelname}-config`
+- **Main Layout** (in root): Use `./config/{panelname}-config`
