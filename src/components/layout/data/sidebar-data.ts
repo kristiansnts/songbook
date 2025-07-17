@@ -1,7 +1,8 @@
 import {
-  IconChecklist,
   IconHelp,
   IconLayoutDashboard,
+  IconMusic,
+  IconNote,
   IconUsers,
 } from '@tabler/icons-react'
 import { type SidebarData } from '../types'
@@ -24,7 +25,12 @@ export const sidebarData: SidebarData = {
         {
           title: 'Songs',
           url: '/songs',
-          icon: IconChecklist,
+          icon: IconMusic,
+        },
+        {
+          title: 'Notes',
+          url: '/notes',
+          icon: IconNote,
         },
         {
           title: 'Users',

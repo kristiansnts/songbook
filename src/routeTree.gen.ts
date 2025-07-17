@@ -20,7 +20,14 @@ import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedSongsIndexRouteImport } from './routes/_authenticated/songs/index'
+import { Route as AuthenticatedNotesIndexRouteImport } from './routes/_authenticated/notes/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
+import { Route as AuthenticatedSongsCreateRouteImport } from './routes/_authenticated/songs/create'
+import { Route as AuthenticatedNotesCreateRouteImport } from './routes/_authenticated/notes/create'
+import { Route as AuthenticatedSongsViewIdRouteImport } from './routes/_authenticated/songs/view/$id'
+import { Route as AuthenticatedSongsEditIdRouteImport } from './routes/_authenticated/songs/edit/$id'
+import { Route as AuthenticatedNotesViewIdRouteImport } from './routes/_authenticated/notes/view/$id'
+import { Route as AuthenticatedNotesEditIdRouteImport } from './routes/_authenticated/notes/edit/$id'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
@@ -76,10 +83,51 @@ const AuthenticatedSongsIndexRoute = AuthenticatedSongsIndexRouteImport.update({
   path: '/songs/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotesIndexRoute = AuthenticatedNotesIndexRouteImport.update({
+  id: '/notes/',
+  path: '/notes/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedHelpCenterIndexRoute =
   AuthenticatedHelpCenterIndexRouteImport.update({
     id: '/help-center/',
     path: '/help-center/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSongsCreateRoute =
+  AuthenticatedSongsCreateRouteImport.update({
+    id: '/songs/create',
+    path: '/songs/create',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedNotesCreateRoute =
+  AuthenticatedNotesCreateRouteImport.update({
+    id: '/notes/create',
+    path: '/notes/create',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSongsViewIdRoute =
+  AuthenticatedSongsViewIdRouteImport.update({
+    id: '/songs/view/$id',
+    path: '/songs/view/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSongsEditIdRoute =
+  AuthenticatedSongsEditIdRouteImport.update({
+    id: '/songs/edit/$id',
+    path: '/songs/edit/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedNotesViewIdRoute =
+  AuthenticatedNotesViewIdRouteImport.update({
+    id: '/notes/view/$id',
+    path: '/notes/view/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedNotesEditIdRoute =
+  AuthenticatedNotesEditIdRouteImport.update({
+    id: '/notes/edit/$id',
+    path: '/notes/edit/$id',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
@@ -92,9 +140,16 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/notes/create': typeof AuthenticatedNotesCreateRoute
+  '/songs/create': typeof AuthenticatedSongsCreateRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
+  '/notes': typeof AuthenticatedNotesIndexRoute
   '/songs': typeof AuthenticatedSongsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/notes/edit/$id': typeof AuthenticatedNotesEditIdRoute
+  '/notes/view/$id': typeof AuthenticatedNotesViewIdRoute
+  '/songs/edit/$id': typeof AuthenticatedSongsEditIdRoute
+  '/songs/view/$id': typeof AuthenticatedSongsViewIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -105,9 +160,16 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/notes/create': typeof AuthenticatedNotesCreateRoute
+  '/songs/create': typeof AuthenticatedSongsCreateRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
+  '/notes': typeof AuthenticatedNotesIndexRoute
   '/songs': typeof AuthenticatedSongsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/notes/edit/$id': typeof AuthenticatedNotesEditIdRoute
+  '/notes/view/$id': typeof AuthenticatedNotesViewIdRoute
+  '/songs/edit/$id': typeof AuthenticatedSongsEditIdRoute
+  '/songs/view/$id': typeof AuthenticatedSongsViewIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -120,9 +182,16 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/notes/create': typeof AuthenticatedNotesCreateRoute
+  '/_authenticated/songs/create': typeof AuthenticatedSongsCreateRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
+  '/_authenticated/notes/': typeof AuthenticatedNotesIndexRoute
   '/_authenticated/songs/': typeof AuthenticatedSongsIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_authenticated/notes/edit/$id': typeof AuthenticatedNotesEditIdRoute
+  '/_authenticated/notes/view/$id': typeof AuthenticatedNotesViewIdRoute
+  '/_authenticated/songs/edit/$id': typeof AuthenticatedSongsEditIdRoute
+  '/_authenticated/songs/view/$id': typeof AuthenticatedSongsViewIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -135,9 +204,16 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/dashboard'
+    | '/notes/create'
+    | '/songs/create'
     | '/help-center'
+    | '/notes'
     | '/songs'
     | '/users'
+    | '/notes/edit/$id'
+    | '/notes/view/$id'
+    | '/songs/edit/$id'
+    | '/songs/view/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -148,9 +224,16 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/dashboard'
+    | '/notes/create'
+    | '/songs/create'
     | '/help-center'
+    | '/notes'
     | '/songs'
     | '/users'
+    | '/notes/edit/$id'
+    | '/notes/view/$id'
+    | '/songs/edit/$id'
+    | '/songs/view/$id'
   id:
     | '__root__'
     | '/'
@@ -162,9 +245,16 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/dashboard'
+    | '/_authenticated/notes/create'
+    | '/_authenticated/songs/create'
     | '/_authenticated/help-center/'
+    | '/_authenticated/notes/'
     | '/_authenticated/songs/'
     | '/_authenticated/users/'
+    | '/_authenticated/notes/edit/$id'
+    | '/_authenticated/notes/view/$id'
+    | '/_authenticated/songs/edit/$id'
+    | '/_authenticated/songs/view/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -257,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSongsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notes/': {
+      id: '/_authenticated/notes/'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof AuthenticatedNotesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
@@ -264,21 +361,77 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/songs/create': {
+      id: '/_authenticated/songs/create'
+      path: '/songs/create'
+      fullPath: '/songs/create'
+      preLoaderRoute: typeof AuthenticatedSongsCreateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notes/create': {
+      id: '/_authenticated/notes/create'
+      path: '/notes/create'
+      fullPath: '/notes/create'
+      preLoaderRoute: typeof AuthenticatedNotesCreateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/songs/view/$id': {
+      id: '/_authenticated/songs/view/$id'
+      path: '/songs/view/$id'
+      fullPath: '/songs/view/$id'
+      preLoaderRoute: typeof AuthenticatedSongsViewIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/songs/edit/$id': {
+      id: '/_authenticated/songs/edit/$id'
+      path: '/songs/edit/$id'
+      fullPath: '/songs/edit/$id'
+      preLoaderRoute: typeof AuthenticatedSongsEditIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notes/view/$id': {
+      id: '/_authenticated/notes/view/$id'
+      path: '/notes/view/$id'
+      fullPath: '/notes/view/$id'
+      preLoaderRoute: typeof AuthenticatedNotesViewIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notes/edit/$id': {
+      id: '/_authenticated/notes/edit/$id'
+      path: '/notes/edit/$id'
+      fullPath: '/notes/edit/$id'
+      preLoaderRoute: typeof AuthenticatedNotesEditIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedNotesCreateRoute: typeof AuthenticatedNotesCreateRoute
+  AuthenticatedSongsCreateRoute: typeof AuthenticatedSongsCreateRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
+  AuthenticatedNotesIndexRoute: typeof AuthenticatedNotesIndexRoute
   AuthenticatedSongsIndexRoute: typeof AuthenticatedSongsIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+  AuthenticatedNotesEditIdRoute: typeof AuthenticatedNotesEditIdRoute
+  AuthenticatedNotesViewIdRoute: typeof AuthenticatedNotesViewIdRoute
+  AuthenticatedSongsEditIdRoute: typeof AuthenticatedSongsEditIdRoute
+  AuthenticatedSongsViewIdRoute: typeof AuthenticatedSongsViewIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedNotesCreateRoute: AuthenticatedNotesCreateRoute,
+  AuthenticatedSongsCreateRoute: AuthenticatedSongsCreateRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
+  AuthenticatedNotesIndexRoute: AuthenticatedNotesIndexRoute,
   AuthenticatedSongsIndexRoute: AuthenticatedSongsIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+  AuthenticatedNotesEditIdRoute: AuthenticatedNotesEditIdRoute,
+  AuthenticatedNotesViewIdRoute: AuthenticatedNotesViewIdRoute,
+  AuthenticatedSongsEditIdRoute: AuthenticatedSongsEditIdRoute,
+  AuthenticatedSongsViewIdRoute: AuthenticatedSongsViewIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

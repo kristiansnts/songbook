@@ -4,6 +4,7 @@ import { DataTableColumnHeader } from './data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
 import { parseLyricsAndChords, richTextToPlainText } from '@/utils/lyrics-parser'
 import { ViewButton } from './view-button'
+import { Checkbox } from '@/components/ui/checkbox'
 
 // Helper function to get base chord from lyrics
 function getBaseChord(song: Song): string {
@@ -29,6 +30,29 @@ function getBaseChord(song: Song): string {
 
 export const columns: ColumnDef<Song>[] = [
   {
+    id: 'select',
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label='Select all'
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label='Select row'
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+    size: 5, // Percentage width
+  },
+  {
     accessorKey: 'title',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Song Title' />
@@ -40,7 +64,7 @@ export const columns: ColumnDef<Song>[] = [
         </div>
       </div>
     ),
-    size: 40, // Percentage width
+    size: 35, // Percentage width
   },
   {
     accessorKey: 'artist',
@@ -54,7 +78,7 @@ export const columns: ColumnDef<Song>[] = [
         </div>
       </div>
     ),
-    size: 30, // Percentage width
+    size: 25, // Percentage width
   },
   {
     id: 'baseChord',
@@ -66,7 +90,7 @@ export const columns: ColumnDef<Song>[] = [
         {getBaseChord(row.original)}
       </span>
     ),
-    size: 15, // Percentage width
+    size: 20, // Percentage width
   },
   {
     id: 'actions',
