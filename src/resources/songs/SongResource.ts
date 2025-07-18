@@ -3,6 +3,7 @@ import { FormBuilder, TableBuilder } from '@/components/builders'
 import { FormBuilderConfig } from '@/lib/builders/form-builder'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
 import { Song } from './song-schema'
+import { IconMusic } from '@tabler/icons-react'
 
 export class SongResource extends Resource<Song> {
   constructor() {
@@ -10,9 +11,11 @@ export class SongResource extends Resource<Song> {
       name: 'SongResource',
       model: 'Song',
       route: '/songs',
-      navigationIcon: undefined, // Add your icon here
-      navigationSort: 0,
-      navigationGroup: undefined, // Add navigation group if needed
+      navigationIcon: IconMusic,
+      navigationSort: 10,
+      navigationGroup: 'General',
+      navigationLabel: 'Songs',
+      navigationVisible: true,
     })
   }
 

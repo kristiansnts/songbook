@@ -6,9 +6,11 @@ export interface ResourceConfig<T = any> {
   name: string
   model: string
   route: string
-  navigationIcon?: ReactNode
+  navigationIcon?: React.ElementType | ReactNode
   navigationSort?: number
   navigationGroup?: string
+  navigationLabel?: string
+  navigationVisible?: boolean
   pages?: {
     list?: string
     create?: string
@@ -70,7 +72,7 @@ export abstract class Resource<T = any> {
   abstract getPluralLabel(): string
 
   // Navigation
-  getNavigationIcon(): ReactNode | undefined {
+  getNavigationIcon(): React.ElementType | ReactNode | undefined {
     return this.config.navigationIcon
   }
 
@@ -80,6 +82,18 @@ export abstract class Resource<T = any> {
 
   getNavigationGroup(): string | undefined {
     return this.config.navigationGroup
+  }
+
+  getNavigationLabel(): string {
+    return this.config.navigationLabel || this.getPluralLabel()
+  }
+
+  getNavigationVisible(): boolean {
+    return this.config.navigationVisible !== false
+  }
+
+  getNavigationUrl(): string {
+    return this.getRoute()
   }
 
   // Form configuration
