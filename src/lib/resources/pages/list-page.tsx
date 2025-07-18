@@ -26,13 +26,17 @@ export function ListPage<T = any>({
     ...tableConfig,
     data,
     loading,
+    onRefresh,
     bulkActions: [
       ...(tableConfig.bulkActions || []),
       ...resource.getBulkActions().map(action => ({
         label: action.label,
         icon: action.icon,
-        onClick: action.action,
-        variant: action.color ? 'default' : 'outline',
+        onClick: async (rows: any) => {
+          await action.action(rows)
+          onRefresh?.()
+        },
+        variant: (action.color ? 'default' : 'outline') as 'default' | 'secondary' | 'destructive' | 'outline',
         requiresConfirmation: action.requiresConfirmation,
         confirmationTitle: action.confirmationTitle,
         confirmationMessage: action.confirmationMessage,

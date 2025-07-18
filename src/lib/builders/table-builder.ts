@@ -88,7 +88,7 @@ export interface ActionConfig<T = any> {
   label: string
   icon?: ReactNode
   onClick: (row: Row<T>) => void
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost'
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link'
   size?: 'sm' | 'md' | 'lg'
   hidden?: (row: Row<T>) => boolean
   disabled?: (row: Row<T>) => boolean
@@ -130,6 +130,7 @@ export interface TableBuilderConfig<T = any> {
   data: T[]
   searchable?: boolean
   searchPlaceholder?: string
+  searchColumnId?: string
   filterable?: boolean
   filters?: FilterConfig[]
   filterGroups?: FilterGroupConfig[]
@@ -150,6 +151,7 @@ export interface TableBuilderConfig<T = any> {
   }
   loading?: boolean
   onRowClick?: (row: Row<T>) => void
+  onRefresh?: () => void
   className?: string
 }
 
@@ -197,6 +199,11 @@ export class TableBuilder<T = any> {
 
   searchPlaceholder(placeholder: string): TableBuilder<T> {
     this.config.searchPlaceholder = placeholder
+    return this
+  }
+
+  searchColumnId(columnId: string): TableBuilder<T> {
+    this.config.searchColumnId = columnId
     return this
   }
 

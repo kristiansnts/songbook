@@ -104,9 +104,10 @@ export class SongResource extends Resource<Song> {
       .build()
   }
 
-  getTableSchema(): TableBuilderConfig<Song> {
+  getTableSchema(refreshCallback?: () => void): TableBuilderConfig<Song> {
     return TableBuilder.create<Song>()
       .searchPlaceholder('Search songs...')
+      .searchColumnId('title')
       .column('title', col => 
         col
           .label('Song Title')

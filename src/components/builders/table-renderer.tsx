@@ -104,7 +104,7 @@ export function TableRenderer<T = any>({
         enableSorting: columnConfig.sortable ?? true,
         cell: ({ row }) => {
           const value = row.getValue(columnConfig.name)
-          return renderCell(columnConfig, value, row)
+          return renderCell(columnConfig, value, row, config.onRefresh)
         },
       }
 
@@ -155,6 +155,7 @@ export function TableRenderer<T = any>({
         table={table}
         searchable={config.searchable}
         searchPlaceholder={config.searchPlaceholder}
+        searchColumnId={config.searchColumnId}
         filters={config.filters}
         bulkActions={config.bulkActions}
         selectedRows={selectedRows}
@@ -226,7 +227,7 @@ export function TableRenderer<T = any>({
   )
 }
 
-function renderCell<T>(columnConfig: ColumnConfig<T>, value: any, row: any) {
+function renderCell<T>(columnConfig: ColumnConfig<T>, value: any, row: any, onRefresh?: () => void) {
   switch (columnConfig.type) {
     case 'text':
       return renderTextCell(columnConfig as TextColumnConfig<T>, value)
@@ -238,7 +239,7 @@ function renderCell<T>(columnConfig: ColumnConfig<T>, value: any, row: any) {
       return renderDateCell(columnConfig as DateColumnConfig<T>, value)
     
     case 'actions':
-      return renderActionsCell(columnConfig as ActionsColumnConfig<T>, row)
+      return renderActionsCell(columnConfig as ActionsColumnConfig<T>, row, onRefresh)
     
     case 'image':
       return renderImageCell(columnConfig as ImageColumnConfig<T>, value)
@@ -305,7 +306,7 @@ function renderDateCell<T>(config: DateColumnConfig<T>, value: any) {
   return <span className={config.className}>{formatted}</span>
 }
 
-function ActionButton<T>({ action, row, className }: { action: ActionConfig<T>, row: any, className?: string }) {
+function ActionButton<T>({ action, row, className, onRefresh }: { action: ActionConfig<T>, row: any, className?: string, onRefresh?: () => void }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -321,6 +322,7 @@ function ActionButton<T>({ action, row, className }: { action: ActionConfig<T>, 
     setIsLoading(true)
     try {
       await Promise.resolve(action.onClick(row))
+      onRefresh?.()
     } finally {
       setIsLoading(false)
       setConfirmOpen(false)
@@ -355,7 +357,7 @@ function ActionButton<T>({ action, row, className }: { action: ActionConfig<T>, 
   )
 }
 
-function renderActionsCell<T>(config: ActionsColumnConfig<T>, row: any) {
+function renderActionsCell<T>(config: ActionsColumnConfig<T>, row: any, onRefresh?: () => void) {
   const visibleActions = config.actions.filter(
     action => !action.hidden || !action.hidden(row)
   )
@@ -369,14 +371,15 @@ function renderActionsCell<T>(config: ActionsColumnConfig<T>, row: any) {
         action={action}
         row={row}
         className={config.className}
+        onRefresh={onRefresh}
       />
     )
   }
 
-  return <ActionDropdown actions={visibleActions} row={row} className={config.className} />
+  return <ActionDropdown actions={visibleActions} row={row} className={config.className} onRefresh={onRefresh} />
 }
 
-function ActionDropdown<T>({ actions, row, className }: { actions: ActionConfig<T>[], row: any, className?: string }) {
+function ActionDropdown<T>({ actions, row, className, onRefresh }: { actions: ActionConfig<T>[], row: any, className?: string, onRefresh?: () => void }) {
   const [confirmAction, setConfirmAction] = useState<ActionConfig<T> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -392,6 +395,7 @@ function ActionDropdown<T>({ actions, row, className }: { actions: ActionConfig<
     setIsLoading(true)
     try {
       await Promise.resolve(action.onClick(row))
+      onRefresh?.()
     } finally {
       setIsLoading(false)
       setConfirmAction(null)

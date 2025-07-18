@@ -60,9 +60,10 @@ export class NoteResource extends Resource<Note> {
       .build()
   }
 
-  getTableSchema(): TableBuilderConfig<Note> {
+  getTableSchema(refreshCallback?: () => void): TableBuilderConfig<Note> {
     return TableBuilder.create<Note>()
       .searchPlaceholder('Search notes...')
+      .searchColumnId('title')
       .filterable(true)
       .groupedFilters(true)
       .filters([
