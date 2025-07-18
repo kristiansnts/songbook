@@ -177,3 +177,11 @@ When making changes to the codebase, always update the `CHANGELOG-CLAUDE.md` fil
 4. Include git commit hash reference
 5. Document todos and done conditions
 6. Commit changes with descriptive message
+
+### Required: End of Todos Changelog Update
+**IMPORTANT**: After completing all todos in a session, you MUST update the `CHANGELOG-CLAUDE.md` file with:
+- Summary of all completed work
+- List of files modified
+- New features or capabilities added
+- Any breaking changes or important notes
+- Current git commit hash for reference

@@ -123,9 +123,35 @@ export class SongResource extends Resource<Song> {
       .column('baseChord', col => 
         col
           .label('Key')
-          .type('text')
+          .type('badge')
           .accessor('baseChord')
           .sortable()
+          .colors({
+            'C': 'blue',
+            'D': 'green',
+            'E': 'yellow',
+            'F': 'orange',
+            'G': 'red',
+            'A': 'purple',
+            'B': 'pink',
+            'Am': 'indigo',
+            'Dm': 'teal',
+            'Em': 'lime',
+            'Gm': 'cyan',
+          })
+      )
+      .column('status', col => 
+        col
+          .label('Status')
+          .type('badge')
+          .accessor('status')
+          .sortable()
+          .colors({
+            'in progress': 'blue',
+            'backlog': 'gray',
+            'todo': 'yellow',
+            'completed': 'green',
+          })
       )
       .column('tags', col => 
         col
@@ -134,11 +160,26 @@ export class SongResource extends Resource<Song> {
           .accessor('tags')
           .searchable()
       )
+      .column('createdAt', col => 
+        col
+          .label('Created At')
+          .type('date')
+          .accessor('createdAt')
+          .dateFormat('MMM d, yyyy')
+      )
       .column('actions', col => 
         col
           .label('Actions')
           .type('actions')
           .actions([
+            {
+              label: 'View',
+              onClick: (row) => {
+                if (typeof window !== 'undefined') {
+                  window.location.href = `/songs/view/${row.original.id}`
+                }
+              },
+            },
             {
               label: 'Edit',
               onClick: (row) => {
@@ -157,6 +198,41 @@ export class SongResource extends Resource<Song> {
             },
           ])
       )
+      .defaultSort('createdAt', 'desc')
+      .filters([
+        {
+          name: 'status',
+          label: 'Status',
+          type: 'select',
+          options: [
+            { label: 'All', value: '' },
+            { label: 'In Progress', value: 'in progress' },
+            { label: 'Backlog', value: 'backlog' },
+            { label: 'Todo', value: 'todo' },
+            { label: 'Completed', value: 'completed' },
+          ],
+        },
+        {
+          name: 'label',
+          label: 'Category',
+          type: 'select',
+          options: [
+            { label: 'All', value: '' },
+            { label: 'Hymn', value: 'hymn' },
+            { label: 'Traditional', value: 'traditional' },
+            { label: 'Contemporary', value: 'contemporary' },
+            { label: 'Gospel', value: 'gospel' },
+            { label: 'Worship', value: 'worship' },
+          ],
+        },
+        {
+          name: 'createdAt',
+          label: 'Created Date',
+          type: 'dateRange',
+          fromLabel: 'From Date',
+          toLabel: 'To Date',
+        },
+      ])
       .build()
   }
 
@@ -201,6 +277,48 @@ export class SongResource extends Resource<Song> {
       chords: 'D,G,A',
       lyricAndChords: 'D        G       D\nBe thou my vision, O Lord of my heart\nA        D       G      D\nNaught be all else to me, save that thou art',
       baseChord: 'D',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: 'SONG-1234',
+      title: 'Here I Am to Worship',
+      artist: 'Tim Hughes',
+      tags: ['contemporary', 'worship'],
+      status: 'completed',
+      label: 'contemporary',
+      lyric: 'Light of the world, you stepped down into darkness...',
+      chords: 'Em,C,G,D',
+      lyricAndChords: 'Em       C       G       D\nLight of the world, you stepped down into darkness',
+      baseChord: 'Em',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: 'SONG-5678',
+      title: 'What a Beautiful Name',
+      artist: 'Hillsong',
+      tags: ['contemporary', 'worship'],
+      status: 'in progress',
+      label: 'contemporary',
+      lyric: 'You were the Word at the beginning...',
+      chords: 'A,D,F#m,E',
+      lyricAndChords: 'A        D       F#m      E\nYou were the Word at the beginning',
+      baseChord: 'A',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
+    {
+      id: 'SONG-9012',
+      title: 'Blessed Assurance',
+      artist: 'Fanny Crosby',
+      tags: ['hymn', 'gospel'],
+      status: 'completed',
+      label: 'gospel',
+      lyric: 'Blessed assurance, Jesus is mine...',
+      chords: 'F,Bb,C,Dm',
+      lyricAndChords: 'F        Bb      C       Dm\nBlessed assurance, Jesus is mine',
+      baseChord: 'F',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     },

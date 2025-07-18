@@ -8,12 +8,80 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Delete confirmation dialog functionality for table actions
+- ActionButton component with confirmation support for single actions
+- ActionDropdown component with confirmation support for multiple actions
+- Loading states for delete operations with proper UI feedback
+- Async action handling with Promise.resolve() wrapper
+- Integration with existing ConfirmDialog component
 
 ### Changed
+- Enhanced table-renderer.tsx with confirmation dialog support
+- Updated ActionConfig to properly handle requiresConfirmation property
+- Modified table action handlers to support both sync and async operations
+- Improved action button styling and loading states
+- Updated import statements to include ConfirmDialog component
 
 ### Fixed
+- Fixed delete confirmation dialog not showing up when clicking delete actions
+- Resolved TypeScript errors with async action handling
+- Fixed 'await has no effect' TypeScript warnings
+- Corrected 'expression of type void cannot be tested for truthiness' errors
+- Fixed button size type compatibility issues
+- Resolved Promise type checking issues with proper Promise.resolve() usage
 
 ### Removed
+- Removed unused SelectColumnConfig import to clean up code
+
+### Todos History
+- [x] Check ConfirmDialog component implementation
+- [x] Investigate table action handler for confirmation
+- [x] Test and fix delete confirmation dialog
+- [x] Fix TypeScript errors with async action handling
+- [x] Update CHANGELOG-CLAUDE.md with implementation details
+
+### Done Condition
+- Delete confirmation dialog appears when clicking delete actions
+- Confirmation dialog shows proper title and message from resource config
+- Loading states work correctly during delete operations
+- TypeScript compilation errors resolved
+- Both single action buttons and dropdown menus support confirmation
+- Integration with existing ConfirmDialog component working properly
+- Development server running successfully with new functionality
+
+---
+
+## [1.0.1] - 2025-07-18
+**Hash**: db2d024
+
+### Added
+- FilamentPHP-style filter system for resources with grouped filters
+- Enhanced TableBuilder with FilamentPHP-style column and filter builders
+- `TextColumn::make()`, `BadgeColumn::make()`, `DateColumn::make()`, `ActionsColumn::make()` static methods
+- `SelectFilter::make()` and `Filter::make()` static methods for fluent API
+- `defaultSort()` method for table configuration
+- Date range filter support with `fromLabel` and `toLabel` properties
+- Filter validation in `FilterBuilder.build()` method
+- Automatic filter type conversion in `TableBuilder.filters()` method
+
+### Changed
+- Updated `TableBuilderConfig` interface to support `defaultSort` configuration
+- Enhanced `FilterConfig` interface with date range support
+- Modified `TableBuilder.filters()` to accept both `FilterConfig` and `FilterBuilder` objects
+- Updated resource table configurations to use new filter system
+- Improved SongResource with color-coded badges for status and keys
+- Enhanced NoteResource with date filtering capabilities
+- Updated CLAUDE.md with changelog update requirements
+
+### Fixed
+- Fixed TypeScript compilation errors in table builder system
+- Resolved 500 error by fixing import/export issues in builders
+- Fixed unused parameter warnings in resources
+- Corrected table builder exports in components index
+- Fixed filter builder validation and type safety
+
+### Removed
+- Removed unused legacy column exports to prevent conflicts
 
 ---
 

@@ -111,9 +111,18 @@ export interface BulkActionConfig<T = any> {
 export interface FilterConfig {
   name: string
   label: string
-  type: 'text' | 'select' | 'date' | 'range'
+  type: 'text' | 'select' | 'date' | 'dateRange'
   options?: { label: string; value: string }[]
   placeholder?: string
+  group?: string
+  fromLabel?: string
+  toLabel?: string
+}
+
+export interface FilterGroupConfig {
+  name: string
+  label: string
+  filters: FilterConfig[]
 }
 
 export interface TableBuilderConfig<T = any> {
@@ -123,11 +132,17 @@ export interface TableBuilderConfig<T = any> {
   searchPlaceholder?: string
   filterable?: boolean
   filters?: FilterConfig[]
+  filterGroups?: FilterGroupConfig[]
+  groupedFilters?: boolean
   selectable?: boolean
   bulkActions?: BulkActionConfig<T>[]
   pagination?: boolean
   pageSize?: number
   pageSizeOptions?: number[]
+  defaultSort?: {
+    column: string
+    direction: 'asc' | 'desc'
+  }
   emptyState?: {
     title: string
     description?: string
@@ -166,8 +181,12 @@ export class TableBuilder<T = any> {
     return this
   }
 
-  columns(columns: ColumnConfig<T>[]): TableBuilder<T> {
-    this.config.columns = columns
+  columns(columns: ColumnConfig<T>[] | ColumnBuilder<T>[]): TableBuilder<T> {
+    if (columns.length > 0 && columns[0] instanceof ColumnBuilder) {
+      this.config.columns = (columns as ColumnBuilder<T>[]).map(builder => builder.build())
+    } else {
+      this.config.columns = columns as ColumnConfig<T>[]
+    }
     return this
   }
 
@@ -186,8 +205,20 @@ export class TableBuilder<T = any> {
     return this
   }
 
-  filters(filters: FilterConfig[]): TableBuilder<T> {
-    this.config.filters = filters
+  filters(filters: (FilterConfig | FilterBuilder)[]): TableBuilder<T> {
+    this.config.filters = filters.map(filter => 
+      filter instanceof FilterBuilder ? filter.build() : filter
+    )
+    return this
+  }
+
+  filterGroups(groups: FilterGroupConfig[]): TableBuilder<T> {
+    this.config.filterGroups = groups
+    return this
+  }
+
+  groupedFilters(grouped: boolean = true): TableBuilder<T> {
+    this.config.groupedFilters = grouped
     return this
   }
 
@@ -233,6 +264,11 @@ export class TableBuilder<T = any> {
 
   className(className: string): TableBuilder<T> {
     this.config.className = className
+    return this
+  }
+
+  defaultSort(column: string, direction: 'asc' | 'desc' = 'asc'): TableBuilder<T> {
+    this.config.defaultSort = { column, direction }
     return this
   }
 
@@ -433,6 +469,27 @@ export class ColumnBuilder<T = any> {
     return this
   }
 
+  // FilamentPHP-style method aliases
+  make(accessor: keyof T | string): ColumnBuilder<T> {
+    this.column.accessor = accessor
+    return this
+  }
+
+  boolean(): ColumnBuilder<T> {
+    this.column.type = 'boolean'
+    return this
+  }
+
+  dateTime(): ColumnBuilder<T> {
+    this.column.type = 'date'
+    return this
+  }
+
+  badge(): ColumnBuilder<T> {
+    this.column.type = 'badge'
+    return this
+  }
+
   build(): ColumnConfig<T> {
     if (!this.column.type) {
       throw new Error(`Column type is required for column: ${this.column.name}`)
@@ -444,12 +501,129 @@ export class ColumnBuilder<T = any> {
   }
 }
 
-export const TextColumn = <T = any>(name: string) => new ColumnBuilder<T>(name).type('text')
-export const BadgeColumn = <T = any>(name: string) => new ColumnBuilder<T>(name).type('badge')
-export const DateColumn = <T = any>(name: string) => new ColumnBuilder<T>(name).type('date')
-export const ActionsColumn = <T = any>(name: string) => new ColumnBuilder<T>(name).type('actions')
-export const SelectColumn = <T = any>(name: string) => new ColumnBuilder<T>(name).type('select')
-export const ImageColumn = <T = any>(name: string) => new ColumnBuilder<T>(name).type('image')
-export const IconColumn = <T = any>(name: string) => new ColumnBuilder<T>(name).type('icon')
-export const BooleanColumn = <T = any>(name: string) => new ColumnBuilder<T>(name).type('boolean')
-export const NumberColumn = <T = any>(name: string) => new ColumnBuilder<T>(name).type('number')
+// FilamentPHP-style column builders
+export class TextColumn {
+  static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
+    return new ColumnBuilder<T>(accessor as string).type('text').make(accessor)
+  }
+}
+
+export class BadgeColumn {
+  static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
+    return new ColumnBuilder<T>(accessor as string).type('badge').make(accessor)
+  }
+}
+
+export class DateColumn {
+  static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
+    return new ColumnBuilder<T>(accessor as string).type('date').make(accessor)
+  }
+}
+
+export class IconColumn {
+  static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
+    return new ColumnBuilder<T>(accessor as string).type('icon').make(accessor)
+  }
+}
+
+export class BooleanColumn {
+  static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
+    return new ColumnBuilder<T>(accessor as string).type('boolean').make(accessor)
+  }
+}
+
+export class NumberColumn {
+  static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
+    return new ColumnBuilder<T>(accessor as string).type('number').make(accessor)
+  }
+}
+
+export class ActionsColumn {
+  static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
+    return new ColumnBuilder<T>(accessor as string).type('actions').make(accessor)
+  }
+}
+
+// Filter builders
+export class SelectFilter {
+  static make(name: string): FilterBuilder {
+    return new FilterBuilder(name).type('select')
+  }
+}
+
+export class Filter {
+  static make(name: string): FilterBuilder {
+    return new FilterBuilder(name)
+  }
+}
+
+export class FilterBuilder {
+  private filter: Partial<FilterConfig> = {}
+
+  constructor(name: string) {
+    this.filter.name = name
+    this.filter.type = 'text' // Default type
+  }
+
+  type(type: 'text' | 'select' | 'date' | 'dateRange'): FilterBuilder {
+    this.filter.type = type
+    return this
+  }
+
+  label(label: string): FilterBuilder {
+    this.filter.label = label
+    return this
+  }
+
+  options(options: { [key: string]: string } | { label: string; value: string }[]): FilterBuilder {
+    if (Array.isArray(options)) {
+      this.filter.options = options
+    } else {
+      this.filter.options = Object.entries(options).map(([value, label]) => ({ label, value }))
+    }
+    return this
+  }
+
+  multiple(): FilterBuilder {
+    return this
+  }
+
+  default(_value: any): FilterBuilder {
+    return this
+  }
+
+  form(_components: any[]): FilterBuilder {
+    this.filter.type = 'dateRange'
+    this.filter.fromLabel = 'From Date'
+    this.filter.toLabel = 'To Date'
+    return this
+  }
+
+  query(_queryFn: Function): FilterBuilder {
+    return this
+  }
+
+  build(): FilterConfig {
+    if (!this.filter.name) {
+      throw new Error('Filter name is required')
+    }
+    if (!this.filter.type) {
+      throw new Error('Filter type is required')
+    }
+    if (!this.filter.label) {
+      throw new Error('Filter label is required')
+    }
+    return this.filter as FilterConfig
+  }
+}
+
+// Legacy exports for backward compatibility
+export const TextColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('text')
+export const BadgeColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('badge')
+export const DateColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('date')
+export const ActionsColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('actions')
+export const SelectColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('select')
+export const ImageColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('image')
+export const IconColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('icon')
+export const BooleanColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('boolean')
+export const NumberColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('number')

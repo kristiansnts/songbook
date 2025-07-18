@@ -26,9 +26,10 @@ export {
   BadgeColumn,
   DateColumn,
   ActionsColumn,
-  SelectColumn,
-  ImageColumn,
   IconColumn,
   BooleanColumn,
   NumberColumn,
+  SelectFilter,
+  Filter,
+  FilterBuilder,
 } from '@/lib/builders/table-builder'

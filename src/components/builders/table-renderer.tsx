@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -35,6 +35,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Check, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { 
   TableBuilderConfig, 
   ColumnConfig,
@@ -42,7 +43,6 @@ import {
   BadgeColumnConfig,
   DateColumnConfig,
   ActionsColumnConfig,
-  SelectColumnConfig,
   ImageColumnConfig,
   IconColumnConfig,
   BooleanColumnConfig,
@@ -305,6 +305,56 @@ function renderDateCell<T>(config: DateColumnConfig<T>, value: any) {
   return <span className={config.className}>{formatted}</span>
 }
 
+function ActionButton<T>({ action, row, className }: { action: ActionConfig<T>, row: any, className?: string }) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleClick = async () => {
+    if (action.requiresConfirmation) {
+      setConfirmOpen(true)
+    } else {
+      executeAction()
+    }
+  }
+
+  const executeAction = async () => {
+    setIsLoading(true)
+    try {
+      await Promise.resolve(action.onClick(row))
+    } finally {
+      setIsLoading(false)
+      setConfirmOpen(false)
+    }
+  }
+
+  return (
+    <>
+      <Button
+        variant={action.variant || 'ghost'}
+        size={action.size as any || 'sm'}
+        disabled={action.disabled?.(row) || isLoading}
+        onClick={handleClick}
+        className={className}
+      >
+        {action.icon}
+        {action.label}
+      </Button>
+      
+      {action.requiresConfirmation && (
+        <ConfirmDialog
+          open={confirmOpen}
+          onOpenChange={setConfirmOpen}
+          title={action.confirmationTitle || 'Confirm Action'}
+          desc={action.confirmationMessage || 'Are you sure you want to perform this action?'}
+          destructive={action.variant === 'destructive'}
+          isLoading={isLoading}
+          handleConfirm={executeAction}
+        />
+      )}
+    </>
+  )
+}
+
 function renderActionsCell<T>(config: ActionsColumnConfig<T>, row: any) {
   const visibleActions = config.actions.filter(
     action => !action.hidden || !action.hidden(row)
@@ -315,39 +365,73 @@ function renderActionsCell<T>(config: ActionsColumnConfig<T>, row: any) {
   if (visibleActions.length === 1) {
     const action = visibleActions[0]
     return (
-      <Button
-        variant={action.variant || 'ghost'}
-        size={action.size || 'sm'}
-        disabled={action.disabled?.(row)}
-        onClick={() => action.onClick(row)}
+      <ActionButton
+        action={action}
+        row={row}
         className={config.className}
-      >
-        {action.icon}
-        {action.label}
-      </Button>
+      />
     )
   }
 
+  return <ActionDropdown actions={visibleActions} row={row} className={config.className} />
+}
+
+function ActionDropdown<T>({ actions, row, className }: { actions: ActionConfig<T>[], row: any, className?: string }) {
+  const [confirmAction, setConfirmAction] = useState<ActionConfig<T> | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleActionClick = async (action: ActionConfig<T>) => {
+    if (action.requiresConfirmation) {
+      setConfirmAction(action)
+    } else {
+      executeAction(action)
+    }
+  }
+
+  const executeAction = async (action: ActionConfig<T>) => {
+    setIsLoading(true)
+    try {
+      await Promise.resolve(action.onClick(row))
+    } finally {
+      setIsLoading(false)
+      setConfirmAction(null)
+    }
+  }
+
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className={cn('h-8 w-8 p-0', config.className)}>
-          <MoreHorizontal className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {visibleActions.map((action, index) => (
-          <DropdownMenuItem
-            key={index}
-            disabled={action.disabled?.(row)}
-            onClick={() => action.onClick(row)}
-          >
-            {action.icon}
-            {action.label}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="sm" className={cn('h-8 w-8 p-0', className)}>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {actions.map((action, index) => (
+            <DropdownMenuItem
+              key={index}
+              disabled={action.disabled?.(row) || isLoading}
+              onClick={() => handleActionClick(action)}
+            >
+              {action.icon}
+              {action.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+      
+      {confirmAction && (
+        <ConfirmDialog
+          open={!!confirmAction}
+          onOpenChange={(open) => !open && setConfirmAction(null)}
+          title={confirmAction.confirmationTitle || 'Confirm Action'}
+          desc={confirmAction.confirmationMessage || 'Are you sure you want to perform this action?'}
+          destructive={confirmAction.variant === 'destructive'}
+          isLoading={isLoading}
+          handleConfirm={() => executeAction(confirmAction)}
+        />
+      )}
+    </>
   )
 }
 
