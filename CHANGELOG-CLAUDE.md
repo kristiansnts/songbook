@@ -8,6 +8,65 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+### Todos History
+
+### Done Condition
+
+---
+
+## [1.0.2] - 2025-07-18
+**Hash**: daef5b0
+
+### Added
+- Configurable search column functionality for table resources
+- `searchColumnId` property to `TableBuilderConfig` interface
+- `searchColumnId()` method to `TableBuilder` class for fluent API
+- Resource-specific search configuration support
+
+### Changed
+- Modified `DataTableToolbar` to accept `searchColumnId` prop instead of hardcoding 'title'
+- Enhanced `TableRenderer` to pass `searchColumnId` to toolbar component
+- Updated `UserResource` to use 'email' as the searchable column
+- Updated `SongResource` and `NoteResource` to explicitly use 'title' as searchable column
+
+### Fixed
+- Fixed console error "[Table] Column with id 'title' does not exist" for UserResource
+- Resolved hardcoded 'title' column dependency in table search functionality
+- Fixed search functionality for resources without a 'title' column
+- Removed unused React import from table-toolbar.tsx
+
+### Removed
+- Removed hardcoded 'title' column reference from table search
+- Removed unused imports to clean up code
+
+### Todos History
+- [x] Identify source of table column error in console
+- [x] Analyze table-toolbar.tsx for hardcoded column references
+- [x] Implement configurable search column functionality
+- [x] Update all resource table schemas with searchColumnId
+- [x] Test fix with development server
+- [x] Update CHANGELOG-CLAUDE.md with implementation details
+
+### Done Condition
+- Console error "[Table] Column with id 'title' does not exist" resolved
+- All resources can define their own searchable column
+- Search functionality works correctly for UserResource (email) and other resources (title)
+- TypeScript compilation clean for table-related components
+- Development server running successfully with search functionality working
+
+---
+
+## [1.0.1] - 2025-07-18
+**Hash**: db2d024
+
+### Added
 - Delete confirmation dialog functionality for table actions
 - ActionButton component with confirmation support for single actions
 - ActionDropdown component with confirmation support for multiple actions

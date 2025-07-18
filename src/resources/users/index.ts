@@ -1,6 +1,6 @@
 // UserResource exports
 export { UserResource } from './userResource'
-export { userSchema, type User, type CreateUser, type UpdateUser } from './user-schema'
+export { userSchema, type User, type UpdateUser } from './user-schema'
 
 // Page components
 export { default as UserListPage } from './pages/list'

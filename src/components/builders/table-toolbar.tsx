@@ -1,4 +1,3 @@
-import React from 'react'
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
@@ -11,12 +10,12 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { FilterConfig, BulkActionConfig } from '@/lib/builders/table-builder'
-import { cn } from '@/lib/utils'
 
 interface TableToolbarProps<T> {
   table: Table<T>
   searchable?: boolean
   searchPlaceholder?: string
+  searchColumnId?: string
   filters?: FilterConfig[]
   bulkActions?: BulkActionConfig<T>[]
   selectedRows?: any[]
@@ -26,6 +25,7 @@ export function DataTableToolbar<T>({
   table,
   searchable = true,
   searchPlaceholder = 'Search...',
+  searchColumnId,
   filters = [],
   bulkActions = [],
   selectedRows = [],
@@ -35,12 +35,12 @@ export function DataTableToolbar<T>({
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
-        {searchable && (
+        {searchable && searchColumnId && (
           <Input
             placeholder={searchPlaceholder}
-            value={(table.getColumn('title')?.getFilterValue() as string) ?? ''}
+            value={(table.getColumn(searchColumnId)?.getFilterValue() as string) ?? ''}
             onChange={(event) =>
-              table.getColumn('title')?.setFilterValue(event.target.value)
+              table.getColumn(searchColumnId)?.setFilterValue(event.target.value)
             }
             className="h-8 w-[150px] lg:w-[250px]"
           />

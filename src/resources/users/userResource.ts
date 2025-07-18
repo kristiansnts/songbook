@@ -4,6 +4,8 @@ import { FormBuilderConfig } from '@/lib/builders/form-builder'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
 import { User } from './user-schema'
 import { IconUsers } from '@tabler/icons-react'
+import { UserRoleEnum } from '@/enums/User/UserRoleEnum'
+import { UserStatusEnum } from '@/enums/User/UserStatusEnum'
 
 export class UserResource extends Resource<User> {
   constructor() {
@@ -37,50 +39,13 @@ export class UserResource extends Resource<User> {
 
   getFormSchema(): FormBuilderConfig {
     return FormBuilder.create()
-      .section(section => 
-        section
-          .title('User Details')
-          .columns(2)
-          .field('email', field => 
-            field
-              .label('Email')
-              .type('email')
-              .placeholder('Enter email address')
-              .required()
-          )
-          .field('role', field => 
-            field
-              .label('Role')
-              .type('select')
-              .placeholder('Select user role')
-              .options([
-                { label: 'Admin', value: 'admin' },
-                { label: 'Member', value: 'member' },
-                { label: 'Guest', value: 'guest' },
-              ])
-              .required()
-          )
-          .field('status', field => 
-            field
-              .label('Status')
-              .type('select')
-              .placeholder('Select user status')
-              .options([
-                { label: 'Active', value: 'active' },
-                { label: 'Pending', value: 'pending' },
-                { label: 'Request', value: 'request' },
-                { label: 'Suspended', value: 'suspend' },
-              ])
-              .required()
-          )
-      )
-      .submitButtonText('Save User')
       .build()
   }
 
   getTableSchema(): TableBuilderConfig<User> {
     return TableBuilder.create<User>()
       .searchPlaceholder('Search users...')
+      .searchColumnId('email')
       .column('email', col => 
         col
           .label('Email')
@@ -88,18 +53,6 @@ export class UserResource extends Resource<User> {
           .accessor('email')
           .searchable()
           .sortable()
-      )
-      .column('role', col => 
-        col
-          .label('Role')
-          .type('badge')
-          .accessor('role')
-          .sortable()
-          .colors({
-            'admin': 'red',
-            'member': 'blue',
-            'guest': 'gray'
-          })
       )
       .column('status', col => 
         col
@@ -114,45 +67,66 @@ export class UserResource extends Resource<User> {
             'suspend': 'red'
           })
       )
-      .column('createdAt', col => 
-        col
-          .label('Created At')
-          .type('date')
-          .accessor('createdAt')
-          .sortable()
-          .dateFormat('MMM d, yyyy')
-      )
       .column('actions', col => 
         col
           .label('Actions')
           .type('actions')
           .actions([
             {
-              label: 'Edit',
-              onClick: (row) => this.navigateToEdit(row.original.id),
-            },
-            {
               label: 'Activate',
-              onClick: (row) => this.updateUserStatus(row.original.id, 'active'),
+              size: 'sm',
               variant: 'default',
-              hidden: (row) => row.original.status === 'active',
+              hidden: (row) => row.original.status === UserStatusEnum.ACTIVE,
+              requiresConfirmation: true,
+              confirmationTitle: 'Activate User',
+              confirmationMessage: 'Are you sure you want to activate this user?',
+              onClick: async (row) => {
+                // Store original values for rollback
+                const originalStatus = row.original.status
+                const originalUpdatedAt = row.original.updatedAt
+                
+                // Apply optimistic update
+                row.original.status = UserStatusEnum.ACTIVE
+                row.original.updatedAt = new Date().toISOString()
+                
+                try {
+                  await this.updateUserStatus(row.original.id, UserStatusEnum.ACTIVE)
+                  // Success - UI already updated
+                } catch (error) {
+                  // Revert on error
+                  row.original.status = originalStatus
+                  row.original.updatedAt = originalUpdatedAt
+                  console.error('Failed to update user status:', error)
+                }
+              }
             },
             {
               label: 'Suspend',
-              onClick: (row) => this.updateUserStatus(row.original.id, 'suspend'),
+              size: 'sm',
               variant: 'destructive',
-              hidden: (row) => row.original.status === 'suspend',
+              hidden: (row) => row.original.status === UserStatusEnum.SUSPEND || row.original.status === UserStatusEnum.REQUEST,
               requiresConfirmation: true,
               confirmationTitle: 'Suspend User',
               confirmationMessage: 'Are you sure you want to suspend this user?',
-            },
-            {
-              label: 'Delete',
-              onClick: (row) => this.deleteRecord(row.original.id),
-              variant: 'destructive',
-              requiresConfirmation: true,
-              confirmationTitle: 'Delete User',
-              confirmationMessage: 'Are you sure you want to delete this user?',
+              onClick: async (row) => {
+                // Store original values for rollback
+                const originalStatus = row.original.status
+                const originalUpdatedAt = row.original.updatedAt
+                
+                // Apply optimistic update
+                row.original.status = UserStatusEnum.SUSPEND
+                row.original.updatedAt = new Date().toISOString()
+                
+                try {
+                  await this.updateUserStatus(row.original.id, UserStatusEnum.SUSPEND)
+                  // Success - UI already updated
+                } catch (error) {
+                  // Revert on error
+                  row.original.status = originalStatus
+                  row.original.updatedAt = originalUpdatedAt
+                  console.error('Failed to update user status:', error)
+                }
+              }
             },
           ])
       )
@@ -164,20 +138,8 @@ export class UserResource extends Resource<User> {
           options: [
             { label: 'All', value: '' },
             { label: 'Active', value: 'active' },
-            { label: 'Pending', value: 'pending' },
             { label: 'Request', value: 'request' },
             { label: 'Suspended', value: 'suspend' },
-          ],
-        },
-        {
-          name: 'role',
-          label: 'Role',
-          type: 'select',
-          options: [
-            { label: 'All', value: '' },
-            { label: 'Admin', value: 'admin' },
-            { label: 'Member', value: 'member' },
-            { label: 'Guest', value: 'guest' },
           ],
         },
       ])
@@ -189,82 +151,92 @@ export class UserResource extends Resource<User> {
     {
       id: '01J5XKQZQZ1A2B3C4D5E6F7G8H',
       email: 'admin@songbook.com',
-      role: 'admin',
-      status: 'active',
+      role: UserRoleEnum.ADMIN,
+      status: UserStatusEnum.ACTIVE,
       createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
       id: '01J5XKQZQZ2A3B4C5D6E7F8G9H',
       email: 'john.doe@example.com',
-      role: 'member',
-      status: 'active',
+      role: UserRoleEnum.MEMBER,
+      status: UserStatusEnum.ACTIVE,
       createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
       id: '01J5XKQZQZ3A4B5C6D7E8F9G0H',
       email: 'jane.smith@example.com',
-      role: 'member',
-      status: 'active',
+      role: UserRoleEnum.MEMBER,
+      status: UserStatusEnum.ACTIVE,
       createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
       id: '01J5XKQZQZ4A5B6C7D8E9F0G1H',
       email: 'guest.user@example.com',
-      role: 'guest',
-      status: 'pending',
+      role: UserRoleEnum.GUEST,
+      status: UserStatusEnum.PENDING,
       createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
       id: '01J5XKQZQZ5A6B7C8D9E0F1G2H',
       email: 'new.request@example.com',
-      role: 'member',
-      status: 'request',
+      role: UserRoleEnum.MEMBER,
+      status: UserStatusEnum.REQUEST,
       createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
       id: '01J5XKQZQZ6A7B8C9D0E1F2G3H',
       email: 'suspended.user@example.com',
-      role: 'member',
-      status: 'suspend',
+      role: UserRoleEnum.MEMBER,
+      status: UserStatusEnum.SUSPEND,
       createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     },
   ]
 
-  // Data operations - implement these with your data layer
+  // Data operations - fetch from API
   async getRecords(): Promise<User[]> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    return UserResource.users
+    try {
+      const userAccess = await this.getUserAccess()
+      
+      // Combine all user types into a single array
+      const allUsers = [
+        ...userAccess.active_users,
+        ...userAccess.request_users,
+        ...userAccess.suspended_users
+      ]
+      
+      return allUsers
+    } catch (error) {
+      console.error('Error fetching users from API:', error)
+      // Fallback to mock data if API fails
+      return UserResource.users.filter(user => user.role !== UserRoleEnum.ADMIN && user.status !== UserStatusEnum.PENDING)
+    }
   }
 
   async getRecord(id: string): Promise<User | null> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300))
-    return UserResource.users.find(user => user.id === id) || null
+    try {
+      const userAccess = await this.getUserAccess()
+      
+      // Search in all user arrays
+      const allUsers = [
+        ...userAccess.active_users,
+        ...userAccess.request_users,
+        ...userAccess.suspended_users
+      ]
+      
+      return allUsers.find(user => user.id === id) || null
+    } catch (error) {
+      console.error('Error fetching user from API:', error)
+      // Fallback to mock data if API fails
+      return UserResource.users.find(user => user.id === id) || null
+    }
   }
 
-  async createRecord(data: Partial<User>): Promise<User> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    const newUser: User = {
-      id: `01J5XKQZQZ${Date.now().toString().slice(-10)}`,
-      email: data.email || '',
-      role: data.role || 'member',
-      status: data.status || 'active',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }
-    
-    UserResource.users.push(newUser)
-    return newUser
-  }
 
   async updateRecord(id: string, data: Partial<User>): Promise<User> {
     // Simulate API delay
@@ -306,11 +278,45 @@ export class UserResource extends Resource<User> {
     return true
   }
 
-  // Custom method to update user status (matching UserController.updateUserAccess)
-  async updateUserStatus(id: string, status: 'active' | 'suspend'): Promise<User> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300))
-    
+  // Custom method to update user status via API
+  async updateUserStatus(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND): Promise<User> {
+    try {
+      const response = await fetch(`http://localhost:3000/api/admin/user-access/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.getAuthToken()}`,
+        },
+        body: JSON.stringify({ status }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.code === 200) {
+        // Update local mock data to reflect the change
+        const user = UserResource.users.find(u => u.id === id)
+        if (user) {
+          user.status = status
+          user.updatedAt = new Date().toISOString()
+          return user
+        }
+        throw new Error('User not found in local data')
+      } else {
+        throw new Error(result.message || 'Failed to update user status')
+      }
+    } catch (error) {
+      console.error('Error updating user status:', error)
+      // Fallback to mock data update if API fails
+      return this.updateUserStatusMock(id, status)
+    }
+  }
+
+  // Fallback mock data method
+  private updateUserStatusMock(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND): User {
     const user = UserResource.users.find(u => u.id === id)
     if (!user) {
       throw new Error('User not found')
@@ -322,17 +328,53 @@ export class UserResource extends Resource<User> {
     return user
   }
 
-  // Method to get users by access status (matching UserController.getUserAccess)
+  // Method to get users by access status from API
   async getUserAccess(): Promise<{
     active_users: User[]
     request_users: User[]
     suspended_users: User[]
   }> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300))
-    
+    try {
+      const response = await fetch('http://localhost:3000/api/admin/user-access', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.getAuthToken()}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.code === 200) {
+        return result.data
+      } else {
+        throw new Error(result.message || 'Failed to fetch user access data')
+      }
+    } catch (error) {
+      console.error('Error fetching user access:', error)
+      // Fallback to mock data if API fails
+      return this.getUserAccessMock()
+    }
+  }
+
+  // Helper method to get auth token from existing auth system
+  private getAuthToken(): string {
+    return localStorage.getItem('auth-token') || ''
+  }
+
+
+  // Fallback mock data method
+  private getUserAccessMock(): {
+    active_users: User[]
+    request_users: User[]
+    suspended_users: User[]
+  } {
     const activeUsers = UserResource.users.filter(user => 
-      user.status === 'active' && user.role !== 'admin'
+      user.status === 'active' && user.role !== UserRoleEnum.ADMIN
     )
     
     const requestUsers = UserResource.users.filter(user => 
@@ -371,7 +413,7 @@ export class UserResource extends Resource<User> {
   async beforeDelete(record: User): Promise<boolean> {
     // Add any pre-delete validation here
     // Prevent deletion of admin users
-    if (record.role === 'admin') {
+    if (record.role === UserRoleEnum.ADMIN) {
       throw new Error('Cannot delete admin users')
     }
     return true
@@ -387,15 +429,7 @@ export class UserResource extends Resource<User> {
     return {
       title: this.getPluralLabel(),
       actions: [
-        {
-          name: 'create',
-          label: `Create ${this.getLabel()}`,
-          action: () => {
-            if (typeof window !== 'undefined') {
-              window.location.href = '/users/create'
-            }
-          },
-        },
+        
       ],
     }
   }

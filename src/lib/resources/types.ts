@@ -100,7 +100,7 @@ export abstract class Resource<T = any> {
   abstract getFormSchema(): FormBuilderConfig
 
   // Table configuration
-  abstract getTableSchema(): TableBuilderConfig<T>
+  abstract getTableSchema(refreshCallback?: () => void): TableBuilderConfig<T>
 
   // Actions
   getActions(): ResourceAction<T>[] {
