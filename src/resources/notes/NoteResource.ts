@@ -3,6 +3,7 @@ import { FormBuilder, TableBuilder } from '@/components/builders'
 import { FormBuilderConfig } from '@/lib/builders/form-builder'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
 import { Note } from './note-schema'
+import { IconNote } from '@tabler/icons-react'
 
 export class NoteResource extends Resource<Note> {
   constructor() {
@@ -10,9 +11,11 @@ export class NoteResource extends Resource<Note> {
       name: 'NoteResource',
       model: 'Note',
       route: '/notes',
-      navigationIcon: undefined, // Add your icon here
-      navigationSort: 0,
-      navigationGroup: undefined, // Add navigation group if needed
+      navigationIcon: IconNote,
+      navigationSort: 20,
+      navigationGroup: 'General',
+      navigationLabel: 'Notes',
+      navigationVisible: true,
     })
   }
 
