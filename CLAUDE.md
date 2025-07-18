@@ -151,3 +151,37 @@ src/routes/_authenticated/{panelName}/
 - **Layout Components** (in `components/layout/`): Use `../../config/{panelname}-config`
 - **Pages** (in `pages/`): Use `../config/{panelname}-config`
 - **Main Layout** (in root): Use `./config/{panelname}-config`
+
+## Changelog Management
+
+### Automatic Changelog Updates
+When making changes to the codebase, always update the `CHANGELOG-CLAUDE.md` file to track modifications:
+
+1. **After completing tasks**: Add new entries to the `[Unreleased]` section
+2. **Include hash reference**: Add git commit hash for traceability
+3. **Document todos history**: Record completed and pending tasks
+4. **Set done condition**: Define completion criteria
+
+### Changelog Structure
+- **Added**: New features and capabilities
+- **Changed**: Modifications to existing functionality  
+- **Fixed**: Bug fixes and corrections
+- **Removed**: Deleted features or code
+- **Todos History**: Track task completion status
+- **Done Condition**: Completion criteria and validation steps
+
+### Update Process
+1. Complete development work
+2. Run tests and build commands
+3. Update `CHANGELOG-CLAUDE.md` with changes
+4. Include git commit hash reference
+5. Document todos and done conditions
+6. Commit changes with descriptive message
+
+### Required: End of Todos Changelog Update
+**IMPORTANT**: After completing all todos in a session, you MUST update the `CHANGELOG-CLAUDE.md` file with:
+- Summary of all completed work
+- List of files modified
+- New features or capabilities added
+- Any breaking changes or important notes
+- Current git commit hash for reference

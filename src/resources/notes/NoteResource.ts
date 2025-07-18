@@ -60,6 +60,42 @@ export class NoteResource extends Resource<Note> {
   getTableSchema(): TableBuilderConfig<Note> {
     return TableBuilder.create<Note>()
       .searchPlaceholder('Search notes...')
+      .filterable(true)
+      .groupedFilters(true)
+      .filters([
+        {
+          name: 'category',
+          label: 'Category',
+          type: 'select',
+          options: [
+            { label: 'All', value: '' },
+            { label: 'System', value: 'system' },
+            { label: 'Song Management', value: 'song' },
+            { label: 'Development', value: 'development' },
+            { label: 'UI/UX', value: 'ui' },
+            { label: 'Database', value: 'database' },
+          ],
+        },
+        {
+          name: 'createdAt',
+          label: 'Created Date',
+          type: 'dateRange',
+          fromLabel: 'From Date',
+          toLabel: 'To Date',
+        },
+        {
+          name: 'title',
+          label: 'Title',
+          type: 'text',
+          placeholder: 'Search by title...',
+        },
+        {
+          name: 'description',
+          label: 'Description',
+          type: 'text',
+          placeholder: 'Search by description...',
+        },
+      ])
       .column('title', col => 
         col
           .label('Title')
@@ -67,6 +103,7 @@ export class NoteResource extends Resource<Note> {
           .accessor('title')
           .searchable()
           .sortable()
+          .filterable()
       )
       .column('description', col => 
         col
@@ -75,12 +112,27 @@ export class NoteResource extends Resource<Note> {
           .accessor('description')
           .truncate()
           .maxLength(50)
+          .filterable()
+      )
+      .column('createdAt', col => 
+        col
+          .label('Created')
+          .type('date')
+          .accessor('createdAt')
+          .sortable()
+          .filterable()
+          .dateFormat('MMM d, yyyy')
+          .relative(false)
       )
       .column('actions', col => 
         col
           .label('Actions')
           .type('actions')
           .actions([
+            {
+              label: 'View',
+              onClick: (row) => this.navigateToView(row.original.id),
+            },
             {
               label: 'Edit',
               onClick: (row) => this.navigateToEdit(row.original.id),
@@ -104,15 +156,43 @@ export class NoteResource extends Resource<Note> {
       id: '1',
       title: 'Welcome to Notes',
       description: 'This is your first note. You can create, edit, and delete notes using the resource system.',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     },
     {
       id: '2',
       title: 'Resource System',
       description: 'The resource system provides automatic CRUD operations with forms and tables.',
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: '3',
+      title: 'Song Management',
+      description: 'Ideas for managing songs: Add tags for better organization, create playlists, and include chord charts.',
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: '4',
+      title: 'Filter Implementation',
+      description: 'Implement FilamentPHP-style filters for better data management and user experience.',
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: '5',
+      title: 'UI Components',
+      description: 'List of UI components to implement: badge components, date formatters, and responsive tables.',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+    },
+    {
+      id: '6',
+      title: 'Database Schema',
+      description: 'Design database schema for songs, notes, and user management with proper relationships.',
+      createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     },
   ]
 
@@ -191,16 +271,16 @@ export class NoteResource extends Resource<Note> {
     return data
   }
 
-  async afterSave(record: Note): Promise<void> {
+  async afterSave(_record: Note): Promise<void> {
     // Add any post-save processing here
   }
 
-  async beforeDelete(record: Note): Promise<boolean> {
+  async beforeDelete(_record: Note): Promise<boolean> {
     // Add any pre-delete validation here
     return true
   }
 
-  async afterDelete(record: Note): Promise<void> {
+  async afterDelete(_record: Note): Promise<void> {
     // Add any post-delete cleanup here
   }
 
