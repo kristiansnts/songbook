@@ -87,9 +87,9 @@ export type ColumnConfig<T = any> =
 export interface ActionConfig<T = any> {
   label: string
   icon?: ReactNode
-  onClick: (row: Row<T>) => void
+  onClick: (row: Row<T>, refresh?: () => void) => void | Promise<void>
   variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link'
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'icon'
   hidden?: (row: Row<T>) => boolean
   disabled?: (row: Row<T>) => boolean
   color?: string

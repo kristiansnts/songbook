@@ -6,6 +6,7 @@ import { User } from './user-schema'
 import { IconUsers } from '@tabler/icons-react'
 import { UserRoleEnum } from '@/enums/User/UserRoleEnum'
 import { UserStatusEnum } from '@/enums/User/UserStatusEnum'
+import { toast } from 'sonner'
 
 export class UserResource extends Resource<User> {
   constructor() {
@@ -74,57 +75,63 @@ export class UserResource extends Resource<User> {
           .actions([
             {
               label: 'Activate',
-              size: 'sm',
-              variant: 'default',
+              size: 'xs',
+              variant: 'outline',
+              color: 'green',
               hidden: (row) => row.original.status === UserStatusEnum.ACTIVE,
               requiresConfirmation: true,
               confirmationTitle: 'Activate User',
               confirmationMessage: 'Are you sure you want to activate this user?',
-              onClick: async (row) => {
-                // Store original values for rollback
-                const originalStatus = row.original.status
-                const originalUpdatedAt = row.original.updatedAt
-                
-                // Apply optimistic update
-                row.original.status = UserStatusEnum.ACTIVE
-                row.original.updatedAt = new Date().toISOString()
-                
+              onClick: async (row, refresh) => {
                 try {
-                  await this.updateUserStatus(row.original.id, UserStatusEnum.ACTIVE)
-                  // Success - UI already updated
+                  const updatedUser = await this.updateUserStatus(row.original.id, UserStatusEnum.ACTIVE)
+                  if (updatedUser) {
+                    // Update the row data with the returned user data
+                    Object.assign(row.original, updatedUser)
+                    refresh?.()
+                    toast.success('User activated successfully', {
+                      action: {
+                        label: 'x',
+                        onClick: () => toast.dismiss()
+                      }
+                    })
+                  } else {
+                    throw new Error('Update failed')
+                  }
                 } catch (error) {
-                  // Revert on error
-                  row.original.status = originalStatus
-                  row.original.updatedAt = originalUpdatedAt
-                  console.error('Failed to update user status:', error)
+                  refresh?.()
+                  toast.error('Failed to activate user. Please try again.', {
+                    action: {
+                      label: 'x',
+                      onClick: () => toast.dismiss()
+                    }
+                  })
                 }
               }
             },
             {
               label: 'Suspend',
-              size: 'sm',
-              variant: 'destructive',
+              size: 'xs',
+              variant: 'outline',
+              color: 'red',
               hidden: (row) => row.original.status === UserStatusEnum.SUSPEND || row.original.status === UserStatusEnum.REQUEST,
               requiresConfirmation: true,
               confirmationTitle: 'Suspend User',
               confirmationMessage: 'Are you sure you want to suspend this user?',
-              onClick: async (row) => {
-                // Store original values for rollback
-                const originalStatus = row.original.status
-                const originalUpdatedAt = row.original.updatedAt
-                
-                // Apply optimistic update
-                row.original.status = UserStatusEnum.SUSPEND
-                row.original.updatedAt = new Date().toISOString()
-                
+              onClick: async (row, refresh) => {                
                 try {
-                  await this.updateUserStatus(row.original.id, UserStatusEnum.SUSPEND)
-                  // Success - UI already updated
+                  const updatedUser = await this.updateUserStatus(row.original.id, UserStatusEnum.SUSPEND)
+                  if (updatedUser) {
+                    // Update the row data with the returned user data
+                    Object.assign(row.original, updatedUser)
+                    refresh?.()
+                    toast.success('User suspended successfully')
+                  } else {
+                    throw new Error('Update failed')
+                  }
                 } catch (error) {
-                  // Revert on error
-                  row.original.status = originalStatus
-                  row.original.updatedAt = originalUpdatedAt
-                  console.error('Failed to update user status:', error)
+                  refresh?.()
+                  toast.error('Failed to suspend user. Please try again.')
                 }
               }
             },
@@ -280,53 +287,62 @@ export class UserResource extends Resource<User> {
 
   // Custom method to update user status via API
   async updateUserStatus(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND): Promise<User> {
-    try {
-      const response = await fetch(`http://localhost:3000/api/admin/user-access/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`,
-        },
-        body: JSON.stringify({ status }),
-      })
+    const token = this.getAuthToken()
+    if (!token) {
+      throw new Error('No authentication token found. Please log in again.')
+    }
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+    const response = await fetch(`http://localhost:3000/api/admin/user-access/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ status }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const result = await response.json()
+    
+    if (result.code === 200) {
+      // Update local mock data to reflect the change
+      const user = UserResource.users.find(u => u.id === id)
+      if (user) {
+        user.status = status
+        user.updatedAt = new Date().toISOString()
+        return user
       }
-
-      const result = await response.json()
       
-      if (result.code === 200) {
-        // Update local mock data to reflect the change
-        const user = UserResource.users.find(u => u.id === id)
-        if (user) {
-          user.status = status
-          user.updatedAt = new Date().toISOString()
-          return user
-        }
-        throw new Error('User not found in local data')
-      } else {
-        throw new Error(result.message || 'Failed to update user status')
-      }
-    } catch (error) {
-      console.error('Error updating user status:', error)
-      // Fallback to mock data update if API fails
-      return this.updateUserStatusMock(id, status)
+      // If user not found in local data, return the API response data
+      return {
+        id,
+        status,
+        updatedAt: new Date().toISOString(),
+        // Add other required fields with fallback values
+        email: '',
+        role: UserRoleEnum.MEMBER,
+        createdAt: new Date().toISOString(),
+      } as User
+    } else {
+      throw new Error(result.message || 'Failed to update user status')
     }
   }
 
   // Fallback mock data method
-  private updateUserStatusMock(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND): User {
-    const user = UserResource.users.find(u => u.id === id)
-    if (!user) {
-      throw new Error('User not found')
-    }
+  // private updateUserStatusMock(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND): User {
+  //   const user = UserResource.users.find(u => u.id === id)
+  //   if (!user) {
+  //     throw new Error('User not found')
+  //   }
     
-    user.status = status
-    user.updatedAt = new Date().toISOString()
+  //   user.status = status
+  //   user.updatedAt = new Date().toISOString()
     
-    return user
-  }
+  //   return user
+  // }
 
   // Method to get users by access status from API
   async getUserAccess(): Promise<{
