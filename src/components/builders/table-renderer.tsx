@@ -65,6 +65,11 @@ export function TableRenderer<T = any>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [sorting, setSorting] = React.useState<SortingState>([])
+  const [refreshKey, setRefreshKey] = React.useState(0)
+
+  const forceRefresh = React.useCallback(() => {
+    setRefreshKey(prev => prev + 1)
+  }, [])
 
   const columns = React.useMemo(() => {
     const tableColumns: ColumnDef<T>[] = []
@@ -104,7 +109,7 @@ export function TableRenderer<T = any>({
         enableSorting: columnConfig.sortable ?? true,
         cell: ({ row }) => {
           const value = row.getValue(columnConfig.name)
-          return renderCell(columnConfig, value, row, config.onRefresh)
+          return renderCell(columnConfig, value, row, config.onRefresh || forceRefresh)
         },
       }
 
@@ -118,7 +123,7 @@ export function TableRenderer<T = any>({
     })
 
     return tableColumns
-  }, [config.columns, config.selectable])
+  }, [config.columns, config.selectable, forceRefresh, refreshKey])
 
   const table = useReactTable({
     data: config.data,
@@ -274,12 +279,27 @@ function renderTextCell<T>(config: TextColumnConfig<T>, value: any) {
 
 function renderBadgeCell<T>(config: BadgeColumnConfig<T>, value: any) {
   const text = String(value || '')
-  const color = config.colors?.[value] || 'default'
+  const colorName = config.colors?.[value] || 'default'
+  
+  const getBadgeColorClass = (color: string) => {
+    switch (color) {
+      case 'green':
+        return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
+      case 'red':
+        return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800'
+      case 'yellow':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800'
+      case 'blue':
+        return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
+      default:
+        return ''
+    }
+  }
   
   return (
     <Badge 
-      variant={config.variant || 'default'}
-      className={cn(config.className, color)}
+      variant={config.variant || 'outline'}
+      className={cn(config.className, getBadgeColorClass(colorName))}
     >
       {text}
     </Badge>
@@ -321,11 +341,24 @@ function ActionButton<T>({ action, row, className, onRefresh }: { action: Action
   const executeAction = async () => {
     setIsLoading(true)
     try {
-      await Promise.resolve(action.onClick(row))
-      onRefresh?.()
+      await Promise.resolve(action.onClick(row, onRefresh))
+      // Additional refresh call removed as it's now handled in the onClick
     } finally {
       setIsLoading(false)
       setConfirmOpen(false)
+    }
+  }
+
+  const getColorClass = (color?: string) => {
+    switch (color) {
+      case 'green':
+        return 'border-green-500 text-green-600 hover:bg-green-500 hover:text-white hover:border-green-500 dark:border-green-400 dark:text-green-400 dark:hover:bg-green-500 dark:hover:text-white dark:hover:border-green-500'
+      case 'red':
+        return 'border-red-500 text-red-600 hover:bg-red-500 hover:text-white hover:border-red-500 dark:border-red-400 dark:text-red-400 dark:hover:bg-red-500 dark:hover:text-white dark:hover:border-red-500'
+      case 'yellow':
+        return 'border-yellow-500 text-yellow-600 hover:bg-yellow-500 hover:text-white hover:border-yellow-500 dark:border-yellow-400 dark:text-yellow-400 dark:hover:bg-yellow-500 dark:hover:text-white dark:hover:border-yellow-500'
+      default:
+        return ''
     }
   }
 
@@ -336,7 +369,7 @@ function ActionButton<T>({ action, row, className, onRefresh }: { action: Action
         size={action.size as any || 'sm'}
         disabled={action.disabled?.(row) || isLoading}
         onClick={handleClick}
-        className={className}
+        className={cn(className, action.color && getColorClass(action.color))}
       >
         {action.icon}
         {action.label}
@@ -394,11 +427,24 @@ function ActionDropdown<T>({ actions, row, className, onRefresh }: { actions: Ac
   const executeAction = async (action: ActionConfig<T>) => {
     setIsLoading(true)
     try {
-      await Promise.resolve(action.onClick(row))
-      onRefresh?.()
+      await Promise.resolve(action.onClick(row, onRefresh))
+      // Additional refresh call removed as it's now handled in the onClick
     } finally {
       setIsLoading(false)
       setConfirmAction(null)
+    }
+  }
+
+  const getDropdownColorClass = (color?: string) => {
+    switch (color) {
+      case 'green':
+        return 'text-green-600 focus:bg-green-50 focus:text-green-700 dark:text-green-400 dark:focus:bg-green-950'
+      case 'red':
+        return 'text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-950'
+      case 'yellow':
+        return 'text-yellow-600 focus:bg-yellow-50 focus:text-yellow-700 dark:text-yellow-400 dark:focus:bg-yellow-950'
+      default:
+        return ''
     }
   }
 
@@ -416,6 +462,7 @@ function ActionDropdown<T>({ actions, row, className, onRefresh }: { actions: Ac
               key={index}
               disabled={action.disabled?.(row) || isLoading}
               onClick={() => handleActionClick(action)}
+              className={action.color ? getDropdownColorClass(action.color) : ''}
             >
               {action.icon}
               {action.label}

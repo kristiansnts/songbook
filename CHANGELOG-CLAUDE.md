@@ -8,16 +8,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `xs` button size variant for compact action buttons matching badge dimensions
+- Color-coded action buttons with green, red, and yellow variants
+- Custom color styling for badge cells with proper light/dark mode support
+- React state-based table refresh system for real-time UI updates
+- Toast notifications for user action feedback instead of console logging
 
 ### Changed
+- Updated action button hover states to use solid background colors with white text
+- Modified badge rendering to use proper Tailwind color classes instead of generic names
+- Enhanced ActionConfig interface to support 'xs' size and refresh callbacks
+- Improved onClick handlers to pass refresh function for immediate UI updates
+- Replaced console.error with user-friendly toast notifications using Sonner
 
 ### Fixed
+- Fixed badge status updates not triggering proper UI rerenders
+- Resolved black badge display issue by implementing proper color mapping
+- Fixed action button sizes to match badge proportions for visual consistency
+- Improved error handling in user status updates with proper fallback behavior
 
 ### Removed
+- Removed mock data fallback from API error handling for clearer error states
+- Cleaned up unnecessary console logging in favor of toast notifications
 
 ### Todos History
+- [x] Examine table-renderer.tsx to understand current rendering implementation
+- [x] Implement useState or Zustand store for badge status rerendering  
+- [x] Update action onClick handlers to trigger proper rerenders
+- [x] Test badge updates and rerenders in development
 
 ### Done Condition
+- Action buttons are properly sized to match badges
+- Badge colors display correctly with semantic color coding
+- User status changes trigger immediate UI updates with toast feedback
+- Button hover states show solid colors with white text
+- All TypeScript compilation passes without errors
 
 ---
 
