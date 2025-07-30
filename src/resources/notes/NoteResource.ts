@@ -4,6 +4,7 @@ import { FormBuilderConfig } from '@/lib/builders/form-builder'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
 import { Note } from './note-schema'
 import { IconNote } from '@tabler/icons-react'
+import { toast } from 'sonner'
 
 export class NoteResource extends Resource<Note> {
   constructor() {
@@ -143,7 +144,26 @@ export class NoteResource extends Resource<Note> {
             },
             {
               label: 'Delete',
-              onClick: (row) => this.deleteRecord(row.original.id),
+              onClick: async (row, refresh) => {
+                try{
+                  await this.deleteRecord(row.original.id)
+                  refresh?.()
+                  toast.success('Noted deleted successfully', {
+                    action: {
+                      label: 'x',
+                      onClick: () => toast.dismiss(),
+                    },
+                  })
+                }catch (error) {
+                  refresh?.()
+                  toast.success('Error deleting user', {
+                    action: {
+                      label: 'x',
+                      onClick: () => toast.dismiss(),
+                    },
+                  })
+                }
+              },
               variant: 'destructive',
               requiresConfirmation: true,
               confirmationTitle: 'Delete Note',

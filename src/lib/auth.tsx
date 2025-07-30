@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_APP_URL_API || 'http://localhost:3000/api'}/auth/login`, { 
+      const response = await axios.post(`${import.meta.env.VITE_APP_PROD_URL_API || 'http://localhost:3000/api'}/auth/login`, { 
         email, 
         password 
       })

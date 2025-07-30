@@ -153,57 +153,7 @@ export class UserResource extends Resource<User> {
       .build()
   }
 
-  // Sample data - replace with your actual data layer
-  private static users: User[] = [
-    {
-      id: '01J5XKQZQZ1A2B3C4D5E6F7G8H',
-      email: 'admin@songbook.com',
-      role: UserRoleEnum.ADMIN,
-      status: UserStatusEnum.ACTIVE,
-      createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '01J5XKQZQZ2A3B4C5D6E7F8G9H',
-      email: 'john.doe@example.com',
-      role: UserRoleEnum.MEMBER,
-      status: UserStatusEnum.ACTIVE,
-      createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '01J5XKQZQZ3A4B5C6D7E8F9G0H',
-      email: 'jane.smith@example.com',
-      role: UserRoleEnum.MEMBER,
-      status: UserStatusEnum.ACTIVE,
-      createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '01J5XKQZQZ4A5B6C7D8E9F0G1H',
-      email: 'guest.user@example.com',
-      role: UserRoleEnum.GUEST,
-      status: UserStatusEnum.PENDING,
-      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '01J5XKQZQZ5A6B7C8D9E0F1G2H',
-      email: 'new.request@example.com',
-      role: UserRoleEnum.MEMBER,
-      status: UserStatusEnum.REQUEST,
-      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-    {
-      id: '01J5XKQZQZ6A7B8C9D0E1F2G3H',
-      email: 'suspended.user@example.com',
-      role: UserRoleEnum.MEMBER,
-      status: UserStatusEnum.SUSPEND,
-      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    },
-  ]
+  private static users: User[] = []
 
   // Data operations - fetch from API
   async getRecords(): Promise<User[]> {
