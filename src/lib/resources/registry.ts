@@ -1,5 +1,6 @@
 import { Resource } from './types'
 import { type SidebarData } from '@/components/layout/types'
+import { IconLayoutDashboard, IconHelp } from '@tabler/icons-react'
 
 class ResourceRegistry {
   private resources: Map<string, Resource> = new Map()
@@ -44,8 +45,8 @@ class ResourceRegistry {
       title,
       items: resources.map(resource => ({
         title: resource.getNavigationLabel(),
-        url: resource.getNavigationUrl(),
-        icon: resource.getNavigationIcon(),
+        url: resource.getNavigationUrl() as any,
+        icon: resource.getNavigationIcon() as any,
       }))
     }))
 
@@ -56,8 +57,8 @@ class ResourceRegistry {
         items: [
           {
             title: 'Dashboard',
-            url: '/dashboard',
-            icon: undefined, // Will be set in sidebar-data.ts
+            url: '/dashboard' as any,
+            icon: IconLayoutDashboard as any,
           },
         ],
       },
@@ -66,8 +67,8 @@ class ResourceRegistry {
         items: [
           {
             title: 'Help Center',
-            url: '/help-center',
-            icon: undefined, // Will be set in sidebar-data.ts
+            url: '/help-center' as any,
+            icon: IconHelp as any,
           },
         ],
       },

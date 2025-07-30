@@ -26,16 +26,25 @@ class ResourceGenerator {
     // Generate files
     const files = this.generateFiles()
     
-    // Write files
+    // Write resource files
     Object.entries(files).forEach(([filename, content]) => {
       const filePath = path.join(this.options.outputPath, filename)
       this.writeFile(filePath, content)
       console.log(`✅ Created: ${filePath}`)
     })
     
+    // Write route files separately with absolute paths
+    this.writeRouteFiles(templateVars)
+    
     console.log(`🎉 ${this.name}Resource generated successfully!`)
     console.log(`📁 Location: ${this.options.outputPath}`)
-    console.log(`🔗 Route: /${this.options.routeName}`)
+    console.log(`🔗 Route: /_authenticated/${this.options.routeName}`)
+    console.log(`🚪 Routes created:`)
+    console.log(`   • /_authenticated/${this.options.routeName}/ (list)`)
+    console.log(`   • /_authenticated/${this.options.routeName}/create`)
+    console.log(`   • /_authenticated/${this.options.routeName}/edit/$id`)
+    console.log(`   • /_authenticated/${this.options.routeName}/view/$id`)
+    console.log(`📡 Auto-registered in sidebar navigation`)
     
     return files
   }
@@ -44,6 +53,9 @@ class ResourceGenerator {
     const dirs = [
       this.options.outputPath,
       path.join(this.options.outputPath, 'pages'),
+      path.join('src', 'routes', '_authenticated', this.options.routeName),
+      path.join('src', 'routes', '_authenticated', this.options.routeName, 'edit'),
+      path.join('src', 'routes', '_authenticated', this.options.routeName, 'view'),
     ]
     
     dirs.forEach(dir => {
@@ -56,7 +68,8 @@ class ResourceGenerator {
   generateFiles() {
     const templateVars = this.getTemplateVariables()
     
-    return {
+    // Resource files
+    const resourceFiles = {
       [`${this.name}Resource.ts`]: this.replaceTemplateVariables(this.getResourceTemplate(), templateVars),
       [`${this.name.toLowerCase()}-schema.ts`]: this.replaceTemplateVariables(this.getSchemaTemplate(), templateVars),
       'pages/list.tsx': this.replaceTemplateVariables(this.getListPageTemplate(), templateVars),
@@ -65,6 +78,13 @@ class ResourceGenerator {
       'pages/view.tsx': this.replaceTemplateVariables(this.getViewPageTemplate(), templateVars),
       'index.ts': this.replaceTemplateVariables(this.getIndexTemplate(), templateVars),
     }
+
+    // Route files (use absolute paths from project root)
+    const routeFiles = {}
+    
+    // We'll write these separately with absolute paths
+
+    return { ...resourceFiles, ...routeFiles }
   }
 
   getTemplateVariables() {
@@ -222,12 +242,39 @@ class ResourceGenerator {
     fs.writeFileSync(filePath, content)
   }
 
+  writeRouteFiles(templateVars) {
+    const routeFiles = [
+      {
+        path: path.join('src', 'routes', '_authenticated', this.options.routeName, 'index.tsx'),
+        content: this.replaceTemplateVariables(this.getRouteIndexTemplate(), templateVars)
+      },
+      {
+        path: path.join('src', 'routes', '_authenticated', this.options.routeName, 'create.tsx'),
+        content: this.replaceTemplateVariables(this.getRouteCreateTemplate(), templateVars)
+      },
+      {
+        path: path.join('src', 'routes', '_authenticated', this.options.routeName, 'edit', '$id.tsx'),
+        content: this.replaceTemplateVariables(this.getRouteEditTemplate(), templateVars)
+      },
+      {
+        path: path.join('src', 'routes', '_authenticated', this.options.routeName, 'view', '$id.tsx'),
+        content: this.replaceTemplateVariables(this.getRouteViewTemplate(), templateVars)
+      }
+    ]
+
+    routeFiles.forEach(({ path: routePath, content }) => {
+      this.writeFile(routePath, content)
+      console.log(`✅ Created: ${routePath}`)
+    })
+  }
+
   getResourceTemplate() {
     return `import { Resource } from '@/lib/resources/types'
 import { FormBuilder, TableBuilder } from '@/components/builders'
 import { FormBuilderConfig } from '@/lib/builders/form-builder'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
 import { {{MODEL_NAME}} } from './{{MODEL_NAME_LOWER}}-schema'
+import { IconFileText } from '@tabler/icons-react' // Replace with appropriate icon
 
 export class {{RESOURCE_NAME}} extends Resource<{{MODEL_NAME}}> {
   constructor() {
@@ -235,9 +282,9 @@ export class {{RESOURCE_NAME}} extends Resource<{{MODEL_NAME}}> {
       name: '{{RESOURCE_NAME}}',
       model: '{{MODEL_NAME}}',
       route: '/{{ROUTE_NAME}}',
-      navigationIcon: undefined, // Add your icon here
-      navigationSort: 0,
-      navigationGroup: undefined, // Add navigation group if needed
+      navigationIcon: IconFileText, // Replace with appropriate icon from @tabler/icons-react
+      navigationSort: 50, // Adjust sort order as needed
+      navigationGroup: 'General', // Set navigation group
     })
   }
 
@@ -284,7 +331,7 @@ export class {{RESOURCE_NAME}} extends Resource<{{MODEL_NAME}}> {
             },
             {
               label: 'Delete',
-              onClick: (row) => this.deleteRecord(row.original.id),
+              onClick: async (row) => { await this.deleteRecord(row.original.id); },
               variant: 'destructive',
               requiresConfirmation: true,
               confirmationTitle: 'Delete {{LABEL}}',
@@ -421,15 +468,14 @@ export default function {{MODEL_NAME}}CreatePage() {
     return `import React from 'react'
 import { EditPage } from '@/lib/resources/pages'
 import { {{RESOURCE_NAME}} } from '../{{RESOURCE_NAME}}'
-import { useRouter } from 'next/router'
+import { useParams } from '@tanstack/react-router'
 
 const resource = new {{RESOURCE_NAME}}()
 
 export default function {{MODEL_NAME}}EditPage() {
-  const router = useRouter()
-  const { id } = router.query
+  const { id } = useParams({ from: '/_authenticated/{{ROUTE_NAME}}/edit/$id' })
 
-  if (!id || typeof id !== 'string') {
+  if (!id) {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center">
@@ -450,15 +496,14 @@ export default function {{MODEL_NAME}}EditPage() {
     return `import React from 'react'
 import { ViewPage } from '@/lib/resources/pages'
 import { {{RESOURCE_NAME}} } from '../{{RESOURCE_NAME}}'
-import { useRouter } from 'next/router'
+import { useParams } from '@tanstack/react-router'
 
 const resource = new {{RESOURCE_NAME}}()
 
 export default function {{MODEL_NAME}}ViewPage() {
-  const router = useRouter()
-  const { id } = router.query
+  const { id } = useParams({ from: '/_authenticated/{{ROUTE_NAME}}/view/$id' })
 
-  if (!id || typeof id !== 'string') {
+  if (!id) {
     return (
       <div className="container mx-auto p-6">
         <div className="text-center">
@@ -476,7 +521,7 @@ export default function {{MODEL_NAME}}ViewPage() {
   }
 
   getIndexTemplate() {
-    return `// {{RESOURCE_NAME}} exports
+    return `// {{RESOURCE_NAME}} exports - Auto-discoverable by resource registry
 export { {{RESOURCE_NAME}} } from './{{RESOURCE_NAME}}'
 export { {{MODEL_NAME_LOWER}}Schema, type {{MODEL_NAME}}, type Create{{MODEL_NAME}} } from './{{MODEL_NAME_LOWER}}-schema'
 
@@ -485,6 +530,47 @@ export { default as {{MODEL_NAME}}ListPage } from './pages/list'
 export { default as {{MODEL_NAME}}CreatePage } from './pages/create'
 export { default as {{MODEL_NAME}}EditPage } from './pages/edit'
 export { default as {{MODEL_NAME}}ViewPage } from './pages/view'
+`
+  }
+
+  // Route templates
+  getRouteIndexTemplate() {
+    return `import { createFileRoute } from '@tanstack/react-router'
+import { {{MODEL_NAME}}ListPage } from '@/resources/{{ROUTE_NAME}}'
+
+export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/')({
+  component: {{MODEL_NAME}}ListPage,
+})
+`
+  }
+
+  getRouteCreateTemplate() {
+    return `import { createFileRoute } from '@tanstack/react-router'
+import { {{MODEL_NAME}}CreatePage } from '@/resources/{{ROUTE_NAME}}'
+
+export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/create')({
+  component: {{MODEL_NAME}}CreatePage,
+})
+`
+  }
+
+  getRouteEditTemplate() {
+    return `import { createFileRoute } from '@tanstack/react-router'
+import { {{MODEL_NAME}}EditPage } from '@/resources/{{ROUTE_NAME}}'
+
+export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/edit/$id')({
+  component: {{MODEL_NAME}}EditPage,
+})
+`
+  }
+
+  getRouteViewTemplate() {
+    return `import { createFileRoute } from '@tanstack/react-router'
+import { {{MODEL_NAME}}ViewPage } from '@/resources/{{ROUTE_NAME}}'
+
+export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/view/$id')({
+  component: {{MODEL_NAME}}ViewPage,
+})
 `
   }
 }
