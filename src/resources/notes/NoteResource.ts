@@ -28,6 +28,10 @@ export class NoteResource extends Resource<Note> {
     return '/notes'
   }
 
+  hideMenu(): boolean {
+    return true
+  }
+
   getLabel(): string {
     return 'Note'
   }

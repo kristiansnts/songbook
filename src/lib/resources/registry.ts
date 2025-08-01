@@ -18,7 +18,9 @@ class ResourceRegistry {
   }
 
   getVisibleResources(): Resource[] {
-    return this.getAllResources().filter(resource => resource.getNavigationVisible())
+    return this.getAllResources().filter(resource => 
+      resource.getNavigationVisible() && !resource.hideMenu()
+    )
   }
 
   generateSidebarData(): SidebarData {

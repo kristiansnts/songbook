@@ -31,6 +31,10 @@ export class SongResource extends Resource<Song> {
     return 'Song'
   }
 
+  hideMenu(): boolean {
+    return true
+  }
+
   getPluralLabel(): string {
     return 'Songs'
   }
