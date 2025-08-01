@@ -96,6 +96,11 @@ export abstract class Resource<T = any> {
     return this.getRoute()
   }
 
+  // Hide from menu - can be overridden by subclasses
+  hideMenu(): boolean {
+    return false
+  }
+
   // Form configuration
   abstract getFormSchema(): FormBuilderConfig
 

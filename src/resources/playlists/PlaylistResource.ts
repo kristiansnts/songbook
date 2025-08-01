@@ -29,6 +29,10 @@ export class PlaylistResource extends Resource<Playlist> {
     return 'Playlist'
   }
 
+  hideMenu(): boolean {
+    return true
+  }
+
   getPluralLabel(): string {
     return 'Playlists'
   }

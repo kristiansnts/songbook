@@ -4,8 +4,8 @@ import { FormBuilderConfig } from '@/lib/builders/form-builder'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
 import { User } from './user-schema'
 import { IconUsers } from '@tabler/icons-react'
-import { UserRoleEnum } from '@/enums/User/UserRoleEnum'
 import { UserStatusEnum } from '@/enums/User/UserStatusEnum'
+import { UserRoleEnum } from '@/enums/User/UserRoleEnum'
 import { toast } from 'sonner'
 
 export class UserResource extends Resource<User> {
@@ -46,14 +46,34 @@ export class UserResource extends Resource<User> {
   getTableSchema(): TableBuilderConfig<User> {
     return TableBuilder.create<User>()
       .searchPlaceholder('Search users...')
-      .searchColumnId('email')
-      .column('email', col => 
+      .searchColumnId('username')
+      .column('nama', col => 
         col
-          .label('Email')
+          .label('Name')
           .type('text')
-          .accessor('email')
+          .accessor('nama')
           .searchable()
           .sortable()
+      )
+      .column('username', col => 
+        col
+          .label('Email/Username')
+          .type('text')
+          .accessor('username')
+          .searchable()
+          .sortable()
+      )
+      .column('role', col => 
+        col
+          .label('Role')
+          .type('badge')
+          .accessor('role')
+          .sortable()
+          .colors({
+            'admin': 'purple',
+            'member': 'blue',
+            'guest': 'gray'
+          })
       )
       .column('status', col => 
         col
@@ -145,166 +165,34 @@ export class UserResource extends Resource<User> {
           options: [
             { label: 'All', value: '' },
             { label: 'Active', value: 'active' },
+            { label: 'Pending', value: 'pending' },
             { label: 'Request', value: 'request' },
             { label: 'Suspended', value: 'suspend' },
+          ],
+        },
+        {
+          name: 'role',
+          label: 'Role',
+          type: 'select',
+          options: [
+            { label: 'All', value: '' },
+            { label: 'Admin', value: 'admin' },
+            { label: 'Member', value: 'member' },
+            { label: 'Guest', value: 'guest' },
           ],
         },
       ])
       .build()
   }
 
-  private static users: User[] = []
 
   // Data operations - fetch from API
   async getRecords(): Promise<User[]> {
     try {
-      const userAccess = await this.getUserAccess()
-      
-      // Combine all user types into a single array
-      const allUsers = [
-        ...userAccess.active_users,
-        ...userAccess.request_users,
-        ...userAccess.suspended_users
-      ]
-      
-      return allUsers
-    } catch (error) {
-      console.error('Error fetching users from API:', error)
-      // Fallback to mock data if API fails
-      return UserResource.users.filter(user => user.role !== UserRoleEnum.ADMIN && user.status !== UserStatusEnum.PENDING)
-    }
-  }
-
-  async getRecord(id: string): Promise<User | null> {
-    try {
-      const userAccess = await this.getUserAccess()
-      
-      // Search in all user arrays
-      const allUsers = [
-        ...userAccess.active_users,
-        ...userAccess.request_users,
-        ...userAccess.suspended_users
-      ]
-      
-      return allUsers.find(user => user.id === id) || null
-    } catch (error) {
-      console.error('Error fetching user from API:', error)
-      // Fallback to mock data if API fails
-      return UserResource.users.find(user => user.id === id) || null
-    }
-  }
-
-
-  async updateRecord(id: string, data: Partial<User>): Promise<User> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    const index = UserResource.users.findIndex(user => user.id === id)
-    if (index === -1) {
-      throw new Error('User not found')
-    }
-    
-    const updatedUser: User = {
-      ...UserResource.users[index],
-      ...data,
-      updatedAt: new Date().toISOString(),
-    }
-    
-    UserResource.users[index] = updatedUser
-    return updatedUser
-  }
-
-  async deleteRecord(id: string): Promise<boolean> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300))
-    
-    const index = UserResource.users.findIndex(user => user.id === id)
-    if (index === -1) {
-      return false
-    }
-    
-    UserResource.users.splice(index, 1)
-    return true
-  }
-
-  async deleteRecords(ids: string[]): Promise<boolean> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    UserResource.users = UserResource.users.filter(user => !ids.includes(user.id))
-    return true
-  }
-
-  // Custom method to update user status via API
-  async updateUserStatus(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND): Promise<User> {
-    const token = this.getAuthToken()
-    if (!token) {
-      throw new Error('No authentication token found. Please log in again.')
-    }
-
-    const response = await fetch(`http://localhost:3000/api/admin/user-access/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ status }),
-    })
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`)
-    }
-
-    const result = await response.json()
-    
-    if (result.code === 200) {
-      // Update local mock data to reflect the change
-      const user = UserResource.users.find(u => u.id === id)
-      if (user) {
-        user.status = status
-        user.updatedAt = new Date().toISOString()
-        return user
-      }
-      
-      // If user not found in local data, return the API response data
-      return {
-        id,
-        status,
-        updatedAt: new Date().toISOString(),
-        // Add other required fields with fallback values
-        email: '',
-        role: UserRoleEnum.MEMBER,
-        createdAt: new Date().toISOString(),
-      } as User
-    } else {
-      throw new Error(result.message || 'Failed to update user status')
-    }
-  }
-
-  // Fallback mock data method
-  // private updateUserStatusMock(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND): User {
-  //   const user = UserResource.users.find(u => u.id === id)
-  //   if (!user) {
-  //     throw new Error('User not found')
-  //   }
-    
-  //   user.status = status
-  //   user.updatedAt = new Date().toISOString()
-    
-  //   return user
-  // }
-
-  // Method to get users by access status from API
-  async getUserAccess(): Promise<{
-    active_users: User[]
-    request_users: User[]
-    suspended_users: User[]
-  }> {
-    try {
-      const response = await fetch('http://localhost:3000/api/admin/user-access', {
+      const response = await fetch('https://songbanks-v1-1.vercel.app/api/admin/user-access', {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
+          'accept': 'application/json',
           'Authorization': `Bearer ${this.getAuthToken()}`,
         },
       })
@@ -316,87 +204,158 @@ export class UserResource extends Resource<User> {
       const result = await response.json()
       
       if (result.code === 200) {
-        return result.data
+        // Transform API data to match our User schema
+        return result.data.map((user: any) => ({
+          id: String(user.id),
+          nama: user.nama,
+          username: user.username,
+          email: user.username, // Use username as email for backward compatibility
+          role: user.role,
+          status: user.status,
+        }))
       } else {
-        throw new Error(result.message || 'Failed to fetch user access data')
+        throw new Error(result.message || 'Failed to fetch users')
       }
     } catch (error) {
-      console.error('Error fetching user access:', error)
-      // Fallback to mock data if API fails
-      return this.getUserAccessMock()
+      console.error('Error fetching users from API:', error)
+      // Fallback to empty array if API fails
+      return []
     }
   }
 
-  // Helper method to get auth token from existing auth system
+  async getRecord(id: string): Promise<User | null> {
+    try {
+      const allUsers = await this.getRecords()
+      return allUsers.find(user => user.id === id) || null
+    } catch (error) {
+      console.error('Error fetching user from API:', error)
+      return null
+    }
+  }
+
+
+
+  async updateRecord(id: string, data: Partial<User>): Promise<User> {
+    const token = this.getAuthToken()
+    if (!token) {
+      throw new Error('No authentication token found. Please log in again.')
+    }
+
+    try {
+      // Build query parameters from the data object
+      const queryParams = new URLSearchParams()
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          queryParams.append(key, String(value))
+        }
+      })
+
+      const response = await fetch(`https://songbanks-v1-1.vercel.app/api/admin/user-access/${id}?${queryParams.toString()}`, {
+        method: 'PUT',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.code === 200) {
+        // Return updated user data, merging with the original data structure
+        const currentUser = await this.getRecord(id)
+        return {
+          ...currentUser,
+          ...data,
+          id: String(id),
+        } as User
+      } else {
+        throw new Error(result.message || 'Failed to update user')
+      }
+    } catch (error) {
+      console.error('Error updating user via API:', error)
+      throw error
+    }
+  }
+
+
+
+  // Custom method to update user status via API
+  async updateUserStatus(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND): Promise<User> {
+    const token = this.getAuthToken()
+    if (!token) {
+      throw new Error('No authentication token found. Please log in again.')
+    }
+
+    try {
+      const response = await fetch(`https://songbanks-v1-1.vercel.app/api/admin/user-access/${id}?status=${status}`, {
+        method: 'PUT',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.code === 200) {
+        // Get the current user data and update the status
+        const currentUser = await this.getRecord(id)
+        if (currentUser) {
+          return {
+            ...currentUser,
+            status,
+          }
+        }
+        
+        // Fallback if user not found in current data
+        return {
+          id: String(id),
+          nama: '',
+          username: '',
+          status,
+          role: UserRoleEnum.GUEST,
+        } as User
+      } else {
+        throw new Error(result.message || 'Failed to update user status')
+      }
+    } catch (error) {
+      console.error('Error updating user status via API:', error)
+      throw error
+    }
+  }
+
+  // Helper method to get auth token from localStorage
   private getAuthToken(): string {
-    return localStorage.getItem('auth-token') || ''
-  }
-
-
-  // Fallback mock data method
-  private getUserAccessMock(): {
-    active_users: User[]
-    request_users: User[]
-    suspended_users: User[]
-  } {
-    const activeUsers = UserResource.users.filter(user => 
-      user.status === 'active' && user.role !== UserRoleEnum.ADMIN
-    )
-    
-    const requestUsers = UserResource.users.filter(user => 
-      user.status === 'request'
-    )
-    
-    const suspendedUsers = UserResource.users.filter(user => 
-      user.status === 'suspend'
-    )
-    
-    return {
-      active_users: activeUsers,
-      request_users: requestUsers,
-      suspended_users: suspendedUsers,
+    if (typeof window === 'undefined') {
+      return ''
     }
+    return localStorage.getItem('auth-token') || ''
   }
 
   // Lifecycle hooks (optional)
   async beforeSave(data: Partial<User>): Promise<Partial<User>> {
-    // Add any pre-save processing here
-    // For example, validate email uniqueness
-    if (data.email) {
-      const existingUser = UserResource.users.find(u => u.email === data.email)
-      if (existingUser) {
-        throw new Error('Email already exists')
-      }
-    }
+    // Add any pre-save processing here for updates
     return data
   }
 
   async afterSave(record: User): Promise<void> {
-    // Add any post-save processing here
-    console.log(`User ${record.email} saved successfully`)
-  }
-
-  async beforeDelete(record: User): Promise<boolean> {
-    // Add any pre-delete validation here
-    // Prevent deletion of admin users
-    if (record.role === UserRoleEnum.ADMIN) {
-      throw new Error('Cannot delete admin users')
-    }
-    return true
-  }
-
-  async afterDelete(record: User): Promise<void> {
-    // Add any post-delete cleanup here
-    console.log(`User ${record.email} deleted successfully`)
+    // Add any post-save processing here for updates
+    console.log(`User ${record.username} updated successfully`)
   }
 
   // Page configurations
   getListPageConfig() {
     return {
       title: this.getPluralLabel(),
-      actions: [
-        
-      ],
+      actions: [], // No create action since user creation is not supported
     }
   }
 }

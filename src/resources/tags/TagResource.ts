@@ -29,6 +29,10 @@ export class TagResource extends Resource<Tag> {
     return 'Tag'
   }
 
+  hideMenu(): boolean {
+    return true
+  }
+
   getPluralLabel(): string {
     return 'Tags'
   }
