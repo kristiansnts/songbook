@@ -6,8 +6,44 @@ import {
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Main } from '@/components/layout/main'
+import { useEffect } from 'react'
+import { useState } from 'react'
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const [totalUser, setTotalUser] = useState(0)
+  const [isClient, setIsClient] = useState(false)
+
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isClient) return
+
+    const fetchData = async () => {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        console.warn('No token found')
+        return
+      }
+
+      try {
+        const response = await fetch('https://songbanks-v1-1.vercel.app/api/admin/user/', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          },
+        })
+        const data = await response.json()
+        setTotalUser(data.pagination.totalItems)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    fetchData()
+  }, [isClient])
+
   return (
     <>
       {/* ===== Main ===== */}
@@ -47,9 +83,9 @@ export default function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>70 Users</div>
+                  <div className='text-2xl font-bold'>{totalUser}</div>
                   <p className='text-muted-foreground text-xs'>
-                    +2 Users from last month
+                  Active Core Users
                   </p>
                 </CardContent>
               </Card>
