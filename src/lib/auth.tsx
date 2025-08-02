@@ -1,23 +1,17 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import axios from 'axios'
+import { authManager, User, LoginCredentials } from '@/lib/auth-manager'
 import { PendingAccessModal } from '@/components/modals/PendingAccessModal'
 import { RequestReviewModal } from '@/components/modals/RequestReviewModal'
 import { ApprovedPage } from '@/components/pages/ApprovedPage'
-
-interface User {
-  id?: string
-  email: string
-  name: string
-  status?: string
-  role?: string
-}
 
 interface LoginResult {
   success: boolean
   isPendingGuest?: boolean
   isRequestReview?: boolean
   isApprovedMember?: boolean
+  data?: any
+  message?: string
 }
 
 interface AuthContextType {
@@ -47,79 +41,83 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const handleRequestSuccess = () => {
     // Update user status to 'request' and show the review modal
     if (user) {
-      const updatedUser = { ...user, status: 'request' }
+      const updatedUser = { ...user }
       setUser(updatedUser)
-      localStorage.setItem('auth-user', JSON.stringify(updatedUser))
     }
     setShowRequestReviewModal(true)
   }
 
+  // ✅ Initialize user from server, not localStorage (per security guide)
   useEffect(() => {
-    const savedUser = localStorage.getItem('auth-user')
-    if (savedUser) {
-      setUser(JSON.parse(savedUser))
+    const initializeAuth = async () => {
+      if (authManager.isLoggedIn()) {
+        try {
+          const currentUser = await authManager.getCurrentUser()
+          setUser(currentUser)
+        } catch (error) {
+          console.error('Failed to get current user:', error)
+        }
+      }
+      setIsLoading(false)
     }
-    setIsLoading(false)
+    
+    initializeAuth()
   }, [])
 
+  // 🔐 LOGIN - Using secure AuthManager (per security guide)
   const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_APP_PROD_URL_API || 'https://songbanks-v1-1.vercel.app/api'}/auth/login`, { 
-        username: email, // Changed from email to username
-        password 
-      })
-      
-      if (response.data.code === 200) {
-        const userData = response.data.data.user
-        const userInfo = { 
-          id: String(userData.id),
-          email: userData.email || userData.username, 
-          name: userData.nama || userData.name || userData.username,
-          status: userData.status,
-          role: userData.role
-        }
-        
-        setUser(userInfo)
-        localStorage.setItem('auth-user', JSON.stringify(userInfo))
-        localStorage.setItem('auth-token', response.data.data.token)
-        
-        // Check if user has pending status and guest role
-        if (userData.status === 'pending' && userData.role === 'guest') {
-          setShowPendingModal(true)
-          return { success: false, isPendingGuest: true }
-        }
-        
-        // Check if user has request status
-        if (userData.status === 'request') {
-          setShowRequestReviewModal(true)
-          return { success: false, isRequestReview: true }
-        }
-        
-        // Check if user has active status and member role (approved member)
-        if (userData.status === 'active' && userData.role === 'member') {
-          return { success: true, isApprovedMember: true }
-        }
-        
-        return { success: true }
+      const credentials: LoginCredentials = {
+        username: email, // Using email as username for compatibility
+        password
       }
-      return { success: false }
+      
+      const result = await authManager.login(credentials)
+      
+      if (result.success) {
+        // Get user data from server after successful login
+        const currentUser = await authManager.getCurrentUser()
+        setUser(currentUser)
+        
+        // Check for special user states (keeping existing flow compatibility)
+        if (currentUser) {
+          // Check if user has pending status and guest role
+          if (currentUser.userType === 'peserta' && currentUser.userlevel && parseInt(currentUser.userlevel) <= 2) {
+            setShowPendingModal(true)
+            return { success: false, isPendingGuest: true }
+          }
+          
+          // Check if user has request status (custom logic can be added here)
+          // This would need to be determined from server response
+          
+          // Check if user has active status and member role (approved member)
+          if (currentUser.userType === 'peserta' && currentUser.verifikasi === '1') {
+            return { success: true, isApprovedMember: true }
+          }
+        }
+        
+        return { success: true, data: result.data }
+      }
+      
+      return { success: false, message: result.message }
     } catch (error) {
-      return { success: false }
+      console.error('Login error:', error)
+      return { success: false, message: error instanceof Error ? error.message : 'Login failed' }
     }
   }
 
-  const logout = () => {
+  // 🚪 LOGOUT - Using secure AuthManager
+  const logout = async () => {
     setUser(null)
-    localStorage.removeItem('auth-user')
-    localStorage.removeItem('auth-token')
-    navigate({ to: '/sign-in' })
+    await authManager.logout()
+    // AuthManager handles redirect, no need for navigate here
   }
 
   const value = {
     user,
     login,
     logout,
-    isAuthenticated: !!user,
+    isAuthenticated: authManager.isLoggedIn() && !!user, // Use AuthManager for token check
     isLoading,
     showPendingModal,
     setShowPendingModal,
@@ -137,16 +135,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           <PendingAccessModal
             open={showPendingModal}
             onOpenChange={setShowPendingModal}
-            userName={user.name}
-            userEmail={user.email}
+            userName={user.nama}
+            userEmail={user.email || user.username}
             userId={user.id}
             onRequestSuccess={handleRequestSuccess}
           />
           <RequestReviewModal
             open={showRequestReviewModal}
             onOpenChange={setShowRequestReviewModal}
-            userName={user.name}
-            userEmail={user.email}
+            userName={user.nama}
+            userEmail={user.email || user.username}
           />
         </>
       )}
