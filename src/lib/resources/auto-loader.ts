@@ -1,10 +1,10 @@
 import { resourceRegistry } from './registry'
 
 // Auto-discover and register all resources
-const modules = import.meta.glob('../../resources/*/index.ts', { eager: true })
+const modules = import.meta.glob('../../panels/admin/resources/*/index.ts', { eager: true })
 
 Object.entries(modules).forEach(([path, module]: [string, any]) => {
-  // Extract resource name from path (e.g., '../../resources/songs/index.ts' -> 'songs')
+  // Extract resource name from path (e.g., '../../panels/admin/resources/songs/index.ts' -> 'songs')
   const resourceName = path.split('/').slice(-2)[0]
   
   // Look for exported resource classes (e.g., SongResource, NoteResource, etc.)

@@ -153,6 +153,8 @@ export interface TableBuilderConfig<T = any> {
   onRowClick?: (row: Row<T>) => void
   onRefresh?: () => void
   className?: string
+  showViewOptions?: boolean
+  onSearchBlur?: (query: string) => void
 }
 
 export class TableBuilder<T = any> {
@@ -276,6 +278,11 @@ export class TableBuilder<T = any> {
 
   defaultSort(column: string, direction: 'asc' | 'desc' = 'asc'): TableBuilder<T> {
     this.config.defaultSort = { column, direction }
+    return this
+  }
+
+  showViewOptions(show: boolean = true): TableBuilder<T> {
+    this.config.showViewOptions = show
     return this
   }
 

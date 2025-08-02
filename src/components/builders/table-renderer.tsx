@@ -164,6 +164,8 @@ export function TableRenderer<T = any>({
         filters={config.filters}
         bulkActions={config.bulkActions}
         selectedRows={selectedRows}
+        showViewOptions={config.showViewOptions}
+        onSearchBlur={config.onSearchBlur}
       />
       
       <div className="rounded-md border overflow-hidden">

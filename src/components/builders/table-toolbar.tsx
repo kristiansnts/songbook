@@ -19,6 +19,8 @@ interface TableToolbarProps<T> {
   filters?: FilterConfig[]
   bulkActions?: BulkActionConfig<T>[]
   selectedRows?: any[]
+  showViewOptions?: boolean
+  onSearchBlur?: (query: string) => void
 }
 
 export function DataTableToolbar<T>({
@@ -29,6 +31,8 @@ export function DataTableToolbar<T>({
   filters = [],
   bulkActions = [],
   selectedRows = [],
+  showViewOptions = true,
+  onSearchBlur,
 }: TableToolbarProps<T>) {
   const isFiltered = table.getState().columnFilters.length > 0
 
@@ -42,6 +46,11 @@ export function DataTableToolbar<T>({
             onChange={(event) =>
               table.getColumn(searchColumnId)?.setFilterValue(event.target.value)
             }
+            onBlur={(event) => {
+              if (onSearchBlur) {
+                onSearchBlur(event.target.value)
+              }
+            }}
             className="h-8 w-[150px] lg:w-[250px]"
           />
         )}
@@ -87,53 +96,55 @@ export function DataTableToolbar<T>({
           </div>
         )}
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="ml-auto hidden h-8 lg:flex"
-            >
-              <svg
-                className="mr-2 h-4 w-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+        {showViewOptions && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-auto hidden h-8 lg:flex"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              View
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[150px]">
-            {table
-              .getAllColumns()
-              .filter(
-                (column) =>
-                  typeof column.accessorFn !== 'undefined' && column.getCanHide()
-              )
-              .map((column) => {
-                return (
-                  <DropdownMenuItem
-                    key={column.id}
-                    className="capitalize"
-                    onClick={() => column.toggleVisibility(!column.getIsVisible())}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={column.getIsVisible()}
-                      readOnly
-                      className="mr-2"
-                    />
-                    {column.id}
-                  </DropdownMenuItem>
+                <svg
+                  className="mr-2 h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                View
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[150px]">
+              {table
+                .getAllColumns()
+                .filter(
+                  (column) =>
+                    typeof column.accessorFn !== 'undefined' && column.getCanHide()
                 )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                .map((column) => {
+                  return (
+                    <DropdownMenuItem
+                      key={column.id}
+                      className="capitalize"
+                      onClick={() => column.toggleVisibility(!column.getIsVisible())}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={column.getIsVisible()}
+                        readOnly
+                        className="mr-2"
+                      />
+                      {column.id}
+                    </DropdownMenuItem>
+                  )
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
       </div>
     </div>
   )
