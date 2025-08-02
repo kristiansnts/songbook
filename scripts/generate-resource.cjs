@@ -11,7 +11,7 @@ class ResourceGenerator {
     this.options = {
       pluralName: options.pluralName || name + 's',
       routeName: options.routeName || name.toLowerCase() + 's',
-      outputPath: options.outputPath || path.join('src', 'resources', name.toLowerCase() + 's'),
+      outputPath: options.outputPath || path.join('src', 'panels', 'admin', 'resources', name.toLowerCase() + 's'),
       fields: options.fields || [],
       ...options
     }
@@ -536,7 +536,7 @@ export { default as {{MODEL_NAME}}ViewPage } from './pages/view'
   // Route templates
   getRouteIndexTemplate() {
     return `import { createFileRoute } from '@tanstack/react-router'
-import { {{MODEL_NAME}}ListPage } from '@/resources/{{ROUTE_NAME}}'
+import { {{MODEL_NAME}}ListPage } from '@/panels/admin/resources/{{ROUTE_NAME}}'
 
 export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/')({
   component: {{MODEL_NAME}}ListPage,
@@ -546,7 +546,7 @@ export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/')({
 
   getRouteCreateTemplate() {
     return `import { createFileRoute } from '@tanstack/react-router'
-import { {{MODEL_NAME}}CreatePage } from '@/resources/{{ROUTE_NAME}}'
+import { {{MODEL_NAME}}CreatePage } from '@/panels/admin/resources/{{ROUTE_NAME}}'
 
 export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/create')({
   component: {{MODEL_NAME}}CreatePage,
@@ -556,7 +556,7 @@ export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/create')({
 
   getRouteEditTemplate() {
     return `import { createFileRoute } from '@tanstack/react-router'
-import { {{MODEL_NAME}}EditPage } from '@/resources/{{ROUTE_NAME}}'
+import { {{MODEL_NAME}}EditPage } from '@/panels/admin/resources/{{ROUTE_NAME}}'
 
 export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/edit/$id')({
   component: {{MODEL_NAME}}EditPage,
@@ -566,7 +566,7 @@ export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/edit/$id')(
 
   getRouteViewTemplate() {
     return `import { createFileRoute } from '@tanstack/react-router'
-import { {{MODEL_NAME}}ViewPage } from '@/resources/{{ROUTE_NAME}}'
+import { {{MODEL_NAME}}ViewPage } from '@/panels/admin/resources/{{ROUTE_NAME}}'
 
 export const Route = createFileRoute('/_authenticated/{{ROUTE_NAME}}/view/$id')({
   component: {{MODEL_NAME}}ViewPage,

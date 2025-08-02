@@ -55,7 +55,7 @@ export class AuthManager {
         
         // ✅ Use server response ONLY for initial redirect
         if (result.data.user.userType === 'pengurus') {
-          window.location.href = '/dashboard';
+          window.location.href = '/admin/dashboard';
         } else if (result.data.user.userType === 'peserta') {
           window.location.href = '/users/dashboard';
         }

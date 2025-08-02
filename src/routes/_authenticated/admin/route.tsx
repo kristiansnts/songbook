@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute, redirect, Outlet } from '@tanstack/react-router'
 import { authManager } from '@/lib/auth-manager'
 
 export const Route = createFileRoute('/_authenticated/admin')({
@@ -12,5 +12,5 @@ export const Route = createFileRoute('/_authenticated/admin')({
       })
     }
   },
-  component: () => <div>Admin Section</div>, // This will be replaced by actual admin layout
+  component: () => <Outlet />, // Render child routes (users, dashboard, etc.)
 })
