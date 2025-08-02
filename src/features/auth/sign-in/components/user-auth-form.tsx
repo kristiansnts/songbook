@@ -49,15 +49,33 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(true)
     
     try {
-      const success = await login(data.email, data.password)
-      if (success) {
-        toast.success('Login successful!', {
-          action: {
-            label: 'x',
-            onClick: () => toast.dismiss()
-          }
-        })
-        navigate({ to: '/dashboard' })
+      const result = await login(data.email, data.password)
+      if (result.success) {
+        if (result.isApprovedMember) {
+          // Redirect approved members to approve page
+          toast.success('Welcome! You have been approved.', {
+            action: {
+              label: 'x',
+              onClick: () => toast.dismiss()
+            }
+          })
+          navigate({ to: '/approved' })
+        } else {
+          // Normal dashboard redirect
+          toast.success('Login successful!', {
+            action: {
+              label: 'x',
+              onClick: () => toast.dismiss()
+            }
+          })
+          navigate({ to: '/dashboard' })
+        }
+      } else if (result.isPendingGuest) {
+        // Don't show error toast for pending guest users - modal will handle it
+        // User stays on sign-in page with modal showing
+      } else if (result.isRequestReview) {
+        // Don't show error toast for request review users - modal will handle it
+        // User stays on sign-in page with modal showing
       } else {
         toast.error('Invalid credentials. Please contact administrator.', {
           action: {
