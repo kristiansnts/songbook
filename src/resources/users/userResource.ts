@@ -186,41 +186,50 @@ export class UserResource extends Resource<User> {
   }
 
 
-  // Data operations - fetch from API
+  // Data operations - fetch only users with ACTIVE status (backend filtered)
   async getRecords(): Promise<User[]> {
     try {
-      const response = await fetch('https://songbanks-v1-1.vercel.app/api/admin/user-access', {
-        method: 'GET',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${this.getAuthToken()}`,
-        },
-      })
+      let allUsers: any[] = []
+      let currentPage = 1
+      let hasNextPage = true
+      const limit = 100 // Fetch in larger chunks for efficiency
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+      // Fetch all pages with backend filtering by status=active
+      while (hasNextPage) {
+        const response = await fetch(`https://songbanks-v1-1.vercel.app/api/admin/user-access?status=active&page=${currentPage}&limit=${limit}`, {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${this.getAuthToken()}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const result = await response.json()
+        
+        if (result.code === 200) {
+          allUsers = [...allUsers, ...result.data]
+          hasNextPage = result.pagination?.hasNextPage || false
+          currentPage++
+        } else {
+          throw new Error(result.message || 'Failed to fetch users')
+        }
       }
 
-      const result = await response.json()
-      
-      if (result.code === 200) {
-        // Transform API data to match our User schema and filter out guest role and pending status
-        return result.data
-          .filter((user: any) => user.role !== 'guest' && user.status !== 'pending')
-          .map((user: any) => ({
-            id: String(user.id),
-            nama: user.nama,
-            username: user.username,
-            email: user.username, // Use username as email for backward compatibility
-            role: user.role,
-            status: user.status,
-          }))
-      } else {
-        throw new Error(result.message || 'Failed to fetch users')
-      }
+      // Transform API data (no frontend filtering needed - backend already filtered)
+      return allUsers.map((user: any) => ({
+        id: String(user.id),
+        nama: user.nama,
+        username: user.username,
+        email: user.username, // Use username as email for backward compatibility
+        role: user.role as UserRoleEnum,
+        status: user.status as UserStatusEnum,
+      }))
     } catch (error) {
       console.error('Error fetching users from API:', error)
-      // Fallback to empty array if API fails
       return []
     }
   }
