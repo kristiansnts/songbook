@@ -19,6 +19,7 @@ import { Route as errors403RouteImport } from './routes/(errors)/403'
 import { Route as errors401RouteImport } from './routes/(errors)/401'
 import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
+import { Route as AuthenticatedUserApprovalIndexRouteImport } from './routes/_authenticated/user-approval/index'
 import { Route as AuthenticatedTagsIndexRouteImport } from './routes/_authenticated/tags/index'
 import { Route as AuthenticatedSongsIndexRouteImport } from './routes/_authenticated/songs/index'
 import { Route as AuthenticatedPlaylistsIndexRouteImport } from './routes/_authenticated/playlists/index'
@@ -89,6 +90,12 @@ const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   path: '/users/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedUserApprovalIndexRoute =
+  AuthenticatedUserApprovalIndexRouteImport.update({
+    id: '/user-approval/',
+    path: '/user-approval/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTagsIndexRoute = AuthenticatedTagsIndexRouteImport.update({
   id: '/tags/',
   path: '/tags/',
@@ -223,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/playlists': typeof AuthenticatedPlaylistsIndexRoute
   '/songs': typeof AuthenticatedSongsIndexRoute
   '/tags': typeof AuthenticatedTagsIndexRoute
+  '/user-approval': typeof AuthenticatedUserApprovalIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/notes/edit/$id': typeof AuthenticatedNotesEditIdRoute
   '/notes/view/$id': typeof AuthenticatedNotesViewIdRoute
@@ -254,6 +262,7 @@ export interface FileRoutesByTo {
   '/playlists': typeof AuthenticatedPlaylistsIndexRoute
   '/songs': typeof AuthenticatedSongsIndexRoute
   '/tags': typeof AuthenticatedTagsIndexRoute
+  '/user-approval': typeof AuthenticatedUserApprovalIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/notes/edit/$id': typeof AuthenticatedNotesEditIdRoute
   '/notes/view/$id': typeof AuthenticatedNotesViewIdRoute
@@ -287,6 +296,7 @@ export interface FileRoutesById {
   '/_authenticated/playlists/': typeof AuthenticatedPlaylistsIndexRoute
   '/_authenticated/songs/': typeof AuthenticatedSongsIndexRoute
   '/_authenticated/tags/': typeof AuthenticatedTagsIndexRoute
+  '/_authenticated/user-approval/': typeof AuthenticatedUserApprovalIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
   '/_authenticated/notes/edit/$id': typeof AuthenticatedNotesEditIdRoute
   '/_authenticated/notes/view/$id': typeof AuthenticatedNotesViewIdRoute
@@ -320,6 +330,7 @@ export interface FileRouteTypes {
     | '/playlists'
     | '/songs'
     | '/tags'
+    | '/user-approval'
     | '/users'
     | '/notes/edit/$id'
     | '/notes/view/$id'
@@ -351,6 +362,7 @@ export interface FileRouteTypes {
     | '/playlists'
     | '/songs'
     | '/tags'
+    | '/user-approval'
     | '/users'
     | '/notes/edit/$id'
     | '/notes/view/$id'
@@ -383,6 +395,7 @@ export interface FileRouteTypes {
     | '/_authenticated/playlists/'
     | '/_authenticated/songs/'
     | '/_authenticated/tags/'
+    | '/_authenticated/user-approval/'
     | '/_authenticated/users/'
     | '/_authenticated/notes/edit/$id'
     | '/_authenticated/notes/view/$id'
@@ -477,6 +490,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/user-approval/': {
+      id: '/_authenticated/user-approval/'
+      path: '/user-approval'
+      fullPath: '/user-approval'
+      preLoaderRoute: typeof AuthenticatedUserApprovalIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/tags/': {
@@ -634,6 +654,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlaylistsIndexRoute: typeof AuthenticatedPlaylistsIndexRoute
   AuthenticatedSongsIndexRoute: typeof AuthenticatedSongsIndexRoute
   AuthenticatedTagsIndexRoute: typeof AuthenticatedTagsIndexRoute
+  AuthenticatedUserApprovalIndexRoute: typeof AuthenticatedUserApprovalIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
   AuthenticatedNotesEditIdRoute: typeof AuthenticatedNotesEditIdRoute
   AuthenticatedNotesViewIdRoute: typeof AuthenticatedNotesViewIdRoute
@@ -659,6 +680,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlaylistsIndexRoute: AuthenticatedPlaylistsIndexRoute,
   AuthenticatedSongsIndexRoute: AuthenticatedSongsIndexRoute,
   AuthenticatedTagsIndexRoute: AuthenticatedTagsIndexRoute,
+  AuthenticatedUserApprovalIndexRoute: AuthenticatedUserApprovalIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
   AuthenticatedNotesEditIdRoute: AuthenticatedNotesEditIdRoute,
   AuthenticatedNotesViewIdRoute: AuthenticatedNotesViewIdRoute,

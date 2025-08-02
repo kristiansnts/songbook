@@ -104,7 +104,7 @@ export class UserResource extends Resource<User> {
               confirmationMessage: 'Are you sure you want to activate this user?',
               onClick: async (row, refresh) => {
                 try {
-                  const updatedUser = await this.updateUserStatus(row.original.id, UserStatusEnum.ACTIVE)
+                  const updatedUser = await this.updateUserStatus(row.original.id, UserStatusEnum.ACTIVE, row.original)
                   if (updatedUser) {
                     // Update the row data with the returned user data
                     Object.assign(row.original, updatedUser)
@@ -140,7 +140,7 @@ export class UserResource extends Resource<User> {
               confirmationMessage: 'Are you sure you want to suspend this user?',
               onClick: async (row, refresh) => {                
                 try {
-                  const updatedUser = await this.updateUserStatus(row.original.id, UserStatusEnum.SUSPEND)
+                  const updatedUser = await this.updateUserStatus(row.original.id, UserStatusEnum.SUSPEND, row.original)
                   if (updatedUser) {
                     // Update the row data with the returned user data
                     Object.assign(row.original, updatedUser)
@@ -204,15 +204,17 @@ export class UserResource extends Resource<User> {
       const result = await response.json()
       
       if (result.code === 200) {
-        // Transform API data to match our User schema
-        return result.data.map((user: any) => ({
-          id: String(user.id),
-          nama: user.nama,
-          username: user.username,
-          email: user.username, // Use username as email for backward compatibility
-          role: user.role,
-          status: user.status,
-        }))
+        // Transform API data to match our User schema and filter out guest role and pending status
+        return result.data
+          .filter((user: any) => user.role !== 'guest' && user.status !== 'pending')
+          .map((user: any) => ({
+            id: String(user.id),
+            nama: user.nama,
+            username: user.username,
+            email: user.username, // Use username as email for backward compatibility
+            role: user.role,
+            status: user.status,
+          }))
       } else {
         throw new Error(result.message || 'Failed to fetch users')
       }
@@ -284,7 +286,7 @@ export class UserResource extends Resource<User> {
 
 
   // Custom method to update user status via API
-  async updateUserStatus(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND): Promise<User> {
+  async updateUserStatus(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND, currentUserData?: User): Promise<User> {
     const token = this.getAuthToken()
     if (!token) {
       throw new Error('No authentication token found. Please log in again.')
@@ -306,7 +308,7 @@ export class UserResource extends Resource<User> {
       const result = await response.json()
       
       if (result.code === 200) {
-        // Get the current user data and update the status
+        // First try to get the current user data from API
         const currentUser = await this.getRecord(id)
         if (currentUser) {
           return {
@@ -315,7 +317,15 @@ export class UserResource extends Resource<User> {
           }
         }
         
-        // Fallback if user not found in current data
+        // If API fetch fails, use the provided currentUserData as fallback
+        if (currentUserData) {
+          return {
+            ...currentUserData,
+            status,
+          }
+        }
+        
+        // Last resort fallback (should rarely happen)
         return {
           id: String(id),
           nama: '',
