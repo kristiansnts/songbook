@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react'
 
 interface DashboardStats {
   totalUsers: number
@@ -12,6 +12,12 @@ interface DashboardDataContextType {
   isLoading: boolean
   fetchDashboardData: () => Promise<void>
   refreshData: () => Promise<void>
+  clearCache: () => void
+}
+
+interface CachedData {
+  stats: DashboardStats
+  timestamp: number
 }
 
 const initialStats: DashboardStats = {
@@ -21,13 +27,28 @@ const initialStats: DashboardStats = {
   lastUpdated: null
 }
 
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes in milliseconds
+
 const DashboardDataContext = createContext<DashboardDataContextType | undefined>(undefined)
 
 export function DashboardDataProvider({ children }: { children: ReactNode }) {
   const [stats, setStats] = useState<DashboardStats>(initialStats)
   const [isLoading, setIsLoading] = useState(false)
+  const cacheRef = useRef<CachedData | null>(null)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const fetchDashboardData = async () => {
+  const isDataExpired = () => {
+    if (!cacheRef.current) return true
+    return Date.now() - cacheRef.current.timestamp > CACHE_DURATION
+  }
+
+  const fetchDashboardData = async (forceRefresh = false) => {
+    // Check cache first unless force refresh
+    if (!forceRefresh && cacheRef.current && !isDataExpired()) {
+      setStats(cacheRef.current.stats)
+      return
+    }
+
     const token = localStorage.getItem('token')
     if (!token) {
       console.warn('No token found for dashboard data fetch')
@@ -65,28 +86,98 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
         return createdAt >= lastMonth
       })
 
-      setStats({
+      const newStats = {
         totalUsers: userData.pagination.totalItems,
         totalSongs: songData.pagination.totalItems,
         monthlySongs: songsThisMonth.length,
         lastUpdated: new Date()
-      })
+      }
+
+      // Update cache and state
+      cacheRef.current = {
+        stats: newStats,
+        timestamp: Date.now()
+      }
+      setStats(newStats)
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error)
+      console.warn('Failed to fetch dashboard data:', error)
     } finally {
       setIsLoading(false)
     }
   }
 
   const refreshData = async () => {
-    await fetchDashboardData()
+    await fetchDashboardData(true) // Force refresh
   }
+
+  const clearCache = () => {
+    cacheRef.current = null
+  }
+
+  // Auto-refresh with page visibility control
+  const startAutoRefresh = () => {
+    if (intervalRef.current) return // Already running
+    
+    intervalRef.current = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        fetchDashboardData()
+      }
+    }, CACHE_DURATION)
+  }
+
+  const stopAutoRefresh = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+  }
+
+  // Set up auto-refresh and visibility handling
+  useEffect(() => {
+    // Initial fetch
+    fetchDashboardData()
+
+    // Start auto-refresh if page is visible
+    if (document.visibilityState === 'visible') {
+      startAutoRefresh()
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        startAutoRefresh()
+        // Refresh data when user returns to tab if cache is expired
+        if (isDataExpired()) {
+          fetchDashboardData()
+        }
+      } else {
+        stopAutoRefresh()
+      }
+    }
+
+    const handleCacheInvalidation = () => {
+      clearCache()
+      // Fetch fresh data if page is visible
+      if (document.visibilityState === 'visible') {
+        fetchDashboardData(true)
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('invalidate-dashboard-cache', handleCacheInvalidation)
+
+    return () => {
+      stopAutoRefresh()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('invalidate-dashboard-cache', handleCacheInvalidation)
+    }
+  }, [])
 
   const value = {
     stats,
     isLoading,
     fetchDashboardData,
-    refreshData
+    refreshData,
+    clearCache
   }
 
   return (
