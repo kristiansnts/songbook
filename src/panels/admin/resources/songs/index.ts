@@ -1,0 +1,1 @@
+export { SongResource } from './songResource'

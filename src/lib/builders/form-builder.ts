@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { FieldValues, UseFormProps } from 'react-hook-form'
 
-export type FieldType = 'text' | 'email' | 'password' | 'number' | 'select' | 'checkbox' | 'textarea' | 'richtext' | 'date' | 'phone'
+export type FieldType = 'text' | 'email' | 'password' | 'number' | 'select' | 'checkbox' | 'textarea' | 'richtext' | 'chordtext' | 'date' | 'phone' | 'tags'
 
 export interface SelectOption {
   label: string
@@ -60,10 +60,20 @@ export interface RichtextFieldConfig extends BaseFieldConfig {
   maxLength?: number
 }
 
+export interface ChordTextFieldConfig extends BaseFieldConfig {
+  type: 'chordtext'
+  rows?: number
+}
+
 export interface DateFieldConfig extends BaseFieldConfig {
   type: 'date'
   minDate?: Date
   maxDate?: Date
+}
+
+export interface TagsFieldConfig extends BaseFieldConfig {
+  type: 'tags'
+  suggestions?: string[] | (() => Promise<string[]>)
 }
 
 export type FieldConfig = 
@@ -73,7 +83,9 @@ export type FieldConfig =
   | CheckboxFieldConfig 
   | TextareaFieldConfig 
   | RichtextFieldConfig
+  | ChordTextFieldConfig
   | DateFieldConfig
+  | TagsFieldConfig
 
 export interface FormSection {
   title?: string
@@ -313,11 +325,12 @@ export class FieldBuilder {
   }
 
   rows(rows: number): FieldBuilder {
-    if (this.field.type === 'textarea' || this.field.type === 'richtext') {
-      (this.field as TextareaFieldConfig | RichtextFieldConfig).rows = rows
+    if (this.field.type === 'textarea' || this.field.type === 'richtext' || this.field.type === 'chordtext') {
+      (this.field as TextareaFieldConfig | RichtextFieldConfig | ChordTextFieldConfig).rows = rows
     }
     return this
   }
+
 
   description(description: string): FieldBuilder {
     if (this.field.type === 'checkbox') {
@@ -336,6 +349,13 @@ export class FieldBuilder {
   maxDate(date: Date): FieldBuilder {
     if (this.field.type === 'date') {
       (this.field as DateFieldConfig).maxDate = date
+    }
+    return this
+  }
+
+  suggestions(suggestions: string[] | (() => Promise<string[]>)): FieldBuilder {
+    if (this.field.type === 'tags') {
+      (this.field as TagsFieldConfig).suggestions = suggestions
     }
     return this
   }
@@ -361,3 +381,4 @@ export const Textarea = (name: string) => new FieldBuilder(name).type('textarea'
 export const Richtext = (name: string) => new FieldBuilder(name).type('richtext')
 export const Date = (name: string) => new FieldBuilder(name).type('date')
 export const Phone = (name: string) => new FieldBuilder(name).type('phone')
+export const Tags = (name: string) => new FieldBuilder(name).type('tags')

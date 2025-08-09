@@ -30,11 +30,11 @@ export function SelectDropdown({
   className = '',
   isControlled = false,
 }: SelectDropdownProps) {
-  const defaultState = isControlled
-    ? { value: defaultValue, onValueChange }
-    : { defaultValue, onValueChange }
+  const selectProps = isControlled
+    ? { value: defaultValue || '', onValueChange }
+    : { defaultValue: defaultValue || '', onValueChange }
   return (
-    <Select {...defaultState}>
+    <Select {...selectProps}>
       <FormControl>
         <SelectTrigger disabled={disabled} className={cn(className)}>
           <SelectValue placeholder={placeholder ?? 'Select'} />

@@ -28,8 +28,12 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedUsersDashboardRouteImport } from './routes/_authenticated/users/dashboard'
 import { Route as AuthenticatedAdminDashboardRouteImport } from './routes/_authenticated/admin/dashboard'
 import { Route as AuthenticatedAdminUsersIndexRouteImport } from './routes/_authenticated/admin/users/index'
+import { Route as AuthenticatedAdminSongsIndexRouteImport } from './routes/_authenticated/admin/songs/index'
 import { Route as AuthenticatedUsersViewIdRouteImport } from './routes/_authenticated/users/view/$id'
+import { Route as AuthenticatedAdminSongsCreateRouteImport } from './routes/_authenticated/admin/songs/create'
 import { Route as AuthenticatedAdminUsersViewIdRouteImport } from './routes/_authenticated/admin/users/view/$id'
+import { Route as AuthenticatedAdminSongsViewIdRouteImport } from './routes/_authenticated/admin/songs/view/$id'
+import { Route as AuthenticatedAdminSongsEditIdRouteImport } from './routes/_authenticated/admin/songs/edit/$id'
 
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
@@ -129,16 +133,40 @@ const AuthenticatedAdminUsersIndexRoute =
     path: '/users/',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminSongsIndexRoute =
+  AuthenticatedAdminSongsIndexRouteImport.update({
+    id: '/songs/',
+    path: '/songs/',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedUsersViewIdRoute =
   AuthenticatedUsersViewIdRouteImport.update({
     id: '/view/$id',
     path: '/view/$id',
     getParentRoute: () => AuthenticatedUsersRouteRoute,
   } as any)
+const AuthenticatedAdminSongsCreateRoute =
+  AuthenticatedAdminSongsCreateRouteImport.update({
+    id: '/songs/create',
+    path: '/songs/create',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminUsersViewIdRoute =
   AuthenticatedAdminUsersViewIdRouteImport.update({
     id: '/users/view/$id',
     path: '/users/view/$id',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminSongsViewIdRoute =
+  AuthenticatedAdminSongsViewIdRouteImport.update({
+    id: '/songs/view/$id',
+    path: '/songs/view/$id',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminSongsEditIdRoute =
+  AuthenticatedAdminSongsEditIdRouteImport.update({
+    id: '/songs/edit/$id',
+    path: '/songs/edit/$id',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 
@@ -160,8 +188,12 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/users/': typeof AuthenticatedUsersIndexRoute
+  '/admin/songs/create': typeof AuthenticatedAdminSongsCreateRoute
   '/users/view/$id': typeof AuthenticatedUsersViewIdRoute
+  '/admin/songs': typeof AuthenticatedAdminSongsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
+  '/admin/songs/edit/$id': typeof AuthenticatedAdminSongsEditIdRoute
+  '/admin/songs/view/$id': typeof AuthenticatedAdminSongsViewIdRoute
   '/admin/users/view/$id': typeof AuthenticatedAdminUsersViewIdRoute
 }
 export interface FileRoutesByTo {
@@ -180,8 +212,12 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/admin/songs/create': typeof AuthenticatedAdminSongsCreateRoute
   '/users/view/$id': typeof AuthenticatedUsersViewIdRoute
+  '/admin/songs': typeof AuthenticatedAdminSongsIndexRoute
   '/admin/users': typeof AuthenticatedAdminUsersIndexRoute
+  '/admin/songs/edit/$id': typeof AuthenticatedAdminSongsEditIdRoute
+  '/admin/songs/view/$id': typeof AuthenticatedAdminSongsViewIdRoute
   '/admin/users/view/$id': typeof AuthenticatedAdminUsersViewIdRoute
 }
 export interface FileRoutesById {
@@ -204,8 +240,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_authenticated/admin/songs/create': typeof AuthenticatedAdminSongsCreateRoute
   '/_authenticated/users/view/$id': typeof AuthenticatedUsersViewIdRoute
+  '/_authenticated/admin/songs/': typeof AuthenticatedAdminSongsIndexRoute
   '/_authenticated/admin/users/': typeof AuthenticatedAdminUsersIndexRoute
+  '/_authenticated/admin/songs/edit/$id': typeof AuthenticatedAdminSongsEditIdRoute
+  '/_authenticated/admin/songs/view/$id': typeof AuthenticatedAdminSongsViewIdRoute
   '/_authenticated/admin/users/view/$id': typeof AuthenticatedAdminUsersViewIdRoute
 }
 export interface FileRouteTypes {
@@ -228,8 +268,12 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/help-center'
     | '/users/'
+    | '/admin/songs/create'
     | '/users/view/$id'
+    | '/admin/songs'
     | '/admin/users'
+    | '/admin/songs/edit/$id'
+    | '/admin/songs/view/$id'
     | '/admin/users/view/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -248,8 +292,12 @@ export interface FileRouteTypes {
     | '/admin'
     | '/help-center'
     | '/users'
+    | '/admin/songs/create'
     | '/users/view/$id'
+    | '/admin/songs'
     | '/admin/users'
+    | '/admin/songs/edit/$id'
+    | '/admin/songs/view/$id'
     | '/admin/users/view/$id'
   id:
     | '__root__'
@@ -271,8 +319,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/help-center/'
     | '/_authenticated/users/'
+    | '/_authenticated/admin/songs/create'
     | '/_authenticated/users/view/$id'
+    | '/_authenticated/admin/songs/'
     | '/_authenticated/admin/users/'
+    | '/_authenticated/admin/songs/edit/$id'
+    | '/_authenticated/admin/songs/view/$id'
     | '/_authenticated/admin/users/view/$id'
   fileRoutesById: FileRoutesById
 }
@@ -424,12 +476,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/songs/': {
+      id: '/_authenticated/admin/songs/'
+      path: '/songs'
+      fullPath: '/admin/songs'
+      preLoaderRoute: typeof AuthenticatedAdminSongsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/users/view/$id': {
       id: '/_authenticated/users/view/$id'
       path: '/view/$id'
       fullPath: '/users/view/$id'
       preLoaderRoute: typeof AuthenticatedUsersViewIdRouteImport
       parentRoute: typeof AuthenticatedUsersRouteRoute
+    }
+    '/_authenticated/admin/songs/create': {
+      id: '/_authenticated/admin/songs/create'
+      path: '/songs/create'
+      fullPath: '/admin/songs/create'
+      preLoaderRoute: typeof AuthenticatedAdminSongsCreateRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/users/view/$id': {
       id: '/_authenticated/admin/users/view/$id'
@@ -438,13 +504,31 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminUsersViewIdRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/songs/view/$id': {
+      id: '/_authenticated/admin/songs/view/$id'
+      path: '/songs/view/$id'
+      fullPath: '/admin/songs/view/$id'
+      preLoaderRoute: typeof AuthenticatedAdminSongsViewIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/songs/edit/$id': {
+      id: '/_authenticated/admin/songs/edit/$id'
+      path: '/songs/edit/$id'
+      fullPath: '/admin/songs/edit/$id'
+      preLoaderRoute: typeof AuthenticatedAdminSongsEditIdRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminDashboardRoute: typeof AuthenticatedAdminDashboardRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminSongsCreateRoute: typeof AuthenticatedAdminSongsCreateRoute
+  AuthenticatedAdminSongsIndexRoute: typeof AuthenticatedAdminSongsIndexRoute
   AuthenticatedAdminUsersIndexRoute: typeof AuthenticatedAdminUsersIndexRoute
+  AuthenticatedAdminSongsEditIdRoute: typeof AuthenticatedAdminSongsEditIdRoute
+  AuthenticatedAdminSongsViewIdRoute: typeof AuthenticatedAdminSongsViewIdRoute
   AuthenticatedAdminUsersViewIdRoute: typeof AuthenticatedAdminUsersViewIdRoute
 }
 
@@ -452,7 +536,11 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
   {
     AuthenticatedAdminDashboardRoute: AuthenticatedAdminDashboardRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+    AuthenticatedAdminSongsCreateRoute: AuthenticatedAdminSongsCreateRoute,
+    AuthenticatedAdminSongsIndexRoute: AuthenticatedAdminSongsIndexRoute,
     AuthenticatedAdminUsersIndexRoute: AuthenticatedAdminUsersIndexRoute,
+    AuthenticatedAdminSongsEditIdRoute: AuthenticatedAdminSongsEditIdRoute,
+    AuthenticatedAdminSongsViewIdRoute: AuthenticatedAdminSongsViewIdRoute,
     AuthenticatedAdminUsersViewIdRoute: AuthenticatedAdminUsersViewIdRoute,
   }
 

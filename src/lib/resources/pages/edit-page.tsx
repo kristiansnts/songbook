@@ -146,7 +146,7 @@ export function EditPage<T = any>({
       className={className}
     >
       <div className="max-w-4xl">
-        <FormRenderer config={enhancedFormConfig} />
+        <FormRenderer key={recordId} config={enhancedFormConfig} />
       </div>
     </BasePage>
   )

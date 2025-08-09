@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -18,6 +18,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { SelectDropdown } from '@/components/select-dropdown'
 import { PasswordInput } from '@/components/password-input'
 import { HtmlEditor } from '@/components/ui/html-editor'
+import { ChordLexicalEditor } from '@/components/ui/chord-lexical-editor'
+import { InputTags } from '@/components/ui/input-tags'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { 
   FormBuilderConfig, 
   FieldConfig, 
@@ -28,7 +31,9 @@ import {
   CheckboxFieldConfig,
   TextareaFieldConfig,
   RichtextFieldConfig,
-  DateFieldConfig
+  ChordTextFieldConfig,
+  DateFieldConfig,
+  TagsFieldConfig
 } from '@/lib/builders/form-builder'
 import { 
   Collapsible, 
@@ -51,6 +56,11 @@ export function FormRenderer({
   onCancel, 
   className 
 }: FormRendererProps) {
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [pendingData, setPendingData] = useState<any>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isUserSubmission, setIsUserSubmission] = useState(false)
+  
   const schema = generateZodSchema(config.sections)
   
   const form = useForm({
@@ -59,15 +69,42 @@ export function FormRenderer({
     ...config.formOptions,
   })
 
+  // Reset form when default values change (for edit mode)
+  React.useEffect(() => {
+    if (config.defaultValues && Object.keys(config.defaultValues).length > 0) {
+      // Use setTimeout to ensure form is fully initialized
+      setTimeout(() => {
+        form.reset(config.defaultValues)
+      }, 0)
+    }
+  }, [JSON.stringify(config.defaultValues), form])
+
   const handleSubmit = async (data: any) => {
+    if (!isUserSubmission) {
+      return
+    }
+    
+    setPendingData(data)
+    setConfirmOpen(true)
+    setIsUserSubmission(false) // Reset flag
+  }
+
+  const handleConfirmSubmit = async () => {
+    if (!pendingData) return
+    
+    setIsSubmitting(true)
     try {
       if (onSubmit) {
-        await onSubmit(data)
+        await onSubmit(pendingData)
       } else if (config.onSubmit) {
-        await config.onSubmit(data)
+        await config.onSubmit(pendingData)
       }
     } catch (error) {
       console.error('Form submission error:', error)
+    } finally {
+      setIsSubmitting(false)
+      setConfirmOpen(false)
+      setPendingData(null)
     }
   }
 
@@ -110,12 +147,24 @@ export function FormRenderer({
                 {config.cancelButtonText || 'Cancel'}
               </Button>
             )}
-            <Button type="submit">
+            <Button 
+              type="submit" 
+              onClick={() => setIsUserSubmission(true)}
+            >
               {config.submitButtonText || 'Submit'}
             </Button>
           </div>
         </form>
       </Form>
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Confirm Submission"
+        desc="Are you sure you want to submit this form? Please review your information before confirming."
+        isLoading={isSubmitting}
+        handleConfirm={handleConfirmSubmit}
+      />
     </div>
   )
 }
@@ -266,11 +315,12 @@ function FieldInput({ field, formField }: { field: FieldConfig; formField: any }
       const selectField = field as SelectFieldConfig
       return (
         <SelectDropdown
-          value={formField.value}
+          defaultValue={formField.value}
           onValueChange={formField.onChange}
           placeholder={field.placeholder}
           disabled={field.disabled}
           items={selectField.options}
+          isControlled={true}
         />
       )
     
@@ -323,6 +373,27 @@ function FieldInput({ field, formField }: { field: FieldConfig; formField: any }
         />
       )
     
+    case 'chordtext':
+      return (
+        <ChordLexicalEditor
+          content={formField.value || ''}
+          onChange={formField.onChange}
+          placeholder={field.placeholder}
+        />
+      )
+    
+    case 'tags':
+      const tagsField = field as TagsFieldConfig
+      return (
+        <InputTags
+          value={formField.value || []}
+          onChange={formField.onChange}
+          placeholder={field.placeholder}
+          disabled={field.disabled}
+          suggestions={tagsField.suggestions}
+        />
+      )
+    
     case 'date':
       return (
         <Input
@@ -362,12 +433,13 @@ function generateZodSchema(sections: FormSection[]): z.ZodSchema<any> {
           case 'phone':
           case 'textarea':
           case 'richtext':
+          case 'chordtext':
             fieldSchema = z.string()
-            const textField = field as TextFieldConfig | TextareaFieldConfig | RichtextFieldConfig
-            if (textField.minLength) {
+            const textField = field as TextFieldConfig | TextareaFieldConfig | RichtextFieldConfig | ChordTextFieldConfig
+            if ('minLength' in textField && textField.minLength) {
               fieldSchema = fieldSchema.min(textField.minLength)
             }
-            if (textField.maxLength) {
+            if ('maxLength' in textField && textField.maxLength) {
               fieldSchema = fieldSchema.max(textField.maxLength)
             }
             if (field.type === 'email') {
@@ -398,13 +470,19 @@ function generateZodSchema(sections: FormSection[]): z.ZodSchema<any> {
             fieldSchema = z.string()
             break
           
+          case 'tags':
+            fieldSchema = z.array(z.string())
+            break
+          
           default:
             fieldSchema = z.string()
         }
       }
 
       if (field.required) {
-        if (field.type === 'string') {
+        if (field.type === 'tags') {
+          fieldSchema = fieldSchema.min(1, `${field.label} is required`)
+        } else if (fieldSchema instanceof z.ZodString) {
           fieldSchema = fieldSchema.min(1, `${field.label} is required`)
         }
       } else {
