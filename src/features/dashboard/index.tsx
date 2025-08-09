@@ -6,43 +6,12 @@ import {
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Main } from '@/components/layout/main'
-import { useEffect } from 'react'
-import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { RefreshCw } from 'lucide-react'
+import { useDashboardData } from '@/lib/dashboard-data-context'
 
-export default async function Dashboard() {
-  const [totalUser, setTotalUser] = useState(0)
-  const [isClient, setIsClient] = useState(false)
-
-  useEffect(() => {
-    setIsClient(true)
-  }, [])
-
-  useEffect(() => {
-    if (!isClient) return
-
-    const fetchData = async () => {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        console.warn('No token found')
-        return
-      }
-
-      try {
-        const response = await fetch('https://songbanks-v1-1.vercel.app/api/admin/user/', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-          },
-        })
-        const data = await response.json()
-        setTotalUser(data.pagination.totalItems)
-      } catch (error) {
-        console.error(error)
-      }
-    }
-
-    fetchData()
-  }, [isClient])
+export default function Dashboard() {
+  const { stats, isLoading, refreshData } = useDashboardData()
 
   return (
     <>
@@ -50,6 +19,16 @@ export default async function Dashboard() {
       <Main>
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refreshData}
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            {isLoading ? 'Refreshing...' : 'Refresh Data'}
+          </Button>
         </div>
         <Tabs
           orientation='vertical'
@@ -70,9 +49,11 @@ export default async function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>100 Songs</div>
+                  <div className='text-2xl font-bold'>
+                    {isLoading ? 'Loading...' : `${stats.totalSongs} Songs`}
+                  </div>
                   <p className='text-muted-foreground text-xs'>
-                    +5 Song from last month
+                    +{stats.monthlySongs} Song from last month
                   </p>
                 </CardContent>
               </Card>
@@ -83,9 +64,11 @@ export default async function Dashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className='text-2xl font-bold'>{totalUser}</div>
+                  <div className='text-2xl font-bold'>
+                    {isLoading ? 'Loading...' : stats.totalUsers}
+                  </div>
                   <p className='text-muted-foreground text-xs'>
-                  Active Core Users
+                    Active Core Users
                   </p>
                 </CardContent>
               </Card>

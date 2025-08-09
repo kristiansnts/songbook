@@ -4,6 +4,7 @@ import { authManager, User, LoginCredentials } from '@/lib/auth-manager'
 import { PendingAccessModal } from '@/components/modals/PendingAccessModal'
 import { RequestReviewModal } from '@/components/modals/RequestReviewModal'
 import { ApprovedPage } from '@/components/pages/ApprovedPage'
+import { useDashboardData } from '@/lib/dashboard-data-context'
 
 interface LoginResult {
   success: boolean
@@ -37,6 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [showRequestReviewModal, setShowRequestReviewModal] = useState(false)
   const [showApprovedPage, setShowApprovedPage] = useState(false)
   const navigate = useNavigate()
+  const { fetchDashboardData } = useDashboardData()
 
   const handleRequestSuccess = () => {
     // Update user status to 'request' and show the review modal
@@ -78,6 +80,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Get user data from server after successful login
         const currentUser = await authManager.getCurrentUser()
         setUser(currentUser)
+        
+        // Fetch dashboard data after successful login
+        await fetchDashboardData()
         
         // Check for special user states (keeping existing flow compatibility)
         if (currentUser) {
