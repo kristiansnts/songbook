@@ -155,6 +155,7 @@ export interface TableBuilderConfig<T = any> {
   className?: string
   showViewOptions?: boolean
   onSearchBlur?: (query: string) => void
+  onFilterChange?: (filters: Record<string, any>) => void
 }
 
 export class TableBuilder<T = any> {

@@ -113,6 +113,8 @@ export function TableRenderer<T = any>({
         },
       }
 
+      // Note: Server-side filtering is now handled via onFilterChange callback
+
       if (columnConfig.width) {
         column.size = typeof columnConfig.width === 'number' 
           ? columnConfig.width 
@@ -124,6 +126,17 @@ export function TableRenderer<T = any>({
 
     return tableColumns
   }, [config.columns, config.selectable, forceRefresh, refreshKey])
+
+  // Listen for filter changes and call onFilterChange if provided
+  React.useEffect(() => {
+    if (config.onFilterChange && columnFilters.length >= 0) {
+      const filterValues: Record<string, any> = {}
+      columnFilters.forEach(filter => {
+        filterValues[filter.id] = filter.value
+      })
+      config.onFilterChange(filterValues)
+    }
+  }, [columnFilters, config.onFilterChange])
 
   const table = useReactTable({
     data: config.data,
@@ -140,7 +153,7 @@ export function TableRenderer<T = any>({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    getFilteredRowModel: config.onFilterChange ? undefined : getFilteredRowModel(), // Disable client-side filtering when server-side filtering is used
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),

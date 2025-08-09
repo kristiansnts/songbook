@@ -1,5 +1,4 @@
 import { createRootRoute, Outlet } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 import { Toaster } from '@/components/ui/sonner'
 import { NavigationProgress } from '@/components/navigation-progress'
 import GeneralError from '@/features/errors/general-error'
@@ -13,11 +12,6 @@ export const Route = createRootRoute({
         <NavigationProgress />
         <Outlet />
         <Toaster duration={50000} />
-        {import.meta.env.MODE === 'development' && (
-          <>
-            <TanStackRouterDevtools position='bottom-right' />
-          </>
-        )}
       </AuthProvider>
     )
   },

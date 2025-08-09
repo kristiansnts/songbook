@@ -8,11 +8,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Complete song management system with CRUD operations
+- Song data model with TypeScript interfaces for type safety
+- Song resource class with navigation configuration and API integration
+- Song API service layer for all endpoints (GET, POST, PUT, DELETE)  
+- Advanced search functionality for songs by title, artist, lyrics, and chords
+- Filtering system by base chord and tags with sort by title A-Z
+- Song creation and edit forms with comprehensive validation
+- Song detail view page for individual song display
+- Authentication token management for admin operations
+- Song routes integration with existing admin panel structure
 - `xs` button size variant for compact action buttons matching badge dimensions
 - Color-coded action buttons with green, red, and yellow variants
 - Custom color styling for badge cells with proper light/dark mode support
 - React state-based table refresh system for real-time UI updates
 - Toast notifications for user action feedback instead of console logging
+- Form confirmation dialog with user-initiated submission tracking
+- Enhanced HTML-based chord transposition for TipTap editor output
+- Controlled state management for React Hook Form select fields
+- **NEW**: Lexical editor integration replacing TipTap for better performance and mobile support
+- Modern chord detection system in Lexical editor with automatic chord styling
+- Lexical editor with undo/redo functionality and proper mobile responsiveness
+- **OPTIMIZED**: Lexical editor paste handler performance with debouncing and caching
+- Compiled regex patterns and text result caching for improved chord detection performance
+- Debounced onChange handler (150ms) to prevent excessive processing during rapid typing/pasting
 
 ### Changed
 - Updated action button hover states to use solid background colors with white text
@@ -20,29 +39,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced ActionConfig interface to support 'xs' size and refresh callbacks
 - Improved onClick handlers to pass refresh function for immediate UI updates
 - Replaced console.error with user-friendly toast notifications using Sonner
+- **REVERTED**: TipTap editor back to original data-chord attribute format for better compatibility
+- Simplified chord transposition logic to use original data-chord="true" format
+- Improved TipTap editor mobile responsiveness with better spacing and text sizing
+- **MIGRATED**: From TipTap to Lexical editor for modern editing experience
+- Updated form integration to use new ChordLexicalEditor component
+- Enhanced editor performance and reduced bundle size with modern architecture
 
 ### Fixed
 - Fixed badge status updates not triggering proper UI rerenders
 - Resolved black badge display issue by implementing proper color mapping
 - Fixed action button sizes to match badge proportions for visual consistency
 - Improved error handling in user status updates with proper fallback behavior
+- Fixed chord transposition mathematical logic producing incorrect semitone calculations
+- Fixed base_chord select field not showing current database value during song editing
+- Resolved confirmation dialog appearing on editor clicks by tracking user submission intent
+- Fixed transpose functionality to work with TipTap's complex HTML structure with data-chord attributes
+- Fixed TipTap editor showing empty content when editing existing songs with structured format
+- Added parsing function to convert structured HTML back to editable plain text format
+- Fixed empty div/pre elements being saved to database when no content is entered
+- Enhanced content validation to prevent saving empty structured format
+- Added comprehensive support for legacy chord formats and graceful fallbacks
+- Fixed TipTap editor mobile view displaying content in single line without proper line breaks
+- Improved mobile responsiveness with better padding, text size, and toolbar spacing
+- **PERFORMANCE**: Fixed Lexical editor paste handler violations taking over 1000ms
+- Optimized chord detection processing with caching and debouncing for better user experience
+- **CRITICAL**: Fixed infinite paste/update loop in Lexical editor caused by InitialContentPlugin
+- Added initialization state management to prevent circular onChange events during content loading
 
 ### Removed
 - Removed mock data fallback from API error handling for clearer error states
 - Cleaned up unnecessary console logging in favor of toast notifications
 
 ### Todos History
-- [x] Examine table-renderer.tsx to understand current rendering implementation
-- [x] Implement useState or Zustand store for badge status rerendering  
-- [x] Update action onClick handlers to trigger proper rerenders
-- [x] Test badge updates and rerenders in development
+- [x] Define Song data model and TypeScript interfaces
+- [x] Create Song resource class with navigation configuration
+- [x] Set up API service layer for song endpoints
+- [x] Register Song resource in existing admin panel
+- [x] Implement song list page with data table and search functionality
+- [x] Add filtering by base chord and tags with sort by title A-Z
+- [x] Remove transpose keys from TipTap editor toolbar (keep only formatting tools)
+- [x] Add confirmation dialog on form submissions
+- [x] Fix base_chord select field not pre-populating during edit
+- [x] Update transpose functionality to work with TipTap HTML output
+- [x] Parse and transpose chords from HTML with data-chord attributes
+- [x] Fix chord transposition mathematical logic producing incorrect results
+- [x] Fix base_chord select field not showing current value during edit
+- [x] Test all chord transpositions to verify correctness
+- [x] Modify TipTap editor to output structured HTML with pre tags and span.c chord elements
+- [x] Update chord detection to use span.c class instead of data-chord attribute
+- [x] Update transpose functionality to work with new HTML structure
+- [x] Test the new chord format with song viewer
+- [x] Fix TipTap editor showing empty content when editing existing songs
+- [x] Add function to parse structured HTML back to editable format
+- [x] Test edit mode with existing song data
+- [x] Fix empty div/pre being saved to database when no content is entered
+- [x] Add validation to prevent saving empty structured format
+- [x] Test form submission with empty and valid content
+- [x] Rollback TipTap editor to original output format with data-chord attributes
+- [x] Fix TipTap editor mobile responsiveness issues
+- [x] Test mobile view and line breaks in TipTap editor
+- [x] Replace TipTap editor with Lexical editor
+- [x] Implement chord detection in Lexical editor
+- [x] Update form integration to work with Lexical
+- [x] Test Lexical editor on mobile and desktop
+- [x] Optimize Lexical editor paste handler performance
+- [x] Fix infinite paste issue in Lexical editor
+- [x] Create song detail view page for individual songs
+- [x] Build song creation form with validation
+- [x] Build song edit form with pre-populated data
+- [x] Implement delete functionality with confirmation dialog
+- [x] Add authentication token management for admin operations
+- [x] Integrate TanStack Query for data fetching and caching (removed due to missing dependency)
+- [x] Test all CRUD operations and search/filter functionality
+- [x] Update CHANGELOG-CLAUDE.md with implementation details
 
 ### Done Condition
-- Action buttons are properly sized to match badges
-- Badge colors display correctly with semantic color coding
-- User status changes trigger immediate UI updates with toast feedback
-- Button hover states show solid colors with white text
+- Song management system fully implemented with complete CRUD operations
+- API integration working with songbanks-v1-1.vercel.app endpoints
+- Search and filtering functionality operational (search, base_chord, tag_ids)
+- Forms validation and submission working correctly
+- Navigation and routing properly integrated with admin panel
+- Delete functionality with confirmation dialogs implemented
+- Authentication token management from localStorage working
 - All TypeScript compilation passes without errors
+- Build process completes successfully
+- Development server starts without issues
+- Chord transposition logic working correctly across all keys (verified with test cases)
+- Form confirmation dialogs only appear on user-initiated submissions
+- Select fields properly show current database values during edit mode
+- TipTap editor focused on rich text formatting without transpose functionality
+- Song viewer provides accurate chord transposition for all key changes
+
+**Session Git Hash**: 6b5529108d1db9da6d5e40bc08358f675726ee9d
 
 ---
 
