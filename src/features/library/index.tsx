@@ -50,6 +50,11 @@ export default function Library() {
                   key={song.id}
                   variant="ghost"
                   className="w-full justify-between p-3 h-auto"
+                  onClick={() => {
+                    if (song.type === 'artists') {
+                      navigate({ to: '/user/artist' })
+                    }
+                  }}
                 >
                   <div className="flex items-center">
                     <IconComponent className="text-gray-600 mr-4 h-6 w-6" />
