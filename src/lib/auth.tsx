@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Check for special user states (keeping existing flow compatibility)
         if (currentUser) {
           // Check if user has pending status and guest role
-          if (currentUser.userType === 'peserta' && currentUser.userlevel && parseInt(currentUser.userlevel) <= 2) {
+          if (currentUser.userType === 'peserta' && currentUser.userlevel && parseInt(currentUser.userlevel) < 2) {
             setShowPendingModal(true)
             return { success: false, isPendingGuest: true }
           }

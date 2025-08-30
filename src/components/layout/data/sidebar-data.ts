@@ -5,4 +5,17 @@ import { resourceRegistry } from '@/lib/resources/registry'
 import '@/lib/resources/auto-loader'
 
 // Generate sidebar data from auto-registered resources
-export const sidebarData: SidebarData = resourceRegistry.generateSidebarData()
+// Since this is now async, we need to handle it differently
+export async function getSidebarData(): Promise<SidebarData> {
+  return await resourceRegistry.generateSidebarData()
+}
+
+// For backwards compatibility, provide a default sidebar
+export const sidebarData: SidebarData = {
+  user: {
+    name: 'User',
+    email: 'user@example.com',
+    avatar: '/avatars/shadcn.jpg',
+  },
+  navGroups: [],
+}

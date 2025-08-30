@@ -59,12 +59,17 @@ const NavBadge = ({ children }: { children: ReactNode }) => (
 
 const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
   const { setOpenMobile } = useSidebar()
+  const isActive = checkIsActive(href, item)
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
         asChild
-        isActive={checkIsActive(href, item)}
+        isActive={isActive}
         tooltip={item.title}
+        className={isActive 
+          ? "bg-blue-50 text-blue-700 font-medium " 
+          : "bg-white text-gray-700 hover:bg-gray-50"
+        }
       >
         <Link to={item.url} onClick={() => setOpenMobile(false)}>
           {item.icon && <item.icon />}
@@ -169,12 +174,32 @@ const SidebarMenuCollapsedDropdown = ({
 }
 
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
-  return (
-    href === item.url || // /endpint?search=param
-    href.split('?')[0] === item.url || // endpoint
-    !!item?.items?.filter((i) => i.url === href).length || // if child nav is active
-    (mainNav &&
+  // Handle exact URL match including query parameters
+  if (href === item.url) {
+    return true
+  }
+  
+  // Handle dashboard without query params (should only match Dashboard item)
+  if (item.url === '/user/dashboard' && href === '/user/dashboard') {
+    return true
+  }
+  
+  // Handle items with query parameters - only match if query params match
+  if (item.url && item.url.includes('?')) {
+    return href === item.url
+  }
+  
+  // Handle child navigation
+  if (item?.items?.filter((i) => i.url === href).length) {
+    return true
+  }
+  
+  // Handle main navigation
+  if (mainNav &&
       href.split('/')[1] !== '' &&
-      href.split('/')[1] === item?.url?.split('/')[1])
-  )
+      href.split('/')[1] === item?.url?.split('/')[1]) {
+    return true
+  }
+  
+  return false
 }
