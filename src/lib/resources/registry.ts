@@ -83,7 +83,7 @@ class ResourceRegistry {
             },
             {
               title: 'Songs',
-              url: '/user/dashboard?section=songs' as any,
+              url: '/user/song' as any,
               icon: IconMusic as any,
             },
             {
@@ -95,6 +95,16 @@ class ResourceRegistry {
               title: 'Playlist Team',
               url: '/user/dashboard?section=team' as any,
               icon: IconUsers as any,
+            },
+          ],
+        },
+        {
+          title: 'Other',
+          items: [
+            {
+              title: 'Help Center',
+              url: '/help-center' as any,
+              icon: IconHelp as any,
             },
           ],
         },

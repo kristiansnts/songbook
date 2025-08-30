@@ -1,4 +1,4 @@
-import { Search, List, Tag, User, History, Plus, Music, Users, ChevronRight } from 'lucide-react'
+import { Search, List, User, Plus, Music, Users, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useNavigate } from '@tanstack/react-router'
@@ -7,9 +7,7 @@ export default function Library() {
   const navigate = useNavigate()
   const songs = [
     { id: 1, type: 'all', label: 'All songs', count: 2, icon: List },
-    { id: 2, type: 'tags', label: 'Tags', icon: Tag },
-    { id: 3, type: 'artists', label: 'Artists', icon: User },
-    { id: 4, type: 'recents', label: 'Recents', icon: History },
+    { id: 2, type: 'artists', label: 'Artists', icon: User },
   ]
 
   const playlists = [
@@ -53,6 +51,9 @@ export default function Library() {
                   onClick={() => {
                     if (song.type === 'artists') {
                       navigate({ to: '/user/artist' })
+                    }
+                    if (song.type === 'all') {
+                      navigate({ to: '/user/song' })
                     }
                   }}
                 >

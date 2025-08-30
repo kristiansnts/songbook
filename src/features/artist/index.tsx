@@ -92,7 +92,7 @@ export function ArtistView() {
                 variant="ghost"
                 className="w-full justify-between p-3 h-auto"
                 onClick={() => {
-                  // Navigate to artist detail view (to be implemented)
+                  navigate({ to: '/user/artist/$name', params: { name: encodeURIComponent(artist.name) } })
                 }}
               >
                 <div className="flex items-center">
