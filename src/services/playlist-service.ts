@@ -170,13 +170,18 @@ export class PlaylistService {
       }
 
       const result = await response.json()
-      const allSongs = await songService.getAllSongs()
-      const newPlaylist = this.transformPlaylistData(result, allSongs)
       
-      // Invalidate relevant caches
-      PlaylistService.clearCacheByPattern('getAllPlaylists')
+      if ((result.code === 200 || result.code === 201) && result.data) {
+        const allSongs = await songService.getAllSongs()
+        const newPlaylist = this.transformPlaylistData(result.data, allSongs)
+        
+        // Invalidate relevant caches
+        PlaylistService.clearCacheByPattern('getAllPlaylists')
+        
+        return newPlaylist
+      }
       
-      return newPlaylist
+      throw new Error(`Invalid response format: ${JSON.stringify(result)}`)
     } catch (error) {
       console.warn('Error creating playlist:', error)
       throw error
@@ -263,7 +268,7 @@ export class PlaylistService {
 
   async removeSongFromPlaylist(playlistId: string, songId: number): Promise<void> {
     try {
-      const response = await fetch(`${BASE_URL}/playlists/${playlistId}/songs/${songId}`, {
+      const response = await fetch(`${BASE_URL}/playlists/${playlistId}/song/${songId}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders(),
       })

@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ChevronLeft, Search, X, Loader2, Play, Share, Copy } from 'lucide-react'
+import { ChevronLeft, Search, X, Loader2, Play, Share, Copy, Trash2 } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
@@ -42,6 +42,10 @@ function PlaylistComponent() {
   const [copySuccess, setCopySuccess] = useState(false)
   const [shareLink, setShareLink] = useState<string>('')
   const [generatingLink, setGeneratingLink] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [removeSongDialogOpen, setRemoveSongDialogOpen] = useState(false)
+  const [songToRemove, setSongToRemove] = useState<Song | null>(null)
   
   useEffect(() => {
     loadPlaylistData()
@@ -68,11 +72,18 @@ function PlaylistComponent() {
     }
   }
 
-  const handleRemoveSong = async (songId: number) => {
+  const handleRemoveSongClick = (song: Song) => {
+    setSongToRemove(song)
+    setRemoveSongDialogOpen(true)
+  }
+
+  const handleConfirmRemoveSong = async () => {
+    if (!songToRemove) return
+
     try {
-      setRemovingIds(prev => new Set([...prev, songId]))
+      setRemovingIds(prev => new Set([...prev, songToRemove.id]))
       
-      await playlistService.removeSongFromPlaylist(id, songId)
+      await playlistService.removeSongFromPlaylist(id, songToRemove.id)
       
       // Reload playlist data to get updated song list
       await loadPlaylistData()
@@ -93,9 +104,11 @@ function PlaylistComponent() {
     } finally {
       setRemovingIds(prev => {
         const newSet = new Set(prev)
-        newSet.delete(songId)
+        newSet.delete(songToRemove.id)
         return newSet
       })
+      setRemoveSongDialogOpen(false)
+      setSongToRemove(null)
     }
   }
 
@@ -110,6 +123,33 @@ function PlaylistComponent() {
         to: '/user/playlist/view/$id', 
         params: { id }
       })
+    }
+  }
+
+  const handleDeletePlaylist = async () => {
+    try {
+      setDeleting(true)
+      await playlistService.deletePlaylist(id)
+      
+      toast.success('Playlist deleted successfully', {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      })
+      
+      // Navigate back to dashboard
+      navigate({ to: '/user/dashboard' })
+    } catch (error) {
+      toast.error('Failed to delete playlist', {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      })
+    } finally {
+      setDeleting(false)
+      setDeleteDialogOpen(false)
     }
   }
 
@@ -363,7 +403,7 @@ function PlaylistComponent() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => handleRemoveSong(song.id)}
+                onClick={() => handleRemoveSongClick(song)}
                 disabled={removingIds.has(song.id)}
                 className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100"
               >
@@ -378,17 +418,91 @@ function PlaylistComponent() {
         )}
       </div>
 
-      {/* Floating Play Button */}
-      {songs.length > 0 && (
-        <div className="fixed bottom-6 right-6 z-50">
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+        {/* Delete Playlist Button */}
+        <Button
+          onClick={() => setDeleteDialogOpen(true)}
+          className="w-12 h-12 rounded-full bg-red-500 text-white hover:bg-red-600 shadow-lg hover:shadow-xl transition-all duration-200"
+          disabled={deleting}
+        >
+          {deleting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </Button>
+        
+        {/* Play Button */}
+        {songs.length > 0 && (
           <Button
             onClick={handlePlayPlaylist}
             className="w-12 h-12 rounded-full bg-black text-white hover:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-200"
           >
             <Play className="h-4 w-4 ml-0.5" />
           </Button>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Remove Song Confirmation Dialog */}
+      <AlertDialog open={removeSongDialogOpen} onOpenChange={setRemoveSongDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Song from Playlist?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove "{songToRemove?.title}" by {songToRemove?.artist} from this playlist?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={songToRemove ? removingIds.has(songToRemove.id) : false}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRemoveSong}
+              disabled={songToRemove ? removingIds.has(songToRemove.id) : false}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {songToRemove && removingIds.has(songToRemove.id) ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Removing...
+                </>
+              ) : (
+                'Remove Song'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Playlist?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the playlist "{playlist?.name}" and all its contents.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePlaylist}
+              disabled={deleting}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Playlist'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
