@@ -1,20 +1,38 @@
-import { Search, List, User, Plus, Music, Users, ChevronRight } from 'lucide-react'
+import { Search, List, User, Plus, Music, Users, ChevronRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { playlistService } from '@/services/playlist-service'
+import { Playlist } from '@/types/playlist'
 
 export default function Library() {
   const navigate = useNavigate()
+  const [playlists, setPlaylists] = useState<Playlist[]>([])
+  const [playlistsLoading, setPlaylistsLoading] = useState(true)
+  
   const songs = [
     { id: 1, type: 'all', label: 'All songs', count: 2, icon: List },
     { id: 2, type: 'artists', label: 'Artists', icon: User },
   ]
 
-  const playlists = [
-    { id: 1, name: 'Monoplex Club', count: 10 },
-    { id: 2, name: 'Veľký Biel Festival', count: 9 },
-    { id: 3, name: 'Summer Open Air', count: 8 },
-  ]
+  useEffect(() => {
+    const loadPlaylists = async () => {
+      try {
+        setPlaylistsLoading(true)
+        const playlistsData = await playlistService.getAllPlaylists()
+        setPlaylists(playlistsData)
+      } catch (error) {
+        console.error('Error loading playlists:', error)
+        // Fallback to empty array on error
+        setPlaylists([])
+      } finally {
+        setPlaylistsLoading(false)
+      }
+    }
+
+    loadPlaylists()
+  }, [])
 
   const teams = [
     { id: 1, name: 'My Team' },
@@ -78,23 +96,34 @@ export default function Library() {
             Playlists
           </h2>
           <div className="space-y-1">
-            {playlists.map((playlist) => (
-              <Button
-                key={playlist.id}
-                variant="ghost"
-                className="w-full justify-between p-3 h-auto"
-                onClick={() => navigate({ to: '/playlist/$id', params: { id: playlist.id.toString() } })}
-              >
-                <div className="flex items-center">
-                  <Music className="text-gray-600 mr-4 h-6 w-6" />
-                  <span className="text-lg">{playlist.name}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="text-gray-500 mr-2">{playlist.count}</span>
-                  <ChevronRight className="h-5 w-5 text-gray-400" />
-                </div>
-              </Button>
-            ))}
+            {playlistsLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <span className="text-gray-500">Loading playlists...</span>
+              </div>
+            ) : playlists.length === 0 ? (
+              <div className="text-center py-4 text-gray-500">
+                No playlists found
+              </div>
+            ) : (
+              playlists.map((playlist) => (
+                <Button
+                  key={playlist.id}
+                  variant="ghost"
+                  className="w-full justify-between p-3 h-auto"
+                  onClick={() => navigate({ to: '/user/playlist/$id', params: { id: playlist.id.toString() } })}
+                >
+                  <div className="flex items-center">
+                    <Music className="text-gray-600 mr-4 h-6 w-6" />
+                    <span className="text-lg">{playlist.name}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-gray-500 mr-2">{playlist.songCount}</span>
+                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                  </div>
+                </Button>
+              ))
+            )}
             <Button
               variant="ghost"
               className="w-full justify-start p-3 h-auto"

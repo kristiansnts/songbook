@@ -20,7 +20,7 @@ export default function PlaylistView({ playlistName = "Test", songCount = 0 }: P
             className="flex items-center p-0 hover:bg-transparent"
           >
             <ArrowLeft className="h-5 w-5 mr-2" />
-            <span className="text-lg">All setlists</span>
+            <span className="text-lg">Song lists</span>
           </Button>
         </div>
         <Button variant="ghost" size="icon">

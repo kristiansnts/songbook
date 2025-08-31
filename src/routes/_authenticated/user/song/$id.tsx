@@ -24,13 +24,13 @@ function SongViewPage() {
     // TODO: Implement actual playlist API calls
     console.log('Adding song to playlists:', playlistIds, 'New playlist:', newPlaylistName)
     
-    // Show success message (you can replace with proper toast notification)
+    // Show success message (you can replace with proper toast notification)tgy9igy
     const playlistText = playlistIds.length > 1 ? 'playlists' : 'playlist'
     const message = newPlaylistName 
       ? `Added to "${newPlaylistName}" and ${playlistIds.length} existing ${playlistText}`
       : `Added to ${playlistIds.length} ${playlistText}`
     
-    alert(message)
+    // alert(message)
   }
 
   useEffect(() => {
