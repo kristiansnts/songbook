@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Setlist</title>
+    <script src="https://cdn.tailwindcss.com/3.3.3"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .material-icons {
+        font-family: "Material Icons";
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: "liga";
+        -webkit-font-smoothing: antialiased;
+      }
+    </style>
+  </head>
+  <body class="bg-white text-black">
+    <div class="min-h-screen flex flex-col">
+      <header class="p-4 flex items-center justify-between border-b">
+        <div class="flex items-center">
+          <button class="flex items-center">
+            <span class="material-icons">arrow_back_ios</span>
+            <span class="text-lg">All setlists</span>
+          </button>
+        </div>
+        <button>
+          <span class="material-icons">more_horiz</span>
+        </button>
+      </header>
+      <main class="flex-grow px-4">
+        <div class="pt-6 pb-4">
+          <h1 class="text-3xl font-bold">Test</h1>
+        </div>
+        <ul class="divide-y">
+          <li class="flex items-center justify-between py-3">
+            <div class="flex items-center">
+              <span class="material-icons text-gray-400 mr-4">drag_handle</span>
+              <div>
+                <p class="font-semibold">Song 1</p>
+                <p class="text-sm text-gray-500">Artist 1</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-4">
+              <span class="text-sm text-gray-500">4:32</span>
+              <button>
+                <span class="material-icons">more_horiz</span>
+              </button>
+            </div>
+          </li>
+          <li class="flex items-center justify-between py-3">
+            <div class="flex items-center">
+              <span class="material-icons text-gray-400 mr-4">drag_handle</span>
+              <div>
+                <p class="font-semibold">Song 2</p>
+                <p class="text-sm text-gray-500">Artist 2</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-4">
+              <span class="text-sm text-gray-500">3:51</span>
+              <button>
+                <span class="material-icons">more_horiz</span>
+              </button>
+            </div>
+          </li>
+          <li class="flex items-center justify-between py-3">
+            <div class="flex items-center">
+              <span class="material-icons text-gray-400 mr-4">drag_handle</span>
+              <div>
+                <p class="font-semibold">Song 3</p>
+                <p class="text-sm text-gray-500">Artist 3</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-4">
+              <span class="text-sm text-gray-500">5:10</span>
+              <button>
+                <span class="material-icons">more_horiz</span>
+              </button>
+            </div>
+          </li>
+          <li class="flex items-center justify-between py-3">
+            <div class="flex items-center">
+              <span class="material-icons text-gray-400 mr-4">drag_handle</span>
+              <div>
+                <p class="font-semibold">Song 4</p>
+                <p class="text-sm text-gray-500">Artist 4</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-4">
+              <span class="text-sm text-gray-500">2:58</span>
+              <button>
+                <span class="material-icons">more_horiz</span>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </main>
+      <div class="px-4 py-6 border-t">
+        <button class="flex items-center w-full text-left py-2">
+          <span class="material-icons text-blue-500 mr-3">add_circle</span>
+          <span class="text-lg">Add ...</span>
+        </button>
+        <div class="border-t my-4"></div>
+        <p class="text-gray-500">4 songs, 16m 31s</p>
+      </div>
+    </div>
+  </body>
+</html>

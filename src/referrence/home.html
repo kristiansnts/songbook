@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .material-icons {
+        font-size: 24px;
+      }
+    </style>
+  </head>
+  <body class="bg-white text-black">
+    <div class="container mx-auto px-4 py-6">
+      <header class="flex justify-between items-center mb-6">
+        <h1 class="text-4xl font-bold">Library</h1>
+        <div class="flex items-center space-x-4">
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <span class="material-icons text-gray-600">help_outline</span>
+          </button>
+          <button class="p-2 rounded-full hover:bg-gray-100">
+            <span class="material-icons text-gray-600">menu</span>
+          </button>
+        </div>
+      </header>
+      <div class="relative mb-8">
+        <span
+          class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          >search</span
+        >
+        <input
+          class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
+          placeholder="Song, tag or artist"
+          type="text"
+        />
+      </div>
+      <main>
+        <section class="mb-8">
+          <h2
+            class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3"
+          >
+            Songs
+          </h2>
+          <div class="space-y-1">
+            <a
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <div class="flex items-center">
+                <span class="material-icons text-gray-600 mr-4">list</span>
+                <span class="text-lg">All songs</span>
+              </div>
+              <div class="flex items-center">
+                <span class="text-gray-500 mr-2">52</span>
+                <span class="material-icons text-gray-400">chevron_right</span>
+              </div>
+            </a>
+            <a
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <div class="flex items-center">
+                <span class="material-icons text-gray-600 mr-4">sell</span>
+                <span class="text-lg">Tags</span>
+              </div>
+              <span class="material-icons text-gray-400">chevron_right</span>
+            </a>
+            <a
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <div class="flex items-center">
+                <span class="material-icons text-gray-600 mr-4">person</span>
+                <span class="text-lg">Artists</span>
+              </div>
+              <span class="material-icons text-gray-400">chevron_right</span>
+            </a>
+            <a
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <div class="flex items-center">
+                <span class="material-icons text-gray-600 mr-4">history</span>
+                <span class="text-lg">Recents</span>
+              </div>
+              <span class="material-icons text-gray-400">chevron_right</span>
+            </a>
+            <a
+              class="flex items-center p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <span class="material-icons text-gray-600 mr-4">add</span>
+              <span class="text-lg">Add song</span>
+            </a>
+          </div>
+        </section>
+        <section class="mb-8">
+          <h2
+            class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3"
+          >
+            Playlists
+          </h2>
+          <div class="space-y-1">
+            <a
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <div class="flex items-center">
+                <span class="material-icons text-gray-600 mr-4"
+                  >music_note</span
+                >
+                <span class="text-lg">Monoplex Club</span>
+              </div>
+              <div class="flex items-center">
+                <span class="text-gray-500 mr-2">10</span>
+                <span class="material-icons text-gray-400">chevron_right</span>
+              </div>
+            </a>
+            <a
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <div class="flex items-center">
+                <span class="material-icons text-gray-600 mr-4"
+                  >music_note</span
+                >
+                <span class="text-lg">Veľký Biel Festival</span>
+              </div>
+              <div class="flex items-center">
+                <span class="text-gray-500 mr-2">9</span>
+                <span class="material-icons text-gray-400">chevron_right</span>
+              </div>
+            </a>
+            <a
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <div class="flex items-center">
+                <span class="material-icons text-gray-600 mr-4"
+                  >music_note</span
+                >
+                <span class="text-lg">Summer Open Air</span>
+              </div>
+              <div class="flex items-center">
+                <span class="text-gray-500 mr-2">8</span>
+                <span class="material-icons text-gray-400">chevron_right</span>
+              </div>
+            </a>
+            <a
+              class="flex items-center p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <span class="material-icons text-gray-600 mr-4">add</span>
+              <span class="text-lg">New playlist</span>
+            </a>
+          </div>
+        </section>
+        <section>
+          <h2
+            class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3"
+          >
+            Playlist Teams
+          </h2>
+          <div class="space-y-1">
+            <a
+              class="flex items-center p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <span class="material-icons text-gray-600 mr-4">group</span>
+              <span class="text-lg">My Team</span>
+            </a>
+            <a
+              class="flex items-center p-3 rounded-lg hover:bg-gray-100"
+              href="#"
+            >
+              <span class="material-icons text-gray-600 mr-4">add</span>
+              <span class="text-lg">New team</span>
+            </a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

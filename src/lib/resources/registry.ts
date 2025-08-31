@@ -1,6 +1,6 @@
 import { Resource } from './types'
 import { type SidebarData } from '@/components/layout/types'
-import { IconLayoutDashboard, IconHelp } from '@tabler/icons-react'
+import { IconLayoutDashboard, IconHelp, IconMusic, IconPlaylist, IconUsers } from '@tabler/icons-react'
 
 class ResourceRegistry {
   private resources: Map<string, Resource> = new Map()
@@ -23,7 +23,7 @@ class ResourceRegistry {
     )
   }
 
-  generateSidebarData(): SidebarData {
+  async generateSidebarData(): Promise<SidebarData> {
     const resources = this.getVisibleResources()
     
     // Group resources by navigation group
@@ -52,43 +52,105 @@ class ResourceRegistry {
       }))
     }))
 
-    // Add static navigation items (like Dashboard, Help Center)
-    const staticNavGroups = [
-      {
-        title: 'General',
-        items: [
-          {
-            title: 'Dashboard',
-            url: '/dashboard' as any,
-            icon: IconLayoutDashboard as any,
-          },
-        ],
-      },
-      {
-        title: 'Other',
-        items: [
-          {
-            title: 'Help Center',
-            url: '/help-center' as any,
-            icon: IconHelp as any,
-          },
-        ],
-      },
-    ]
+    // Determine user type (default to pengurus for backwards compatibility)
+    let userType = 'pengurus'
+    try {
+      // Try to get user info from auth manager
+      const { authManager } = await import('@/lib/auth-manager')
+      if (authManager.isLoggedIn()) {
+        const user = await authManager.getCurrentUser()
+        if (user?.userType) {
+          userType = user.userType
+        }
+      }
+    } catch (error) {
+      console.warn('Could not determine user type, defaulting to pengurus:', error)
+    }
+
+    // Create different navigation based on user type
+    let staticNavGroups
+    
+    if (userType === 'peserta') {
+      // Navigation for peserta (regular users)
+      staticNavGroups = [
+        {
+          title: 'Peserta',
+          items: [
+            {
+              title: 'Dashboard',
+              url: '/user/dashboard' as any,
+              icon: IconLayoutDashboard as any,
+            },
+            {
+              title: 'Songs',
+              url: '/user/song' as any,
+              icon: IconMusic as any,
+            },
+            {
+              title: 'Playlist',
+              url: '/user/dashboard?section=playlist' as any,
+              icon: IconPlaylist as any,
+            },
+            {
+              title: 'Playlist Team',
+              url: '/user/dashboard?section=team' as any,
+              icon: IconUsers as any,
+            },
+          ],
+        },
+        {
+          title: 'Other',
+          items: [
+            {
+              title: 'Help Center',
+              url: '/help-center' as any,
+              icon: IconHelp as any,
+            },
+          ],
+        },
+      ]
+    } else {
+      // Navigation for pengurus (admin users) - keep old structure
+      staticNavGroups = [
+        {
+          title: 'General',
+          items: [
+            {
+              title: 'Dashboard',
+              url: '/dashboard' as any,
+              icon: IconLayoutDashboard as any,
+            },
+          ],
+        },
+        {
+          title: 'Other',
+          items: [
+            {
+              title: 'Help Center',
+              url: '/help-center' as any,
+              icon: IconHelp as any,
+            },
+          ],
+        },
+      ]
+    }
 
     // Merge static and resource-generated navigation
-    const mergedNavGroups = [...staticNavGroups]
+    let mergedNavGroups = [...staticNavGroups]
     
-    navGroups.forEach(resourceGroup => {
-      const existingGroup = mergedNavGroups.find(g => g.title === resourceGroup.title)
-      if (existingGroup) {
-        // Merge resource items into existing group
-        existingGroup.items.push(...resourceGroup.items)
-      } else {
-        // Add new group
-        mergedNavGroups.push(resourceGroup)
-      }
-    })
+    // Only merge resource groups for pengurus users
+    if (userType === 'pengurus') {
+      navGroups.forEach(resourceGroup => {
+        const existingGroup = mergedNavGroups.find(g => g.title === resourceGroup.title)
+        if (existingGroup) {
+          // Merge resource items into existing group
+          existingGroup.items.push(...resourceGroup.items)
+        } else {
+          // Add new group
+          mergedNavGroups.push(resourceGroup)
+        }
+      })
+    }
 
     return {
       user: {

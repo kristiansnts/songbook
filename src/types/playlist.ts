@@ -1,0 +1,38 @@
+import { Song } from './song'
+
+export interface Playlist {
+  id: string;
+  name: string;
+  songCount: number;
+  songs?: Song[]; // Array of full song objects
+  created_at?: string;
+  updated_at?: string;
+  access_type?: string;
+  sharable_link?: string;
+  share_token?: string;
+  is_shared?: boolean;
+  is_locked?: boolean;
+}
+
+export interface CreatePlaylistRequest {
+  playlist_name: string;
+  songs?: string[];
+}
+
+export interface UpdatePlaylistRequest {
+  name: string;
+  songs?: number[];
+}
+
+export interface PlaylistFilters {
+  search?: string;
+}
+
+export interface PlaylistListResponse {
+  data: Playlist[];
+  meta?: {
+    total: number;
+    page: number;
+    per_page: number;
+  };
+}

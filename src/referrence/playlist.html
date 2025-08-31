@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Setlist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .material-icons {
+        font-family: "Material Icons";
+        font-weight: normal;
+        font-style: normal;
+        font-size: 24px;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        display: inline-block;
+        white-space: nowrap;
+        word-wrap: normal;
+        direction: ltr;
+        -webkit-font-feature-settings: "liga";
+        -webkit-font-smoothing: antialiased;
+      }
+    </style>
+  </head>
+  <body class="bg-white text-black">
+    <div class="min-h-screen flex flex-col">
+      <header class="p-4 flex items-center justify-between border-b">
+        <div class="flex items-center">
+          <button class="flex items-center">
+            <span class="material-icons">arrow_back_ios</span>
+            <span class="text-lg">All setlists</span>
+          </button>
+        </div>
+        <button>
+          <span class="material-icons">more_horiz</span>
+        </button>
+      </header>
+      <main
+        class="flex-grow flex flex-col items-center justify-center text-center px-4"
+      >
+        <div
+          class="w-48 h-48 flex items-center justify-center bg-gray-100 rounded-lg mb-6"
+        >
+          <svg
+            class="w-32 h-32 text-gray-300"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              clip-rule="evenodd"
+              d="M10 18a8 8 0 100-16 8 8 0 000 16zM6 9a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 4a1 1 0 100 2h3a1 1 0 100-2H7z"
+              fill-rule="evenodd"
+            ></path>
+            <path
+              d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L13 7.414V17a1 1 0 11-2 0V7.414L8.707 9.707a1 1 0 01-1.414-1.414l4-4z"
+            ></path>
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold mb-2">Test</h1>
+        <p class="text-gray-500">Setlist has no songs.</p>
+      </main>
+      <div class="px-4 py-6 border-t">
+        <button class="flex items-center w-full text-left py-2">
+          <span class="material-icons text-blue-500 mr-3">add_circle</span>
+          <span class="text-lg">Add ...</span>
+        </button>
+        <div class="border-t my-4"></div>
+        <p class="text-gray-500">0 songs</p>
+      </div>
+    </div>
+  </body>
+</html>
