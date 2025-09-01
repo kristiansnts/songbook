@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ChevronLeft, Search, X, Loader2, Play, Share, Copy, Trash2 } from 'lucide-react'
+import { ChevronLeft, Search, X, Loader2, Play, Share, Copy, Trash2, Users } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
@@ -46,9 +46,20 @@ function PlaylistComponent() {
   const [deleting, setDeleting] = useState(false)
   const [removeSongDialogOpen, setRemoveSongDialogOpen] = useState(false)
   const [songToRemove, setSongToRemove] = useState<Song | null>(null)
+  const [playlistTeams, setPlaylistTeams] = useState<any[]>([])
+  const [loadingTeams, setLoadingTeams] = useState(false)
+  const [membersDialogOpen, setMembersDialogOpen] = useState(false)
+  const [removingMemberId, setRemovingMemberId] = useState<number | null>(null)
+  const [teamDetails, setTeamDetails] = useState<any>(null)
+  const [loadingMembers, setLoadingMembers] = useState(false)
+  const [deleteTeamDialogOpen, setDeleteTeamDialogOpen] = useState(false)
+  const [deletingTeam, setDeletingTeam] = useState(false)
+  const [removeMemberDialogOpen, setRemoveMemberDialogOpen] = useState(false)
+  const [memberToRemove, setMemberToRemove] = useState<any>(null)
   
   useEffect(() => {
     loadPlaylistData()
+    loadPlaylistTeams()
   }, [id])
 
   useEffect(() => {
@@ -69,6 +80,129 @@ function PlaylistComponent() {
       setSongs([])
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadPlaylistTeams = async () => {
+    try {
+      setLoadingTeams(true)
+      const teams = await playlistService.getPlaylistTeams()
+      // Filter teams for this specific playlist
+      const currentPlaylistTeams = teams.filter((team: any) => 
+        team.playlist_id?.toString() === id.toString()
+      )
+      setPlaylistTeams(currentPlaylistTeams)
+    } catch (error) {
+      console.warn('Failed to load playlist teams:', error)
+      setPlaylistTeams([])
+    } finally {
+      setLoadingTeams(false)
+    }
+  }
+
+  const getCurrentPlaylistTeam = () => {
+    return playlistTeams.find((team: any) => 
+      team.playlist_id?.toString() === id.toString()
+    )
+  }
+
+  const handleRemoveMemberClick = (member: any) => {
+    setMemberToRemove(member)
+    setRemoveMemberDialogOpen(true)
+  }
+
+  const handleConfirmRemoveMember = async () => {
+    if (!memberToRemove || !playlist?.playlist_team_id) return
+
+    try {
+      setRemovingMemberId(memberToRemove.id)
+      
+      // Call API to remove member using team ID
+      await playlistService.removeMemberFromPlaylist(playlist.playlist_team_id.toString(), memberToRemove.id)
+      
+      // Reload team details to refresh the member list
+      await loadTeamDetails()
+      
+      toast.success('Member removed from playlist', {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      })
+      
+      // Close dialog and reset state
+      setRemoveMemberDialogOpen(false)
+      setMemberToRemove(null)
+    } catch (error) {
+      toast.error('Failed to remove member', {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      })
+    } finally {
+      setRemovingMemberId(null)
+    }
+  }
+
+  const loadTeamDetails = async () => {
+    // Get team ID from playlist data, not from playlist teams
+    if (!playlist?.playlist_team_id) {
+      console.warn('No playlist_team_id found in playlist data')
+      setTeamDetails(null)
+      return
+    }
+
+    try {
+      setLoadingMembers(true)
+      const teamId = playlist.playlist_team_id
+      const details = await playlistService.getPlaylistTeamDetails(teamId.toString())
+      
+      setTeamDetails(details)
+    } catch (error) {
+      console.warn('Failed to load team details:', error)
+      setTeamDetails(null)
+    } finally {
+      setLoadingMembers(false)
+    }
+  }
+
+  const handleMembersDialogOpen = () => {
+    setMembersDialogOpen(true)
+    loadTeamDetails()
+  }
+
+  const handleDeleteTeam = async () => {
+    if (!playlist?.playlist_team_id) return
+
+    try {
+      setDeletingTeam(true)
+      await playlistService.deletePlaylistTeam(playlist.playlist_team_id.toString())
+      
+      toast.success('Team deleted successfully', {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      })
+      
+      // Close dialogs and refresh data
+      setDeleteTeamDialogOpen(false)
+      setMembersDialogOpen(false)
+      setTeamDetails(null)
+      
+      // Reload playlist data to update playlist_team_id
+      await loadPlaylistData()
+      await loadPlaylistTeams()
+    } catch (error) {
+      toast.error('Failed to delete team', {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      })
+    } finally {
+      setDeletingTeam(false)
     }
   }
 
@@ -360,6 +494,145 @@ function PlaylistComponent() {
         </div>
       </div>
 
+      {/* Members Dialog */}
+      <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Playlist Members
+            </DialogTitle>
+            <DialogDescription>
+              Manage members who have access to this playlist
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {loadingMembers ? (
+              <div className="text-center py-4 text-gray-500">
+                <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
+                Loading members...
+              </div>
+            ) : !teamDetails ? (
+              <div className="text-center py-4 text-gray-500">
+                No team data found
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {(!teamDetails.members || teamDetails.members.length === 0) ? (
+                  <div className="text-center py-4 text-gray-500">
+                    No members in this playlist
+                  </div>
+                ) : (
+                  teamDetails.members.map((member: any, index: number) => (
+                    <div key={`member-${member.id}-${index}`} className="flex items-center justify-between p-3 rounded-lg border">
+                      <div className="flex-1">
+                        <div className="font-medium">{member.nama || member.name || 'No name'}</div>
+                        <div className="text-sm text-gray-500">{member.email || 'No email'}</div>
+                      </div>
+                      
+                      {/* Remove Member Button - Only show for playlist owners */}
+                      {playlist?.access_type === 'owner' && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveMemberClick(member)}
+                          disabled={removingMemberId === member.id}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        >
+                          {removingMemberId === member.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <X className="h-4 w-4" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+          
+          {/* Footer with Delete Team Button - Only show for playlist owners */}
+          {playlist?.access_type === 'owner' && (
+            <div className="flex justify-end pt-4 border-t">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDeleteTeamDialogOpen(true)}
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200"
+                disabled={loadingMembers}
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Delete Team
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Team Confirmation Dialog */}
+      <AlertDialog open={deleteTeamDialogOpen} onOpenChange={setDeleteTeamDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Team?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the team and remove all members from this playlist.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingTeam}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteTeam}
+              disabled={deletingTeam}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {deletingTeam ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete Team'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Remove Member Confirmation Dialog */}
+      <AlertDialog open={removeMemberDialogOpen} onOpenChange={setRemoveMemberDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove "{memberToRemove?.nama || memberToRemove?.name}" from this playlist team? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removingMemberId === memberToRemove?.id}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmRemoveMember}
+              disabled={removingMemberId === memberToRemove?.id}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {removingMemberId === memberToRemove?.id ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Removing...
+                </>
+              ) : (
+                'Remove Member'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -420,18 +693,35 @@ function PlaylistComponent() {
 
       {/* Floating Action Buttons */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
-        {/* Delete Playlist Button */}
-        <Button
-          onClick={() => setDeleteDialogOpen(true)}
-          className="w-12 h-12 rounded-full bg-red-500 text-white hover:bg-red-600 shadow-lg hover:shadow-xl transition-all duration-200"
-          disabled={deleting}
-        >
-          {deleting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Trash2 className="h-4 w-4" />
-          )}
-        </Button>
+        {/* Group/People Button - Only show if playlist has team ID */}
+        {playlist?.playlist_team_id && (
+          <Button
+            onClick={handleMembersDialogOpen}
+            className="w-12 h-12 rounded-full bg-blue-500 text-white hover:bg-blue-600 shadow-lg hover:shadow-xl transition-all duration-200"
+            disabled={loadingTeams}
+          >
+            {loadingTeams ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Users className="h-4 w-4" />
+            )}
+          </Button>
+        )}
+
+        {/* Delete Playlist Button - Only show for playlist owners */}
+        {playlist?.access_type === 'owner' && (
+          <Button
+            onClick={() => setDeleteDialogOpen(true)}
+            className="w-12 h-12 rounded-full bg-red-500 text-white hover:bg-red-600 shadow-lg hover:shadow-xl transition-all duration-200"
+            disabled={deleting}
+          >
+            {deleting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="h-4 w-4" />
+            )}
+          </Button>
+        )}
         
         {/* Play Button */}
         {songs.length > 0 && (

@@ -12,6 +12,7 @@ export interface Playlist {
   share_token?: string;
   is_shared?: boolean;
   is_locked?: boolean;
+  playlist_team_id?: number;
 }
 
 export interface CreatePlaylistRequest {

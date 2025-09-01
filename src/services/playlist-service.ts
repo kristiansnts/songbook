@@ -349,6 +349,119 @@ export class PlaylistService {
     }
   }
 
+  async getPlaylistTeams(): Promise<any[]> {
+    const cacheKey = PlaylistService.getCacheKey('getPlaylistTeams')
+    
+    // Try cache first
+    const cachedResult = PlaylistService.getFromCache<any[]>(cacheKey)
+    if (cachedResult) {
+      return cachedResult
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/playlist-teams`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch playlist teams: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.code === 200 && Array.isArray(result.data)) {
+        // Cache the result
+        PlaylistService.setCache(cacheKey, result.data)
+        return result.data
+      }
+      
+      throw new Error(`Invalid response format: ${JSON.stringify(result)}`)
+    } catch (error) {
+      console.warn('Error fetching playlist teams:', error)
+      // Return empty array on error to avoid breaking the UI
+      return []
+    }
+  }
+
+  async getPlaylistTeamDetails(teamId: string): Promise<any> {
+    const cacheKey = PlaylistService.getCacheKey('getPlaylistTeamDetails', { teamId })
+    
+    // Try cache first
+    const cachedResult = PlaylistService.getFromCache<any>(cacheKey)
+    if (cachedResult) {
+      return cachedResult
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/playlist-teams/${teamId}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch playlist team details: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.code === 200 && result.data) {
+        // Cache the result
+        PlaylistService.setCache(cacheKey, result.data)
+        return result.data
+      }
+      
+      throw new Error(`Invalid response format: ${JSON.stringify(result)}`)
+    } catch (error) {
+      console.warn('Error fetching playlist team details:', error)
+      return null
+    }
+  }
+
+  async removeMemberFromPlaylist(teamId: string, memberId: number): Promise<void> {
+    try {
+      const response = await fetch(`${BASE_URL}/playlist-teams/${teamId}/members/${memberId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to remove member: ${response.status} - ${errorText}`)
+      }
+      
+      // Invalidate playlist teams cache
+      PlaylistService.clearCacheByPattern('getPlaylistTeams')
+      PlaylistService.clearCacheByPattern('getPlaylistTeamDetails')
+    } catch (error) {
+      console.warn('Error removing member from playlist:', error)
+      throw error
+    }
+  }
+
+  async deletePlaylistTeam(teamId: string): Promise<void> {
+    try {
+      const response = await fetch(`${BASE_URL}/playlist-teams/${teamId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to delete team: ${response.status} - ${errorText}`)
+      }
+      
+      // Invalidate relevant caches
+      PlaylistService.clearCacheByPattern('getPlaylistTeams')
+      PlaylistService.clearCacheByPattern('getPlaylistTeamDetails')
+    } catch (error) {
+      console.warn('Error deleting playlist team:', error)
+      throw error
+    }
+  }
+
   private transformPlaylistData(playlist: any, _allSongs: any[]): Playlist {
     // Handle songs array - can be full song objects or just IDs
     let songCount = 0
@@ -392,6 +505,7 @@ export class PlaylistService {
       share_token: playlist.share_token,
       is_shared: playlist.is_shared,
       is_locked: playlist.is_locked,
+      playlist_team_id: playlist.playlist_team_id,
     }
   }
 
