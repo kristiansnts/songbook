@@ -316,6 +316,39 @@ export class PlaylistService {
     }
   }
 
+  async joinPlaylist(shareToken: string): Promise<void> {
+    const token = this.getAuthToken()
+    
+    if (!token) {
+      throw new Error('AUTHENTICATION_REQUIRED')
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/playlists/join/${shareToken}`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: '',
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        
+        // Check if user is the owner of the playlist
+        if (response.status === 409 || errorText.includes('owner')) {
+          throw new Error('PLAYLIST_OWNER')
+        }
+        
+        throw new Error(`Failed to join playlist: ${response.status} - ${errorText}`)
+      }
+      
+      // Invalidate all playlists cache to refresh with newly joined playlist
+      PlaylistService.clearCacheByPattern('getAllPlaylists')
+    } catch (error) {
+      console.warn('Error joining playlist:', error)
+      throw error
+    }
+  }
+
   private transformPlaylistData(playlist: any, _allSongs: any[]): Playlist {
     // Handle songs array - can be full song objects or just IDs
     let songCount = 0

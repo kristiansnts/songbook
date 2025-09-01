@@ -34,6 +34,7 @@ import { Route as AuthenticatedAdminSongsIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedUserSongIdRouteImport } from './routes/_authenticated/user/song/$id'
 import { Route as AuthenticatedUserPlaylistIdRouteImport } from './routes/_authenticated/user/playlist/$id'
 import { Route as AuthenticatedUserArtistNameRouteImport } from './routes/_authenticated/user/artist/$name'
+import { Route as AuthenticatedPlaylistJoinSharetokenRouteImport } from './routes/_authenticated/playlist/join/$sharetoken'
 import { Route as AuthenticatedAdminSongsCreateRouteImport } from './routes/_authenticated/admin/songs/create'
 import { Route as AuthenticatedUserPlaylistViewIdRouteImport } from './routes/_authenticated/user/playlist/view/$id'
 import { Route as AuthenticatedAdminUsersViewIdRouteImport } from './routes/_authenticated/admin/users/view/$id'
@@ -172,6 +173,12 @@ const AuthenticatedUserArtistNameRoute =
     path: '/$name',
     getParentRoute: () => AuthenticatedUserArtistRoute,
   } as any)
+const AuthenticatedPlaylistJoinSharetokenRoute =
+  AuthenticatedPlaylistJoinSharetokenRouteImport.update({
+    id: '/playlist/join/$sharetoken',
+    path: '/playlist/join/$sharetoken',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminSongsCreateRoute =
   AuthenticatedAdminSongsCreateRouteImport.update({
     id: '/songs/create',
@@ -223,6 +230,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/admin/songs/create': typeof AuthenticatedAdminSongsCreateRoute
+  '/playlist/join/$sharetoken': typeof AuthenticatedPlaylistJoinSharetokenRoute
   '/user/artist/$name': typeof AuthenticatedUserArtistNameRoute
   '/user/playlist/$id': typeof AuthenticatedUserPlaylistIdRoute
   '/user/song/$id': typeof AuthenticatedUserSongIdRoute
@@ -252,6 +260,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/admin/songs/create': typeof AuthenticatedAdminSongsCreateRoute
+  '/playlist/join/$sharetoken': typeof AuthenticatedPlaylistJoinSharetokenRoute
   '/user/artist/$name': typeof AuthenticatedUserArtistNameRoute
   '/user/playlist/$id': typeof AuthenticatedUserPlaylistIdRoute
   '/user/song/$id': typeof AuthenticatedUserSongIdRoute
@@ -285,6 +294,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/admin/songs/create': typeof AuthenticatedAdminSongsCreateRoute
+  '/_authenticated/playlist/join/$sharetoken': typeof AuthenticatedPlaylistJoinSharetokenRoute
   '/_authenticated/user/artist/$name': typeof AuthenticatedUserArtistNameRoute
   '/_authenticated/user/playlist/$id': typeof AuthenticatedUserPlaylistIdRoute
   '/_authenticated/user/song/$id': typeof AuthenticatedUserSongIdRoute
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/help-center'
     | '/admin/songs/create'
+    | '/playlist/join/$sharetoken'
     | '/user/artist/$name'
     | '/user/playlist/$id'
     | '/user/song/$id'
@@ -347,6 +358,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/help-center'
     | '/admin/songs/create'
+    | '/playlist/join/$sharetoken'
     | '/user/artist/$name'
     | '/user/playlist/$id'
     | '/user/song/$id'
@@ -379,6 +391,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/help-center/'
     | '/_authenticated/admin/songs/create'
+    | '/_authenticated/playlist/join/$sharetoken'
     | '/_authenticated/user/artist/$name'
     | '/_authenticated/user/playlist/$id'
     | '/_authenticated/user/song/$id'
@@ -581,6 +594,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUserArtistNameRouteImport
       parentRoute: typeof AuthenticatedUserArtistRoute
     }
+    '/_authenticated/playlist/join/$sharetoken': {
+      id: '/_authenticated/playlist/join/$sharetoken'
+      path: '/playlist/join/$sharetoken'
+      fullPath: '/playlist/join/$sharetoken'
+      preLoaderRoute: typeof AuthenticatedPlaylistJoinSharetokenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/songs/create': {
       id: '/_authenticated/admin/songs/create'
       path: '/songs/create'
@@ -684,6 +704,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUserDashboardRoute: typeof AuthenticatedUserDashboardRoute
   AuthenticatedUserSongRoute: typeof AuthenticatedUserSongRouteWithChildren
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
+  AuthenticatedPlaylistJoinSharetokenRoute: typeof AuthenticatedPlaylistJoinSharetokenRoute
   AuthenticatedUserPlaylistIdRoute: typeof AuthenticatedUserPlaylistIdRoute
   AuthenticatedUserPlaylistViewIdRoute: typeof AuthenticatedUserPlaylistViewIdRoute
 }
@@ -696,6 +717,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedUserDashboardRoute: AuthenticatedUserDashboardRoute,
   AuthenticatedUserSongRoute: AuthenticatedUserSongRouteWithChildren,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
+  AuthenticatedPlaylistJoinSharetokenRoute:
+    AuthenticatedPlaylistJoinSharetokenRoute,
   AuthenticatedUserPlaylistIdRoute: AuthenticatedUserPlaylistIdRoute,
   AuthenticatedUserPlaylistViewIdRoute: AuthenticatedUserPlaylistViewIdRoute,
 }
