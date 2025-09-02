@@ -1,11 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight, Filter, X } from 'lucide-react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { songService } from '@/services/songService'
 import { Song } from '@/types/song'
+import { KEYS } from '@/lib/transpose-utils'
+import { cn } from '@/lib/utils'
 
 export function SongListView() {
   const navigate = useNavigate()
@@ -16,6 +18,8 @@ export function SongListView() {
   const [selectedSongs, setSelectedSongs] = useState<Set<number>>(new Set())
   const [searchTerm, setSearchTerm] = useState('')
   const [isSelectMode, setIsSelectMode] = useState(false)
+  const [selectedChord, setSelectedChord] = useState<string>('')
+  const [showChordFilter, setShowChordFilter] = useState(false)
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -49,11 +53,16 @@ export function SongListView() {
     return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, '')
   }
 
-  // Filter and sort songs based on search term and artist filter
+  // Filter and sort songs based on search term, artist filter, and chord filter
   const filteredSongs = songs
     .filter((song: Song) => {
       // First filter by artist if specified
       if (search.artist && song.artist.toLowerCase() !== search.artist.toLowerCase()) {
+        return false
+      }
+      
+      // Filter by chord if specified
+      if (selectedChord && song.base_chord !== selectedChord) {
         return false
       }
       
@@ -95,6 +104,24 @@ export function SongListView() {
   const handleAddToPlaylist = () => {
     // Handle add to playlist action
     // TODO: Implement playlist functionality
+  }
+
+  const handleChordFilter = (chord: string) => {
+    if (selectedChord === chord) {
+      // If same chord is clicked, remove filter
+      setSelectedChord('')
+    } else {
+      // Otherwise, set new chord filter
+      setSelectedChord(chord)
+    }
+  }
+
+  const clearChordFilter = () => {
+    setSelectedChord('')
+  }
+
+  const toggleChordFilter = () => {
+    setShowChordFilter(!showChordFilter)
   }
 
   return (
@@ -148,7 +175,7 @@ export function SongListView() {
         </div>
 
       {/* Fixed Search */}
-      <div className="px-4 py-4 bg-white border-b">
+      <div className="px-4 py-4 bg-white border-b space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
@@ -158,6 +185,63 @@ export function SongListView() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+        </div>
+
+        {/* Chord Filter Section */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleChordFilter}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              >
+                <Filter className="h-4 w-4" />
+                Filter by Chord
+                {selectedChord && (
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
+                    {selectedChord}
+                  </span>
+                )}
+              </Button>
+            </div>
+            {selectedChord && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearChordFilter}
+                className="text-gray-500 hover:text-gray-700 p-1"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {showChordFilter && (
+            <div className="grid grid-cols-6 gap-2">
+              {KEYS.map((chord) => (
+                <button
+                  key={chord}
+                  onClick={() => handleChordFilter(chord)}
+                  className={cn(
+                    "h-8 rounded-md text-sm font-semibold transition-colors",
+                    selectedChord === chord
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                  )}
+                >
+                  {chord}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {selectedChord && (
+            <p className="text-sm text-gray-600">
+              Showing {filteredSongs.length} songs in key <strong>{selectedChord}</strong>
+            </p>
+          )}
         </div>
       </div>
 
@@ -183,6 +267,12 @@ export function SongListView() {
                     />
                     <div className="flex-1 text-left">
                       <h3 className="text-lg font-medium">{song.title}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-gray-500">{song.artist}</p>
+                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                          {song.base_chord}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -195,7 +285,12 @@ export function SongListView() {
                   >
                     <div className="flex-1 text-left">
                       <h3 className="text-lg font-medium">{song.title}</h3>
-                      <p className="text-gray-500">{song.artist}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="text-gray-500">{song.artist}</p>
+                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                          {song.base_chord}
+                        </span>
+                      </div>
                     </div>
                     <ChevronRight className="h-5 w-5 text-gray-400" />
                   </Button>

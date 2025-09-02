@@ -2,9 +2,11 @@ import { Song } from './song'
 
 export interface Playlist {
   id: string;
-  name: string;
-  songCount: number;
+  name?: string;
+  playlist_name?: string;
+  songCount?: number;
   songs?: Song[]; // Array of full song objects
+  playlist_notes?: Array<{song_id: number, base_chord: string}>; // Notes for each song
   created_at?: string;
   updated_at?: string;
   access_type?: string;

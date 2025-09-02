@@ -266,6 +266,29 @@ export class PlaylistService {
     }
   }
 
+  async addSongToPlaylistWithChord(playlistId: string, songId: number, baseChord: string): Promise<void> {
+    try {
+      const response = await fetch(`${BASE_URL}/playlists/${playlistId}/songs/${songId}`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ base_chord: baseChord }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to add song to playlist: ${response.status} - ${errorText}`)
+      }
+      
+      // Invalidate relevant caches
+      PlaylistService.clearCacheByPattern('getAllPlaylists')
+      PlaylistService.clearCacheByPattern(`getPlaylist:{"id":"${playlistId}"}`)
+      PlaylistService.clearCacheByPattern(`getPlaylistSongs:{"id":"${playlistId}"}`)
+    } catch (error) {
+      console.warn('Error adding song to playlist with chord:', error)
+      throw error
+    }
+  }
+
   async removeSongFromPlaylist(playlistId: string, songId: number): Promise<void> {
     try {
       const response = await fetch(`${BASE_URL}/playlists/${playlistId}/song/${songId}`, {
@@ -496,8 +519,10 @@ export class PlaylistService {
     return {
       id: playlist.id?.toString() || Math.random().toString(36).substr(2, 9),
       name: playlist.playlist_name || playlist.name || 'Untitled Playlist',
+      playlist_name: playlist.playlist_name,
       songCount,
       songs,
+      playlist_notes: playlist.playlist_notes,
       created_at: playlist.createdAt || playlist.created_at,
       updated_at: playlist.updatedAt || playlist.updated_at,
       access_type: playlist.access_type,
