@@ -8,6 +8,8 @@ import { Song } from '@/types/song'
 import { Playlist } from '@/types/playlist'
 import { playlistService } from '@/services/playlist-service'
 import { toast } from 'sonner'
+import { KEYS } from '@/lib/transpose-utils'
+import { cn } from '@/lib/utils'
 
 interface PlaylistDialogProps {
   open: boolean
@@ -22,12 +24,15 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
   const [selectedPlaylists, setSelectedPlaylists] = useState<Set<string>>(new Set())
   const [newPlaylistName, setNewPlaylistName] = useState('')
   const [showNewPlaylistInput, setShowNewPlaylistInput] = useState(false)
+  const [selectedChord, setSelectedChord] = useState<string>('')
 
   useEffect(() => {
     if (open) {
       loadPlaylists()
+      // Initialize selected chord to song's base chord or default to 'C'
+      setSelectedChord(song?.base_chord || 'C')
     }
-  }, [open])
+  }, [open, song])
 
   const loadPlaylists = async () => {
     try {
@@ -72,10 +77,10 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
       const selectedPlaylistIds = Array.from(selectedPlaylists)
       
       for (const playlistId of selectedPlaylistIds) {
-        await playlistService.addSongsToPlaylist(playlistId, [songId])
+        await playlistService.addSongToPlaylistWithChord(playlistId, songId, selectedChord)
       }
       
-      toast.success(`Song added to ${selectedPlaylistIds.length} playlist(s)`, {
+      toast.success(`Song added to ${selectedPlaylistIds.length} playlist(s) with chord ${selectedChord}`, {
         action: {
           label: 'x',
           onClick: () => toast.dismiss()
@@ -87,6 +92,7 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
       
       // Reset state
       setSelectedPlaylists(new Set())
+      setSelectedChord('')
       onOpenChange(false)
     } catch (err) {
       toast.error('Failed to add song to playlist', {
@@ -137,7 +143,7 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
     }
   }
 
-  const canAddToExistingPlaylists = selectedPlaylists.size > 0
+  const canAddToExistingPlaylists = selectedPlaylists.size > 0 && selectedChord.trim() !== ''
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -154,8 +160,36 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
             <div className="bg-gray-50 rounded-lg p-3">
               <h3 className="font-medium text-gray-900">{song.title}</h3>
               <p className="text-sm text-gray-600">{song.artist}</p>
+              <p className="text-xs text-gray-500 mt-1">Original Key: {song.base_chord}</p>
             </div>
           )}
+
+          {/* Chord Selector */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-gray-900">Choose base chord for playlist:</h4>
+            <div className="grid grid-cols-6 gap-2">
+              {KEYS.map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedChord(key)}
+                  className={cn(
+                    "h-8 w-8 rounded-lg text-sm font-semibold transition-colors",
+                    selectedChord === key 
+                      ? "bg-blue-500 text-white" 
+                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                  )}
+                >
+                  {key}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500">
+              Selected chord: <strong>{selectedChord}</strong> 
+              {selectedChord !== song?.base_chord && song?.base_chord && (
+                <span> (transposed from {song.base_chord})</span>
+              )}
+            </p>
+          </div>
 
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-gray-900">Select existing playlists:</h4>

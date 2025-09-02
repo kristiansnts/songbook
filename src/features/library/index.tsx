@@ -1,6 +1,7 @@
 import { Search, List, User, Plus, Music, Users, ChevronRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
   DialogContent,
@@ -14,9 +15,11 @@ import { useEffect, useState } from 'react'
 import { playlistService } from '@/services/playlist-service'
 import { Playlist } from '@/types/playlist'
 import { toast } from 'sonner'
+import { useAuth } from '@/lib/auth'
 
 export default function Library() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [playlists, setPlaylists] = useState<Playlist[]>([])
   const [playlistsLoading, setPlaylistsLoading] = useState(true)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -101,6 +104,10 @@ export default function Library() {
     { id: 1, name: 'My Team' },
   ]
 
+  // Check if user is a verified member (peserta with verifikasi = '1')
+  // Don't show badge for owned playlists - only for shared/joined playlists
+  const isVerifiedMember = user?.userType === 'peserta' && user?.verifikasi === '1'
+
   return (
     <div className="container mx-auto px-4 py-6">
       <header className="flex justify-between items-center mb-6">
@@ -182,6 +189,11 @@ export default function Library() {
                   </div>
                   <div className="flex items-center">
                     <span className="text-gray-500 mr-2">{playlist.songCount}</span>
+                    {isVerifiedMember && playlist.access_type !== 'owner' && (
+                      <Badge className="bg-blue-500 text-white hover:bg-blue-600 mr-2">
+                        Member
+                      </Badge>
+                    )}
                     <ChevronRight className="h-5 w-5 text-gray-400" />
                   </div>
                 </Button>
@@ -194,31 +206,6 @@ export default function Library() {
             >
               <Plus className="text-gray-600 mr-4 h-6 w-6" />
               <span className="text-lg">New playlist</span>
-            </Button>
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            Playlist Teams
-          </h2>
-          <div className="space-y-1">
-            {teams.map((team) => (
-              <Button
-                key={team.id}
-                variant="ghost"
-                className="w-full justify-start p-3 h-auto"
-              >
-                <Users className="text-gray-600 mr-4 h-6 w-6" />
-                <span className="text-lg">{team.name}</span>
-              </Button>
-            ))}
-            <Button
-              variant="ghost"
-              className="w-full justify-start p-3 h-auto"
-            >
-              <Plus className="text-gray-600 mr-4 h-6 w-6" />
-              <span className="text-lg">New team</span>
             </Button>
           </div>
         </section>

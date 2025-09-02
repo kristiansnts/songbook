@@ -51,7 +51,19 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     try {
       const result = await login(data.email, data.password)
       if (result.success) {
-        if (result.isApprovedMember) {
+        // Check if there's a saved playlist sharetoken
+        const savedShareToken = localStorage.getItem('pending_playlist_join')
+        
+        if (savedShareToken) {
+          // Redirect to the playlist join page
+          toast.success('Login successful! Redirecting to playlist...', {
+            action: {
+              label: 'x',
+              onClick: () => toast.dismiss()
+            }
+          })
+          navigate({ to: `/playlist/join/${savedShareToken}` })
+        } else if (result.isApprovedMember) {
           // Redirect approved members to approve page
           toast.success('Welcome! You have been approved.', {
             action: {

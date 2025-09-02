@@ -1,18 +1,47 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { playlistService } from '@/services/playlist-service'
 import { Playlist } from '@/types/playlist'
 import { Song } from '@/types/song'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { KEYS, transposeStoredChords } from '@/lib/transpose-utils'
+import { cn } from '@/lib/utils'
 
 export const Route = createFileRoute('/_authenticated/user/playlist/view/$id')({
   component: PlaylistViewerComponent,
 })
 
-// Component to render individual song content
-function SongContent({ song, index }: { song: Song; index: number }) {
+// Component to render individual song content with transpose functionality
+function SongContent({ 
+  song, 
+  index, 
+  defaultKey 
+}: { 
+  song: Song; 
+  index: number;
+  defaultKey?: string;
+}) {
+  const [selectedKey, setSelectedKey] = useState(defaultKey || song.base_chord || 'C');
+
+  // Update selected key when defaultKey changes (from playlist_notes)
+  useEffect(() => {
+    if (defaultKey) {
+      setSelectedKey(defaultKey);
+    }
+  }, [defaultKey]);
+
+  const memoizedTransposedContent = useCallback(() => {
+    if (!song.lyrics_and_chords) return '';
+    
+    return transposeStoredChords(
+      song.lyrics_and_chords, 
+      song.base_chord || 'C', 
+      selectedKey
+    );
+  }, [song.lyrics_and_chords, song.base_chord, selectedKey]);
+
   return (
     <div className="bg-white rounded-lg border p-6 mb-6">
       {/* Song Header */}
@@ -26,17 +55,39 @@ function SongContent({ song, index }: { song: Song; index: number }) {
             <p className="text-gray-600">{song.artist}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm text-gray-500">
-          <span>Key: <strong className="text-gray-700">{song.base_chord}</strong></span>
+        <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+          <span>Original Key: <strong className="text-gray-700">{song.base_chord}</strong></span>
+          {defaultKey && defaultKey !== song.base_chord && (
+            <span>Playlist Key: <strong className="text-blue-600">{defaultKey}</strong></span>
+          )}
+        </div>
+
+        {/* Key Selector Grid */}
+        <div className="grid grid-cols-6 gap-2 max-w-xs">
+          {KEYS.map((key) => (
+            <button
+              key={key}
+              onClick={() => setSelectedKey(key)}
+              className={cn(
+                "h-8 w-8 rounded-lg text-sm font-semibold transition-colors",
+                selectedKey === key 
+                  ? "bg-blue-500 text-white" 
+                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+              )}
+            >
+              {key}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* Song Lyrics and Chords */}
       <div className="lyrics-content">
-        {song.lyrics_and_chords ? (
+        {song.lyrics_and_chords && song.lyrics_and_chords.trim() !== '' ? (
           <div 
-            className="whitespace-pre-wrap font-mono text-sm leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: song.lyrics_and_chords }}
+            key={selectedKey}
+            className="prose-sm max-w-none text-sm md:text-base leading-normal"
+            dangerouslySetInnerHTML={{ __html: memoizedTransposedContent() }}
           />
         ) : (
           <p className="text-gray-500 italic">No lyrics available</p>
@@ -51,32 +102,34 @@ function PlaylistViewerComponent() {
   const navigate = useNavigate()
   const [playlist, setPlaylist] = useState<Playlist | null>(null)
   const [songs, setSongs] = useState<Song[]>([])
+  const [playlistNotes, setPlaylistNotes] = useState<Array<{song_id: number, base_chord: string}>>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadPlaylistData()
-  }, [id])
-
-  const loadPlaylistData = async () => {
+  const loadPlaylistData = useCallback(async () => {
     try {
       setLoading(true)
       const playlistData = await playlistService.getPlaylist(id)
       setPlaylist(playlistData)
       setSongs(playlistData.songs || [])
-    } catch (error) {
-      console.error('Error loading playlist data:', error)
+      setPlaylistNotes(playlistData.playlist_notes || [])
+    } catch (_error) {
       toast.error('Failed to load playlist', {
         action: {
           label: 'x',
           onClick: () => toast.dismiss()
         }
       })
-      setPlaylist({ id, name: 'Playlist Not Found', songCount: 0 })
+      setPlaylist({ id: 'error', playlist_name: 'Playlist Not Found' } as Playlist)
       setSongs([])
+      setPlaylistNotes([])
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
+
+  useEffect(() => {
+    loadPlaylistData()
+  }, [loadPlaylistData])
 
   const handleBackToPlaylist = () => {
     navigate({ to: '/user/playlist/$id', params: { id } })
@@ -112,6 +165,12 @@ function PlaylistViewerComponent() {
     )
   }
 
+  // Function to get default key for a song from playlist notes
+  const getDefaultKeyForSong = (songId: number): string | undefined => {
+    const note = playlistNotes.find(note => note.song_id === songId);
+    return note?.base_chord;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -127,7 +186,7 @@ function PlaylistViewerComponent() {
               <ChevronLeft className="h-6 w-6" />
             </Button>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">{playlist.name}</h1>
+              <h1 className="text-lg font-semibold text-gray-900">{playlist.playlist_name || playlist.name}</h1>
               <p className="text-sm text-gray-500">
                 {songs.length} {songs.length === 1 ? 'song' : 'songs'}
               </p>
@@ -140,7 +199,12 @@ function PlaylistViewerComponent() {
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-4xl mx-auto">
           {songs.map((song, index) => (
-            <SongContent key={song.id} song={song} index={index} />
+            <SongContent 
+              key={song.id} 
+              song={song} 
+              index={index} 
+              defaultKey={getDefaultKeyForSong(song.id)}
+            />
           ))}
         </div>
       </div>

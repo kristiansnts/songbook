@@ -266,6 +266,29 @@ export class PlaylistService {
     }
   }
 
+  async addSongToPlaylistWithChord(playlistId: string, songId: number, baseChord: string): Promise<void> {
+    try {
+      const response = await fetch(`${BASE_URL}/playlists/${playlistId}/songs/${songId}`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ base_chord: baseChord }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to add song to playlist: ${response.status} - ${errorText}`)
+      }
+      
+      // Invalidate relevant caches
+      PlaylistService.clearCacheByPattern('getAllPlaylists')
+      PlaylistService.clearCacheByPattern(`getPlaylist:{"id":"${playlistId}"}`)
+      PlaylistService.clearCacheByPattern(`getPlaylistSongs:{"id":"${playlistId}"}`)
+    } catch (error) {
+      console.warn('Error adding song to playlist with chord:', error)
+      throw error
+    }
+  }
+
   async removeSongFromPlaylist(playlistId: string, songId: number): Promise<void> {
     try {
       const response = await fetch(`${BASE_URL}/playlists/${playlistId}/song/${songId}`, {
@@ -316,6 +339,152 @@ export class PlaylistService {
     }
   }
 
+  async joinPlaylist(shareToken: string): Promise<void> {
+    const token = this.getAuthToken()
+    
+    if (!token) {
+      throw new Error('AUTHENTICATION_REQUIRED')
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/playlists/join/${shareToken}`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: '',
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        
+        // Check if user is the owner of the playlist
+        if (response.status === 409 || errorText.includes('owner')) {
+          throw new Error('PLAYLIST_OWNER')
+        }
+        
+        throw new Error(`Failed to join playlist: ${response.status} - ${errorText}`)
+      }
+      
+      // Invalidate all playlists cache to refresh with newly joined playlist
+      PlaylistService.clearCacheByPattern('getAllPlaylists')
+    } catch (error) {
+      console.warn('Error joining playlist:', error)
+      throw error
+    }
+  }
+
+  async getPlaylistTeams(): Promise<any[]> {
+    const cacheKey = PlaylistService.getCacheKey('getPlaylistTeams')
+    
+    // Try cache first
+    const cachedResult = PlaylistService.getFromCache<any[]>(cacheKey)
+    if (cachedResult) {
+      return cachedResult
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/playlist-teams`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch playlist teams: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.code === 200 && Array.isArray(result.data)) {
+        // Cache the result
+        PlaylistService.setCache(cacheKey, result.data)
+        return result.data
+      }
+      
+      throw new Error(`Invalid response format: ${JSON.stringify(result)}`)
+    } catch (error) {
+      console.warn('Error fetching playlist teams:', error)
+      // Return empty array on error to avoid breaking the UI
+      return []
+    }
+  }
+
+  async getPlaylistTeamDetails(teamId: string): Promise<any> {
+    const cacheKey = PlaylistService.getCacheKey('getPlaylistTeamDetails', { teamId })
+    
+    // Try cache first
+    const cachedResult = PlaylistService.getFromCache<any>(cacheKey)
+    if (cachedResult) {
+      return cachedResult
+    }
+
+    try {
+      const response = await fetch(`${BASE_URL}/playlist-teams/${teamId}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders(),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to fetch playlist team details: ${response.status} - ${errorText}`)
+      }
+
+      const result = await response.json()
+      
+      if (result.code === 200 && result.data) {
+        // Cache the result
+        PlaylistService.setCache(cacheKey, result.data)
+        return result.data
+      }
+      
+      throw new Error(`Invalid response format: ${JSON.stringify(result)}`)
+    } catch (error) {
+      console.warn('Error fetching playlist team details:', error)
+      return null
+    }
+  }
+
+  async removeMemberFromPlaylist(teamId: string, memberId: number): Promise<void> {
+    try {
+      const response = await fetch(`${BASE_URL}/playlist-teams/${teamId}/members/${memberId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to remove member: ${response.status} - ${errorText}`)
+      }
+      
+      // Invalidate playlist teams cache
+      PlaylistService.clearCacheByPattern('getPlaylistTeams')
+      PlaylistService.clearCacheByPattern('getPlaylistTeamDetails')
+    } catch (error) {
+      console.warn('Error removing member from playlist:', error)
+      throw error
+    }
+  }
+
+  async deletePlaylistTeam(teamId: string): Promise<void> {
+    try {
+      const response = await fetch(`${BASE_URL}/playlist-teams/${teamId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders(),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to delete team: ${response.status} - ${errorText}`)
+      }
+      
+      // Invalidate relevant caches
+      PlaylistService.clearCacheByPattern('getPlaylistTeams')
+      PlaylistService.clearCacheByPattern('getPlaylistTeamDetails')
+    } catch (error) {
+      console.warn('Error deleting playlist team:', error)
+      throw error
+    }
+  }
+
   private transformPlaylistData(playlist: any, _allSongs: any[]): Playlist {
     // Handle songs array - can be full song objects or just IDs
     let songCount = 0
@@ -350,8 +519,10 @@ export class PlaylistService {
     return {
       id: playlist.id?.toString() || Math.random().toString(36).substr(2, 9),
       name: playlist.playlist_name || playlist.name || 'Untitled Playlist',
+      playlist_name: playlist.playlist_name,
       songCount,
       songs,
+      playlist_notes: playlist.playlist_notes,
       created_at: playlist.createdAt || playlist.created_at,
       updated_at: playlist.updatedAt || playlist.updated_at,
       access_type: playlist.access_type,
@@ -359,6 +530,7 @@ export class PlaylistService {
       share_token: playlist.share_token,
       is_shared: playlist.is_shared,
       is_locked: playlist.is_locked,
+      playlist_team_id: playlist.playlist_team_id,
     }
   }
 
