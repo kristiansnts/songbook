@@ -51,7 +51,12 @@ function PlaylistJoin() {
     setIsJoining(true)
     try {
       await playlistService.joinPlaylist(sharetoken)
-      toast.success('Successfully joined the playlist!')
+      toast.success('Successfully joined the playlist!', {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      })
       
       // Redirect to user dashboard
       navigate({ to: '/user/dashboard' })
