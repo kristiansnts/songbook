@@ -39,7 +39,7 @@ export function SongViewer({ song }: SongViewerProps) {
       {/* Compact Header Section */}
       <div className="space-y-1">
         <h1 className="text-lg md:text-xl font-bold text-gray-900">{song.title}</h1>
-        <p className="text-sm md:text-base text-gray-600">{song.artist}</p>
+        <p className="text-sm md:text-base text-gray-600">{Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}</p>
       </div>
 
       {/* Compact Key Selector Grid */}

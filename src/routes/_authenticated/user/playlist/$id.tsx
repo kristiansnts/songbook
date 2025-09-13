@@ -22,7 +22,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ChevronLeft, Search, X, Loader2, Play, Share, Copy, Trash2, Users } from 'lucide-react'
+import { ChevronLeft, Search, X, Loader2, Play, Share, Copy, Trash2, Users, LogOut } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 
@@ -56,6 +56,8 @@ function PlaylistComponent() {
   const [deletingTeam, setDeletingTeam] = useState(false)
   const [removeMemberDialogOpen, setRemoveMemberDialogOpen] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<any>(null)
+  const [leavePlaylistDialogOpen, setLeavePlaylistDialogOpen] = useState(false)
+  const [leavingPlaylist, setLeavingPlaylist] = useState(false)
   
   useEffect(() => {
     loadPlaylistData()
@@ -246,6 +248,35 @@ function PlaylistComponent() {
     }
   }
 
+  const handleLeavePlaylist = async () => {
+    if (!playlist?.playlist_team_id) return
+
+    try {
+      setLeavingPlaylist(true)
+      await playlistService.leavePlaylist(playlist.playlist_team_id.toString())
+
+      toast.success('Left playlist successfully', {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      })
+
+      // Navigate back to dashboard
+      navigate({ to: '/user/dashboard' })
+    } catch (error) {
+      toast.error('Failed to leave playlist', {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      })
+    } finally {
+      setLeavingPlaylist(false)
+      setLeavePlaylistDialogOpen(false)
+    }
+  }
+
   const handleBackToLibrary = () => {
     navigate({ to: '/user/dashboard' })
   }
@@ -427,15 +458,29 @@ function PlaylistComponent() {
               {playlist.songCount} {playlist.songCount === 1 ? 'song' : 'songs'}
             </p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-2"
-            onClick={handleSharePlaylist}
-          >
-            <Share className="h-4 w-4" />
-            Share
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Leave Playlist Button - Only show for member users */}
+            {playlist?.access_type === 'member' && playlist?.playlist_team_id && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2 text-red-500 hover:text-red-700 border-red-200 hover:bg-red-50"
+                onClick={() => setLeavePlaylistDialogOpen(true)}
+              >
+                <LogOut className="h-4 w-4" />
+                Leave
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={handleSharePlaylist}
+            >
+              <Share className="h-4 w-4" />
+              Share
+            </Button>
+          </div>
 
           <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
             <DialogContent className="sm:max-w-md">
@@ -633,6 +678,35 @@ function PlaylistComponent() {
         </AlertDialogContent>
       </AlertDialog>
 
+      {/* Leave Playlist Confirmation Dialog */}
+      <AlertDialog open={leavePlaylistDialogOpen} onOpenChange={setLeavePlaylistDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave Playlist?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to leave "{playlist?.name}"? You will no longer have access to this playlist and its contents.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={leavingPlaylist}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleLeavePlaylist}
+              disabled={leavingPlaylist}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {leavingPlaylist ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Leaving...
+                </>
+              ) : (
+                'Leave Playlist'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -668,7 +742,7 @@ function PlaylistComponent() {
                   {song.title}
                 </h3>
                 <p className="text-sm text-gray-600 truncate">
-                  {song.artist}
+                  {Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}
                 </p>
               </div>
 
@@ -742,7 +816,7 @@ function PlaylistComponent() {
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Song from Playlist?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove "{songToRemove?.title}" by {songToRemove?.artist} from this playlist?
+              Are you sure you want to remove "{songToRemove?.title}" by {Array.isArray(songToRemove?.artist) ? songToRemove.artist.join(', ') : songToRemove?.artist} from this playlist?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

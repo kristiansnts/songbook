@@ -91,11 +91,6 @@ class ResourceRegistry {
               url: '/user/dashboard?section=playlist' as any,
               icon: IconPlaylist as any,
             },
-            {
-              title: 'Playlist Team',
-              url: '/user/dashboard?section=team' as any,
-              icon: IconUsers as any,
-            },
           ],
         },
         {
