@@ -117,6 +117,17 @@ export class PlaylistService {
     }
   }
 
+  async getOwnerPlaylists(filters?: PlaylistFilters): Promise<Playlist[]> {
+    try {
+      const allPlaylists = await this.getAllPlaylists(filters)
+      // Filter to only show playlists where the user is the owner
+      return allPlaylists.filter(playlist => playlist.access_type === 'owner')
+    } catch (error) {
+      console.warn('Error fetching owner playlists:', error)
+      throw error
+    }
+  }
+
   async getPlaylist(id: string): Promise<Playlist> {
     const cacheKey = PlaylistService.getCacheKey('getPlaylist', { id })
     

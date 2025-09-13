@@ -23,15 +23,18 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination } from '../components/data-table-pagination'
 import { DataTableToolbar } from '../components/data-table-toolbar'
+import { Song } from '../data/schema'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+  onBulkAddToPlaylist?: (songs: Song[]) => void
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onBulkAddToPlaylist,
 }: DataTableProps<TData, TValue>) {
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -65,7 +68,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className='space-y-4'>
-      <DataTableToolbar table={table} />
+      <DataTableToolbar table={table} onBulkAddToPlaylist={onBulkAddToPlaylist} />
       <div className='rounded-md border overflow-hidden'>
         <div className='overflow-x-auto'>
           <Table className='w-full table-fixed'>

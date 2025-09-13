@@ -672,20 +672,22 @@ function PlaylistComponent() {
                 </p>
               </div>
 
-              {/* Remove Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleRemoveSongClick(song)}
-                disabled={removingIds.has(song.id)}
-                className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100"
-              >
-                {removingIds.has(song.id) ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <X className="h-4 w-4" />
-                )}
-              </Button>
+              {/* Remove Button - Only show for playlist owners */}
+              {playlist?.access_type === 'owner' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRemoveSongClick(song)}
+                  disabled={removingIds.has(song.id)}
+                  className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100"
+                >
+                  {removingIds.has(song.id) ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <X className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
             </div>
           ))
         )}

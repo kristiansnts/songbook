@@ -7,18 +7,24 @@ import { Plus, Music, Loader2 } from 'lucide-react'
 import { Song } from '@/types/song'
 import { Playlist } from '@/types/playlist'
 import { playlistService } from '@/services/playlist-service'
+import { SongsService } from '@/features/songs/services/songs-service'
 import { toast } from 'sonner'
 import { KEYS } from '@/lib/transpose-utils'
 import { cn } from '@/lib/utils'
 
-interface PlaylistDialogProps {
+interface BulkPlaylistDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  song?: Song
+  songs: Song[]
   onAddToPlaylist: (playlistIds: string[], newPlaylistName?: string) => void
 }
 
-export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: PlaylistDialogProps) {
+export function BulkPlaylistDialog({ 
+  open, 
+  onOpenChange, 
+  songs, 
+  onAddToPlaylist 
+}: BulkPlaylistDialogProps) {
   const [playlists, setPlaylists] = useState<Playlist[]>([])
   const [loading, setLoading] = useState(false)
   const [selectedPlaylists, setSelectedPlaylists] = useState<Set<string>>(new Set())
@@ -30,11 +36,10 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
   useEffect(() => {
     if (open) {
       loadPlaylists()
-      // Initialize selected chord to song's base chord, but don't use custom chord by default
-      setSelectedChord(song?.base_chord || 'C')
-      setUseCustomChord(false) // Default to using original chord
+      setSelectedChord('') // No default chord - use original chords
+      setUseCustomChord(false) // Default to using original chords
     }
-  }, [open, song])
+  }, [open])
 
   const loadPlaylists = async () => {
     try {
@@ -73,20 +78,28 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
   }
 
   const handleAddToExistingPlaylists = async () => {
-    if (!song || selectedPlaylists.size === 0) return
+    if (!songs.length || selectedPlaylists.size === 0) return
     
     try {
       setLoading(true)
-      const songId = parseInt(song.id.toString(), 10)
+      const songIds = songs.map(song => song.id)
       const selectedPlaylistIds = Array.from(selectedPlaylists)
       
+      // Add songs to each selected playlist
       for (const playlistId of selectedPlaylistIds) {
-        const chordToUse = useCustomChord ? selectedChord : song?.base_chord || 'C'
-        await playlistService.addSongToPlaylistWithChord(playlistId, songId, chordToUse)
+        const success = await SongsService.addMultipleSongsToPlaylist(
+          songIds, 
+          playlistId, 
+          useCustomChord ? selectedChord : undefined // Only use custom chord if enabled
+        )
+        
+        if (!success) {
+          throw new Error(`Failed to add songs to playlist ${playlistId}`)
+        }
       }
       
-      const chordMessage = useCustomChord ? selectedChord : song?.base_chord || 'C'
-      toast.success(`Song added to ${selectedPlaylistIds.length} playlist(s) with chord ${chordMessage}`, {
+      const chordMessage = useCustomChord ? ` with chord ${selectedChord}` : ' with their original chords'
+      toast.success(`${songs.length} songs added to ${selectedPlaylistIds.length} playlist(s)${chordMessage}`, {
         action: {
           label: 'x',
           onClick: () => toast.dismiss()
@@ -102,7 +115,7 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
       setUseCustomChord(false)
       onOpenChange(false)
     } catch (err) {
-      toast.error('Failed to add song to playlist', {
+      toast.error('Failed to add songs to playlist', {
         action: {
           label: 'x',
           onClick: () => toast.dismiss()
@@ -160,18 +173,29 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Music className="h-5 w-5" />
-            Add to Playlist
+            Add {songs.length} Songs to Playlist
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
-          {song && (
-            <div className="bg-gray-50 rounded-lg p-3">
-              <h3 className="font-medium text-gray-900">{song.title}</h3>
-              <p className="text-sm text-gray-600">{song.artist}</p>
-              <p className="text-xs text-gray-500 mt-1">Original Key: {song.base_chord}</p>
+          {/* Selected Songs Summary */}
+          <div className="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto">
+            <div className="text-sm font-medium text-gray-900 mb-2">
+              Selected Songs ({songs.length}):
             </div>
-          )}
+            <div className="space-y-1">
+              {songs.slice(0, 3).map((song) => (
+                <div key={song.id} className="text-xs text-gray-600">
+                  • {song.title} - {song.artist}
+                </div>
+              ))}
+              {songs.length > 3 && (
+                <div className="text-xs text-gray-500 italic">
+                  ... and {songs.length - 3} more songs
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Chord Selector */}
           <div className="space-y-3">
@@ -181,11 +205,11 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
                 onCheckedChange={(checked) => {
                   setUseCustomChord(!!checked)
                   if (!checked) {
-                    setSelectedChord(song?.base_chord || 'C')
+                    setSelectedChord('')
                   }
                 }}
               />
-              <h4 className="text-sm font-medium text-gray-900">Override base chord</h4>
+              <h4 className="text-sm font-medium text-gray-900">Override base chord for all songs</h4>
             </div>
             
             {useCustomChord && (
@@ -206,18 +230,17 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500">
-                  Selected chord: <strong>{selectedChord}</strong> 
-                  {selectedChord !== song?.base_chord && song?.base_chord && (
-                    <span> (transposed from {song.base_chord})</span>
-                  )}
-                </p>
+                {selectedChord && (
+                  <p className="text-xs text-gray-500">
+                    Selected chord: <strong>{selectedChord}</strong> (will override all songs' original chords)
+                  </p>
+                )}
               </>
             )}
             
             {!useCustomChord && (
               <p className="text-xs text-gray-500">
-                Song will be added with its original chord: <strong>{song?.base_chord || 'C'}</strong>
+                Songs will be added with their original base chords
               </p>
             )}
           </div>

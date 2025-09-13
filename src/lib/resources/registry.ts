@@ -136,7 +136,7 @@ class ResourceRegistry {
     }
 
     // Merge static and resource-generated navigation
-    let mergedNavGroups = [...staticNavGroups]
+    const mergedNavGroups = [...staticNavGroups]
     
     // Only merge resource groups for pengurus users
     if (userType === 'pengurus') {

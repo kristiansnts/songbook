@@ -13,6 +13,7 @@ import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
 import { Route as ApprovedRouteImport } from './routes/approved'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedSongsTableRouteImport } from './routes/_authenticated/songs-table'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
@@ -59,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedSongsTableRoute = AuthenticatedSongsTableRouteImport.update({
+  id: '/songs-table',
+  path: '/songs-table',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/songs-table': typeof AuthenticatedSongsTableRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/playlist/$id': typeof AuthenticatedPlaylistIdRoute
   '/user/artist': typeof AuthenticatedUserArtistRouteWithChildren
@@ -253,6 +260,7 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/songs-table': typeof AuthenticatedSongsTableRoute
   '/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/playlist/$id': typeof AuthenticatedPlaylistIdRoute
   '/user/artist': typeof AuthenticatedUserArtistRouteWithChildren
@@ -286,6 +294,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/songs-table': typeof AuthenticatedSongsTableRoute
   '/_authenticated/admin/dashboard': typeof AuthenticatedAdminDashboardRoute
   '/_authenticated/playlist/$id': typeof AuthenticatedPlaylistIdRoute
   '/_authenticated/user/artist': typeof AuthenticatedUserArtistRouteWithChildren
@@ -320,6 +329,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/dashboard'
+    | '/songs-table'
     | '/admin/dashboard'
     | '/playlist/$id'
     | '/user/artist'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/500'
     | '/503'
     | '/dashboard'
+    | '/songs-table'
     | '/admin/dashboard'
     | '/playlist/$id'
     | '/user/artist'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/(errors)/500'
     | '/(errors)/503'
     | '/_authenticated/dashboard'
+    | '/_authenticated/songs-table'
     | '/_authenticated/admin/dashboard'
     | '/_authenticated/playlist/$id'
     | '/_authenticated/user/artist'
@@ -446,6 +458,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/songs-table': {
+      id: '/_authenticated/songs-table'
+      path: '/songs-table'
+      fullPath: '/songs-table'
+      preLoaderRoute: typeof AuthenticatedSongsTableRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
@@ -699,6 +718,7 @@ const AuthenticatedUserSongRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedSongsTableRoute: typeof AuthenticatedSongsTableRoute
   AuthenticatedPlaylistIdRoute: typeof AuthenticatedPlaylistIdRoute
   AuthenticatedUserArtistRoute: typeof AuthenticatedUserArtistRouteWithChildren
   AuthenticatedUserDashboardRoute: typeof AuthenticatedUserDashboardRoute
@@ -712,6 +732,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedSongsTableRoute: AuthenticatedSongsTableRoute,
   AuthenticatedPlaylistIdRoute: AuthenticatedPlaylistIdRoute,
   AuthenticatedUserArtistRoute: AuthenticatedUserArtistRouteWithChildren,
   AuthenticatedUserDashboardRoute: AuthenticatedUserDashboardRoute,
