@@ -486,12 +486,35 @@ export class PlaylistService {
         const errorText = await response.text()
         throw new Error(`Failed to delete team: ${response.status} - ${errorText}`)
       }
-      
+
       // Invalidate relevant caches
       PlaylistService.clearCacheByPattern('getPlaylistTeams')
       PlaylistService.clearCacheByPattern('getPlaylistTeamDetails')
     } catch (error) {
       console.warn('Error deleting playlist team:', error)
+      throw error
+    }
+  }
+
+  async leavePlaylist(teamId: string): Promise<void> {
+    try {
+      const response = await fetch(`${BASE_URL}/playlist-teams/${teamId}/leave`, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: '',
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to leave playlist: ${response.status} - ${errorText}`)
+      }
+
+      // Invalidate relevant caches
+      PlaylistService.clearCacheByPattern('getAllPlaylists')
+      PlaylistService.clearCacheByPattern('getPlaylistTeams')
+      PlaylistService.clearCacheByPattern('getPlaylistTeamDetails')
+    } catch (error) {
+      console.warn('Error leaving playlist:', error)
       throw error
     }
   }
@@ -546,10 +569,33 @@ export class PlaylistService {
   }
 
   private transformSongData(song: any): Song {
+    let artists: string[] = ['Unknown Artist']
+
+    if (song.artist) {
+      try {
+        // Try to parse as JSON array if it's a string
+        if (typeof song.artist === 'string') {
+          const parsed = JSON.parse(song.artist)
+          if (Array.isArray(parsed)) {
+            artists = parsed
+          } else {
+            artists = [song.artist]
+          }
+        } else if (Array.isArray(song.artist)) {
+          artists = song.artist
+        } else {
+          artists = [String(song.artist)]
+        }
+      } catch {
+        // If JSON parsing fails, treat as single artist
+        artists = [song.artist]
+      }
+    }
+
     return {
       id: song.id,
       title: song.title || 'Untitled',
-      artist: song.artist || 'Unknown Artist',
+      artist: artists,
       base_chord: song.base_chord || 'C',
       lyrics_and_chords: song.lyrics_and_chords || '',
       tag_names: Array.isArray(song.tags) ? song.tags.map((tag: any) => tag.name) : [],

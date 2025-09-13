@@ -186,7 +186,7 @@ export function BulkPlaylistDialog({
             <div className="space-y-1">
               {songs.slice(0, 3).map((song) => (
                 <div key={song.id} className="text-xs text-gray-600">
-                  • {song.title} - {song.artist}
+                  • {song.title} - {Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}
                 </div>
               ))}
               {songs.length > 3 && (

@@ -51,10 +51,10 @@ export class SongResource extends Resource<Song> {
           )
           .field('artist', field =>
             field
-              .label('Artist')
-              .type('text')
+              .label('Artists')
+              .type('tags')
               .required()
-              .placeholder('Enter artist name')
+              .placeholder('Enter artist names')
           )
           .field('base_chord', field =>
             field
@@ -154,13 +154,19 @@ export class SongResource extends Resource<Song> {
           .searchable()
           .sortable()
       )
-      .column('artist', col => 
+      .column('artist', col =>
         col
-          .label('Artist')
+          .label('Artists')
           .type('text')
           .accessor('artist')
           .searchable()
           .sortable()
+          .format((artists: string[]) => {
+            if (Array.isArray(artists)) {
+              return artists.join(', ')
+            }
+            return artists ? String(artists) : ''
+          })
       )
       .column('base_chord', col => 
         col
@@ -233,13 +239,19 @@ export class SongResource extends Resource<Song> {
           .searchable()
           .sortable()
       )
-      .column('artist', col => 
+      .column('artist', col =>
         col
-          .label('Artist')
+          .label('Artists')
           .type('text')
           .accessor('artist')
           .searchable()
           .sortable()
+          .format((artists: string[]) => {
+            if (Array.isArray(artists)) {
+              return artists.join(', ')
+            }
+            return artists ? String(artists) : ''
+          })
       )
       .column('base_chord', col => 
         col
@@ -300,16 +312,41 @@ export class SongResource extends Resource<Song> {
       
       if (result.code === 200 && Array.isArray(result.data)) {
         // Transform API data to match our Song interface
-        const songs = result.data.map((song: any) => ({
-          id: song.id,
-          title: song.title || 'Untitled',
-          artist: song.artist || 'Unknown Artist',
-          base_chord: song.base_chord || 'C',
-          lyrics_and_chords: song.lyrics_and_chords || '',
-          tag_names: Array.isArray(song.tags) ? song.tags.map((tag: any) => tag.name) : [],
-          created_at: song.createdAt,
-          updated_at: song.updatedAt,
-        }))
+        const songs = result.data.map((song: any) => {
+          let artists: string[] = ['Unknown Artist']
+
+          if (song.artist) {
+            try {
+              // Try to parse as JSON array if it's a string
+              if (typeof song.artist === 'string') {
+                const parsed = JSON.parse(song.artist)
+                if (Array.isArray(parsed)) {
+                  artists = parsed
+                } else {
+                  artists = [song.artist]
+                }
+              } else if (Array.isArray(song.artist)) {
+                artists = song.artist
+              } else {
+                artists = [String(song.artist)]
+              }
+            } catch {
+              // If JSON parsing fails, treat as single artist
+              artists = [song.artist]
+            }
+          }
+
+          return {
+            id: song.id,
+            title: song.title || 'Untitled',
+            artist: artists,
+            base_chord: song.base_chord || 'C',
+            lyrics_and_chords: song.lyrics_and_chords || '',
+            tag_names: Array.isArray(song.tags) ? song.tags.map((tag: any) => tag.name) : [],
+            created_at: song.createdAt,
+            updated_at: song.updatedAt,
+          }
+        })
 
         // Sort songs by title A-Z by default
         songs.sort((a: Song, b: Song) => a.title.localeCompare(b.title))
@@ -343,10 +380,33 @@ export class SongResource extends Resource<Song> {
       
       if (result.code === 200 && result.data) {
         const song = result.data
+        let artists: string[] = ['Unknown Artist']
+
+        if (song.artist) {
+          try {
+            // Try to parse as JSON array if it's a string
+            if (typeof song.artist === 'string') {
+              const parsed = JSON.parse(song.artist)
+              if (Array.isArray(parsed)) {
+                artists = parsed
+              } else {
+                artists = [song.artist]
+              }
+            } else if (Array.isArray(song.artist)) {
+              artists = song.artist
+            } else {
+              artists = [String(song.artist)]
+            }
+          } catch {
+            // If JSON parsing fails, treat as single artist
+            artists = [song.artist]
+          }
+        }
+
         return {
           id: song.id,
           title: song.title || 'Untitled',
-          artist: song.artist || 'Unknown Artist',
+          artist: artists,
           base_chord: song.base_chord || 'C',
           lyrics_and_chords: song.lyrics_and_chords || '',
           tag_names: Array.isArray(song.tags) ? song.tags.map((tag: any) => tag.name) : [],
@@ -385,11 +445,34 @@ export class SongResource extends Resource<Song> {
       }
 
       const result = await response.json()
-      
+
+      let artists: string[] = ['Unknown Artist']
+
+      if (result.artist) {
+        try {
+          // Try to parse as JSON array if it's a string
+          if (typeof result.artist === 'string') {
+            const parsed = JSON.parse(result.artist)
+            if (Array.isArray(parsed)) {
+              artists = parsed
+            } else {
+              artists = [result.artist]
+            }
+          } else if (Array.isArray(result.artist)) {
+            artists = result.artist
+          } else {
+            artists = [String(result.artist)]
+          }
+        } catch {
+          // If JSON parsing fails, treat as single artist
+          artists = [result.artist]
+        }
+      }
+
       return {
         id: result.id,
         title: result.title,
-        artist: result.artist,
+        artist: artists,
         base_chord: result.base_chord,
         lyrics_and_chords: result.lyrics_and_chords,
         tag_names: result.tag_names || [],
@@ -424,11 +507,34 @@ export class SongResource extends Resource<Song> {
       }
 
       const result = await response.json()
-      
+
+      let artists: string[] = ['Unknown Artist']
+
+      if (result.artist) {
+        try {
+          // Try to parse as JSON array if it's a string
+          if (typeof result.artist === 'string') {
+            const parsed = JSON.parse(result.artist)
+            if (Array.isArray(parsed)) {
+              artists = parsed
+            } else {
+              artists = [result.artist]
+            }
+          } else if (Array.isArray(result.artist)) {
+            artists = result.artist
+          } else {
+            artists = [String(result.artist)]
+          }
+        } catch {
+          // If JSON parsing fails, treat as single artist
+          artists = [result.artist]
+        }
+      }
+
       return {
         id: result.id,
         title: result.title,
-        artist: result.artist,
+        artist: artists,
         base_chord: result.base_chord,
         lyrics_and_chords: result.lyrics_and_chords,
         tag_names: result.tag_names || [],

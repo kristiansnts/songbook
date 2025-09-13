@@ -168,7 +168,7 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
           {song && (
             <div className="bg-gray-50 rounded-lg p-3">
               <h3 className="font-medium text-gray-900">{song.title}</h3>
-              <p className="text-sm text-gray-600">{song.artist}</p>
+              <p className="text-sm text-gray-600">{Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}</p>
               <p className="text-xs text-gray-500 mt-1">Original Key: {song.base_chord}</p>
             </div>
           )}

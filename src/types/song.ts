@@ -1,7 +1,7 @@
 export interface Song {
   id: number;
   title: string;
-  artist: string;
+  artist: string[];
   base_chord: string;
   lyrics_and_chords: string;
   tag_names: string[];
@@ -11,7 +11,7 @@ export interface Song {
 
 export interface CreateSongRequest {
   title: string;
-  artist: string;
+  artist: string[];
   base_chord: string;
   lyrics_and_chords: string;
   tag_names: string[];
