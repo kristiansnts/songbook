@@ -8,6 +8,8 @@ import { songService } from '@/services/songService'
 import { Song } from '@/types/song'
 import { KEYS } from '@/lib/transpose-utils'
 import { cn } from '@/lib/utils'
+import { BulkPlaylistDialog } from '@/components/bulk-playlist-dialog'
+import { toast } from 'sonner'
 
 export function SongListView() {
   const navigate = useNavigate()
@@ -20,6 +22,7 @@ export function SongListView() {
   const [isSelectMode, setIsSelectMode] = useState(false)
   const [selectedChord, setSelectedChord] = useState<string>('')
   const [showChordFilter, setShowChordFilter] = useState(false)
+  const [showBulkPlaylistDialog, setShowBulkPlaylistDialog] = useState(false)
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -102,9 +105,28 @@ export function SongListView() {
   }
 
   const handleAddToPlaylist = () => {
-    // Handle add to playlist action
-    // TODO: Implement playlist functionality
+    if (selectedSongs.size === 0) return
+    setShowBulkPlaylistDialog(true)
   }
+
+  const handleBulkPlaylistComplete = (playlistIds: string[], newPlaylistName?: string) => {
+    // Clear selection after successful addition
+    setSelectedSongs(new Set())
+    setIsSelectMode(false)
+    
+    toast.success(
+      `Songs successfully added to ${playlistIds.length} playlist(s)${newPlaylistName ? ` including "${newPlaylistName}"` : ''}`,
+      {
+        action: {
+          label: 'x',
+          onClick: () => toast.dismiss()
+        }
+      }
+    )
+  }
+
+  // Get selected song objects for the dialog
+  const selectedSongObjects = filteredSongs.filter(song => selectedSongs.has(song.id))
 
   const handleChordFilter = (chord: string) => {
     if (selectedChord === chord) {
@@ -321,6 +343,14 @@ export function SongListView() {
           </div>
         </div>
       )}
+
+      {/* Bulk Playlist Dialog */}
+      <BulkPlaylistDialog
+        open={showBulkPlaylistDialog}
+        onOpenChange={setShowBulkPlaylistDialog}
+        songs={selectedSongObjects}
+        onAddToPlaylist={handleBulkPlaylistComplete}
+      />
     </div>
   )
 }

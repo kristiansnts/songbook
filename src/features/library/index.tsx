@@ -16,6 +16,7 @@ import { playlistService } from '@/services/playlist-service'
 import { Playlist } from '@/types/playlist'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/auth'
+import { SongsService } from '@/features/songs/services/songs-service'
 
 export default function Library() {
   const navigate = useNavigate()
@@ -25,15 +26,27 @@ export default function Library() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [playlistName, setPlaylistName] = useState('')
   const [creating, setCreating] = useState(false)
+  const [songCount, setSongCount] = useState(0)
   
   const songs = [
-    { id: 1, type: 'all', label: 'All songs', count: 2, icon: List },
+    { id: 1, type: 'all', label: 'All songs', count: songCount, icon: List },
     { id: 2, type: 'artists', label: 'Artists', icon: User },
   ]
 
   useEffect(() => {
     loadPlaylists()
+    loadSongCount()
   }, [])
+
+  const loadSongCount = () => {
+    try {
+      const allSongs = SongsService.getSongs()
+      setSongCount(allSongs.length)
+    } catch (error) {
+      console.error('Error loading song count:', error)
+      setSongCount(0)
+    }
+  }
 
   const loadPlaylists = async () => {
     try {
@@ -64,6 +77,8 @@ export default function Library() {
       
       // Reload playlists to show the new one
       await loadPlaylists()
+      // Also refresh song count in case it changed
+      loadSongCount()
       
       toast.success('Playlist created successfully', {
         action: {

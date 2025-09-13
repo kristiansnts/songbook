@@ -300,7 +300,7 @@ export class SongResource extends Resource<Song> {
       
       if (result.code === 200 && Array.isArray(result.data)) {
         // Transform API data to match our Song interface
-        let songs = result.data.map((song: any) => ({
+        const songs = result.data.map((song: any) => ({
           id: song.id,
           title: song.title || 'Untitled',
           artist: song.artist || 'Unknown Artist',
