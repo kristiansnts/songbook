@@ -60,25 +60,25 @@ export function SongListView() {
   const filteredSongs = songs
     .filter((song: Song) => {
       // First filter by artist if specified
-      if (search.artist && song.artist.toLowerCase() !== search.artist.toLowerCase()) {
+      if (search.artist && !song.artist.some(artist => artist.toLowerCase() === search.artist?.toLowerCase())) {
         return false
       }
-      
+
       // Filter by chord if specified
       if (selectedChord && song.base_chord !== selectedChord) {
         return false
       }
-      
+
       // Then filter by search term (title, artist, and lyrics)
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase()
         return (
           song.title.toLowerCase().includes(searchLower) ||
-          song.artist.toLowerCase().includes(searchLower) ||
+          song.artist.some(artist => artist.toLowerCase().includes(searchLower)) ||
           stripHtmlTags(song.lyrics_and_chords || '').toLowerCase().includes(searchLower)
         )
       }
-      
+
       return true
     })
     .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()))
@@ -290,7 +290,7 @@ export function SongListView() {
                     <div className="flex-1 text-left">
                       <h3 className="text-lg font-medium">{song.title}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-gray-500">{song.artist}</p>
+                        <p className="text-gray-500">{song.artist.join(', ')}</p>
                         <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
                           {song.base_chord}
                         </span>
@@ -308,7 +308,7 @@ export function SongListView() {
                     <div className="flex-1 text-left">
                       <h3 className="text-lg font-medium">{song.title}</h3>
                       <div className="flex items-center gap-2 mt-1">
-                        <p className="text-gray-500">{song.artist}</p>
+                        <p className="text-gray-500">{song.artist.join(', ')}</p>
                         <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
                           {song.base_chord}
                         </span>
