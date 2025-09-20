@@ -4,7 +4,7 @@ import { TableRenderer } from '@/components/builders'
 import { BasePage } from '@/lib/resources/pages/base-page'
 import { useState, useEffect, useCallback } from 'react'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
-import { Song, SongFilters } from '@/types/song'
+import { Song, SongFilters, PaginationMeta } from '@/types/song'
 import { TagService } from '@/services/tagService'
 
 const songResource = new SongResource()
@@ -15,7 +15,15 @@ function SongListPage() {
   const [tableConfig, setTableConfig] = useState<TableBuilderConfig<Song> | null>(null)
   const [configLoading, setConfigLoading] = useState(true)
   const [tagNameToIdMap, setTagNameToIdMap] = useState<Record<string, number>>({})
-  const [currentFilters, setCurrentFilters] = useState<SongFilters>({})
+  const [currentFilters, setCurrentFilters] = useState<SongFilters>({ page: 1, limit: 10 })
+  const [pagination, setPagination] = useState<PaginationMeta>({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+    hasNextPage: false,
+    hasPrevPage: false,
+  })
 
   // Load tag name to ID mapping
   useEffect(() => {
@@ -39,8 +47,9 @@ function SongListPage() {
   const loadData = useCallback(async (filters: SongFilters = {}) => {
     try {
       setLoading(true)
-      const songs = await songResource.getRecords(filters)
-      setData(songs)
+      const response = await songResource.getRecordsWithPagination(filters)
+      setData(response.data)
+      setPagination(response.pagination)
     } catch (error) {
       console.error('Error loading songs:', error)
       setData([])
@@ -105,6 +114,19 @@ function SongListPage() {
     loadData(currentFilters)
   }, [loadData, currentFilters])
 
+  // Pagination handlers
+  const handlePageChange = useCallback((page: number) => {
+    const newFilters = { ...currentFilters, page }
+    setCurrentFilters(newFilters)
+    loadData(newFilters)
+  }, [currentFilters, loadData])
+
+  const handlePageSizeChange = useCallback((pageSize: number) => {
+    const newFilters = { ...currentFilters, limit: pageSize, page: 1 }
+    setCurrentFilters(newFilters)
+    loadData(newFilters)
+  }, [currentFilters, loadData])
+
   // Conditional rendering after all hooks
   if (configLoading || !tableConfig) {
     return (
@@ -135,6 +157,16 @@ function SongListPage() {
     loading,
     onRefresh: refresh,
     onFilterChange: handleFilterChange, // Add filter change handler
+    serverSidePagination: {
+      currentPage: pagination.currentPage,
+      totalPages: pagination.totalPages,
+      totalItems: pagination.totalItems,
+      itemsPerPage: pagination.itemsPerPage,
+      hasNextPage: pagination.hasNextPage,
+      hasPrevPage: pagination.hasPrevPage,
+      onPageChange: handlePageChange,
+      onPageSizeChange: handlePageSizeChange,
+    },
     bulkActions: [
       ...(tableConfig.bulkActions || []),
       ...songResource.getBulkActions().map(action => ({

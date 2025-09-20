@@ -241,7 +241,10 @@ export function TableRenderer<T = any>({
       </div>
 
       {config.pagination && (
-        <DataTablePagination table={table} />
+        <DataTablePagination
+          table={table}
+          serverSidePagination={config.serverSidePagination}
+        />
       )}
     </div>
   )

@@ -8,10 +8,11 @@ type InputTagsProps = InputProps & {
   value: string[];
   onChange: Dispatch<SetStateAction<string[]>>;
   suggestions?: string[] | (() => Promise<string[]>);
+  autoAddOnKeys?: boolean;
 };
 
 export const InputTags = forwardRef<HTMLInputElement, InputTagsProps>(
-  ({ value, onChange, suggestions, ...props }, ref) => {
+  ({ value, onChange, suggestions, autoAddOnKeys = true, ...props }, ref) => {
     const [pendingDataPoint, setPendingDataPoint] = useState("");
     const [availableSuggestions, setAvailableSuggestions] = useState<string[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -122,7 +123,7 @@ export const InputTags = forwardRef<HTMLInputElement, InputTagsProps>(
                 if (e.key === "Enter") {
                   e.preventDefault();
                   addPendingDataPoint();
-                } else if (e.key === "," || e.key === " ") {
+                } else if (autoAddOnKeys && (e.key === "," || e.key === " ")) {
                   e.preventDefault();
                   addPendingDataPoint();
                 }

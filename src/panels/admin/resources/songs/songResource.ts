@@ -2,7 +2,7 @@ import { Resource } from '@/lib/resources/types'
 import { FormBuilder, TableBuilder } from '@/components/builders'
 import { FormBuilderConfig } from '@/lib/builders/form-builder'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
-import { Song, CreateSongRequest, UpdateSongRequest, SongFilters } from '@/types/song'
+import { Song, CreateSongRequest, UpdateSongRequest, SongFilters, SongListResponse, PaginationMeta } from '@/types/song'
 import { IconMusic } from '@tabler/icons-react'
 import { TagService } from '@/services/tagService'
 
@@ -55,6 +55,7 @@ export class SongResource extends Resource<Song> {
               .type('tags')
               .required()
               .placeholder('Enter artist names')
+              .autoAddOnKeys(false)
           )
           .field('base_chord', field =>
             field
@@ -282,10 +283,22 @@ export class SongResource extends Resource<Song> {
 
   // Data operations - fetch songs from API
   async getRecords(filters?: SongFilters): Promise<Song[]> {
+    const response = await this.getRecordsWithPagination(filters)
+    return response.data
+  }
+
+  // New method that returns both data and pagination
+  async getRecordsWithPagination(filters?: SongFilters): Promise<SongListResponse> {
     try {
       // Build URL with filter parameters
       const url = new URL('https://songbanks-v1-1.vercel.app/api/songs')
-      
+
+      // Add pagination parameters
+      const page = filters?.page || 1
+      const limit = filters?.limit || 10
+      url.searchParams.set('page', page.toString())
+      url.searchParams.set('limit', limit.toString())
+
       if (filters?.search && filters.search.trim()) {
         url.searchParams.set('search', filters.search.trim())
       }
@@ -305,11 +318,21 @@ export class SongResource extends Resource<Song> {
 
       if (!response.ok) {
         console.error(`API request failed with status: ${response.status}`)
-        return []
+        return {
+          data: [],
+          pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: 0,
+            itemsPerPage: limit,
+            hasNextPage: false,
+            hasPrevPage: false,
+          }
+        }
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200 && Array.isArray(result.data)) {
         // Transform API data to match our Song interface
         const songs = result.data.map((song: any) => {
@@ -348,17 +371,45 @@ export class SongResource extends Resource<Song> {
           }
         })
 
-        // Sort songs by title A-Z by default
-        songs.sort((a: Song, b: Song) => a.title.localeCompare(b.title))
-
-        return songs
+        // Return the response with pagination data
+        return {
+          data: songs,
+          pagination: result.pagination || {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: songs.length,
+            itemsPerPage: limit,
+            hasNextPage: false,
+            hasPrevPage: false,
+          }
+        }
       } else {
         console.error('Invalid API response format:', result)
-        return []
+        return {
+          data: [],
+          pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: 0,
+            itemsPerPage: limit,
+            hasNextPage: false,
+            hasPrevPage: false,
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching songs from API:', error)
-      return []
+      return {
+        data: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: 0,
+          itemsPerPage: filters?.limit || 10,
+          hasNextPage: false,
+          hasPrevPage: false,
+        }
+      }
     }
   }
 

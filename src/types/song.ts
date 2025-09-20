@@ -17,19 +17,35 @@ export interface CreateSongRequest {
   tag_names: string[];
 }
 
-export interface UpdateSongRequest extends CreateSongRequest {}
+export interface UpdateSongRequest extends CreateSongRequest {
+  id?: number;
+}
 
 export interface SongFilters {
   search?: string;
   base_chord?: string;
   tag_ids?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface SongListResponse {
   data: Song[];
-  meta?: {
-    total: number;
-    page: number;
-    per_page: number;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
   };
+}
+
+export interface PaginationMeta {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
 }
