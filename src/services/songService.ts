@@ -88,6 +88,12 @@ export class SongService {
       if (filters?.tag_ids) {
         url.searchParams.set('tag_ids', filters.tag_ids)
       }
+      if (filters?.page) {
+        url.searchParams.set('page', filters.page.toString())
+      }
+      if (filters?.limit) {
+        url.searchParams.set('limit', filters.limit.toString())
+      }
 
       const response = await fetch(url.toString(), {
         method: 'GET',
