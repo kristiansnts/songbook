@@ -140,6 +140,16 @@ export interface TableBuilderConfig<T = any> {
   pagination?: boolean
   pageSize?: number
   pageSizeOptions?: number[]
+  serverSidePagination?: {
+    currentPage: number
+    totalPages: number
+    totalItems: number
+    itemsPerPage: number
+    hasNextPage: boolean
+    hasPrevPage: boolean
+    onPageChange: (page: number) => void
+    onPageSizeChange: (pageSize: number) => void
+  }
   defaultSort?: {
     column: string
     direction: 'asc' | 'desc'

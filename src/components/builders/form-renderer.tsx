@@ -391,6 +391,7 @@ function FieldInput({ field, formField }: { field: FieldConfig; formField: any }
           placeholder={field.placeholder}
           disabled={field.disabled}
           suggestions={tagsField.suggestions}
+          autoAddOnKeys={tagsField.autoAddOnKeys}
         />
       )
     

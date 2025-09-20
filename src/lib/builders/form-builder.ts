@@ -74,6 +74,7 @@ export interface DateFieldConfig extends BaseFieldConfig {
 export interface TagsFieldConfig extends BaseFieldConfig {
   type: 'tags'
   suggestions?: string[] | (() => Promise<string[]>)
+  autoAddOnKeys?: boolean // Control whether space and comma trigger auto-add
 }
 
 export type FieldConfig = 
@@ -356,6 +357,13 @@ export class FieldBuilder {
   suggestions(suggestions: string[] | (() => Promise<string[]>)): FieldBuilder {
     if (this.field.type === 'tags') {
       (this.field as TagsFieldConfig).suggestions = suggestions
+    }
+    return this
+  }
+
+  autoAddOnKeys(enabled: boolean = true): FieldBuilder {
+    if (this.field.type === 'tags') {
+      (this.field as TagsFieldConfig).autoAddOnKeys = enabled
     }
     return this
   }
