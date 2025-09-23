@@ -1,4 +1,4 @@
-import { Song, CreateSongRequest, UpdateSongRequest, SongFilters } from '@/types/song'
+import { Song, CreateSongRequest, UpdateSongRequest, SongFilters, SongListResponse } from '@/types/song'
 
 const BASE_URL = 'https://songbanks-v1-1.vercel.app/api'
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes in milliseconds
@@ -67,18 +67,18 @@ export class SongService {
     }
   }
 
-  async getAllSongs(filters?: SongFilters): Promise<Song[]> {
+  async getAllSongs(filters?: SongFilters): Promise<SongListResponse> {
     const cacheKey = SongService.getCacheKey('getAllSongs', filters)
-    
+
     // Try cache first
-    const cachedResult = SongService.getFromCache<Song[]>(cacheKey)
+    const cachedResult = SongService.getFromCache<SongListResponse>(cacheKey)
     if (cachedResult) {
       return cachedResult
     }
 
     try {
       const url = new URL(`${BASE_URL}/songs`)
-      
+
       if (filters?.search && filters.search.trim()) {
         url.searchParams.set('search', filters.search.trim())
       }
@@ -107,16 +107,31 @@ export class SongService {
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200 && Array.isArray(result.data)) {
         const songs = result.data.map(this.transformSongData)
-        
+
+        // Create pagination metadata from response
+        const pagination = {
+          currentPage: result.pagination?.currentPage || filters?.page || 1,
+          totalPages: result.pagination?.totalPages || 1,
+          totalItems: result.pagination?.totalItems || songs.length,
+          itemsPerPage: result.pagination?.itemsPerPage || filters?.limit || 10,
+          hasNextPage: result.pagination?.hasNextPage || false,
+          hasPrevPage: result.pagination?.hasPrevPage || false,
+        }
+
+        const response_data: SongListResponse = {
+          data: songs,
+          pagination
+        }
+
         // Cache the result
-        SongService.setCache(cacheKey, songs)
-        
-        return songs
+        SongService.setCache(cacheKey, response_data)
+
+        return response_data
       }
-      
+
       throw new Error(`Invalid response format: ${JSON.stringify(result)}`)
     } catch (error) {
       console.warn('Error fetching songs:', error)
@@ -240,13 +255,13 @@ export class SongService {
     }
   }
 
-  async searchSongs(query: string, baseChord?: string, tagIds?: string): Promise<Song[]> {
+  async searchSongs(query: string, baseChord?: string, tagIds?: string): Promise<SongListResponse> {
     const filters: SongFilters = {
       search: query,
       ...(baseChord && { base_chord: baseChord }),
       ...(tagIds && { tag_ids: tagIds }),
     }
-    
+
     return this.getAllSongs(filters)
   }
 

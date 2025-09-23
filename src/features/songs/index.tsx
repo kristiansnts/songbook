@@ -5,7 +5,7 @@ import { Search, ChevronLeft, ChevronRight, Filter, X } from 'lucide-react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { songService } from '@/services/songService'
-import { Song } from '@/types/song'
+import { Song, PaginationMeta } from '@/types/song'
 import { KEYS } from '@/lib/transpose-utils'
 import { cn } from '@/lib/utils'
 import { BulkPlaylistDialog } from '@/components/bulk-playlist-dialog'
@@ -15,6 +15,8 @@ export function SongListView() {
   const navigate = useNavigate()
   const search = useSearch({ from: '/_authenticated/user/song/' }) as { artist?: string }
   const [songs, setSongs] = useState<Song[]>([])
+  const [pagination, setPagination] = useState<PaginationMeta | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedSongs, setSelectedSongs] = useState<Set<number>>(new Set())
@@ -28,8 +30,16 @@ export function SongListView() {
     const fetchSongs = async () => {
       try {
         setIsLoading(true)
-        const data = await songService.getAllSongs()
-        setSongs(data)
+        const filters = {
+          page: currentPage,
+          limit: 20,
+          ...(searchTerm && { search: searchTerm }),
+          ...(selectedChord && { base_chord: selectedChord }),
+          ...(search.artist && { search: search.artist })
+        }
+        const response = await songService.getAllSongs(filters)
+        setSongs(response.data)
+        setPagination(response.pagination)
         setError(null)
       } catch (_err) {
         setError('Failed to load songs')
@@ -39,7 +49,7 @@ export function SongListView() {
     }
 
     fetchSongs()
-  }, [])
+  }, [currentPage, searchTerm, selectedChord, search.artist])
 
   const handleSongToggle = (songId: number) => {
     const newSelected = new Set(selectedSongs)
@@ -51,37 +61,24 @@ export function SongListView() {
     setSelectedSongs(newSelected)
   }
 
-  // Helper function to strip HTML tags from lyrics
-  const stripHtmlTags = (html: string) => {
-    return html.replace(/<[^>]*>/g, '').replace(/&[^;]+;/g, '')
+  // Since filtering is now done server-side, use songs directly
+  const filteredSongs = songs
+
+  const handlePrevPage = () => {
+    if (pagination?.hasPrevPage) {
+      setCurrentPage(prev => prev - 1)
+    }
   }
 
-  // Filter and sort songs based on search term, artist filter, and chord filter
-  const filteredSongs = songs
-    .filter((song: Song) => {
-      // First filter by artist if specified
-      if (search.artist && !song.artist.some(artist => artist.toLowerCase() === search.artist?.toLowerCase())) {
-        return false
-      }
+  const handleNextPage = () => {
+    if (pagination?.hasNextPage) {
+      setCurrentPage(prev => prev + 1)
+    }
+  }
 
-      // Filter by chord if specified
-      if (selectedChord && song.base_chord !== selectedChord) {
-        return false
-      }
-
-      // Then filter by search term (title, artist, and lyrics)
-      if (searchTerm) {
-        const searchLower = searchTerm.toLowerCase()
-        return (
-          song.title.toLowerCase().includes(searchLower) ||
-          song.artist.some(artist => artist.toLowerCase().includes(searchLower)) ||
-          stripHtmlTags(song.lyrics_and_chords || '').toLowerCase().includes(searchLower)
-        )
-      }
-
-      return true
-    })
-    .sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()))
+  const resetPagination = () => {
+    setCurrentPage(1)
+  }
 
   const handleSelectAll = () => {
     if (selectedSongs.size === filteredSongs.length) {
@@ -136,10 +133,22 @@ export function SongListView() {
       // Otherwise, set new chord filter
       setSelectedChord(chord)
     }
+    resetPagination()
   }
 
   const clearChordFilter = () => {
     setSelectedChord('')
+    resetPagination()
+  }
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    resetPagination()
+  }
+
+  const clearSearch = () => {
+    setSearchTerm('')
+    resetPagination()
   }
 
   const toggleChordFilter = () => {
@@ -191,8 +200,13 @@ export function SongListView() {
 
        <div className="px-4 py-6 bg-white">
           <h1 className="text-4xl font-bold">{search.artist || 'Songs'}</h1>
-          {search.artist && (
-            <p className="text-gray-500 mt-1">{filteredSongs.length} song{filteredSongs.length !== 1 ? 's' : ''}</p>
+          {pagination && (
+            <p className="text-gray-500 mt-1">
+              {pagination.totalItems} song{pagination.totalItems !== 1 ? 's' : ''} total
+              {pagination.totalPages > 1 && (
+                <span> • Page {pagination.currentPage} of {pagination.totalPages}</span>
+              )}
+            </p>
           )}
         </div>
 
@@ -205,11 +219,11 @@ export function SongListView() {
             placeholder="Search songs, artists, or lyrics"
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
           {searchTerm && (
             <button
-              onClick={() => setSearchTerm('')}
+              onClick={clearSearch}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 h-5 w-5 flex items-center justify-center"
             >
               <X className="h-4 w-4" />
@@ -267,9 +281,9 @@ export function SongListView() {
             </div>
           )}
 
-          {selectedChord && (
+          {selectedChord && pagination && (
             <p className="text-sm text-gray-600">
-              Showing {filteredSongs.length} songs in key <strong>{selectedChord}</strong>
+              Showing {pagination.totalItems} songs in key <strong>{selectedChord}</strong>
             </p>
           )}
         </div>
@@ -327,6 +341,37 @@ export function SongListView() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="flex justify-center items-center gap-4 py-4 border-t bg-white">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrevPage}
+              disabled={!pagination.hasPrevPage || isLoading}
+              className="flex items-center gap-2"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+
+            <span className="text-sm text-gray-600">
+              Page {pagination.currentPage} of {pagination.totalPages}
+            </span>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={!pagination.hasNextPage || isLoading}
+              className="flex items-center gap-2"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         )}
       </main>
