@@ -454,7 +454,7 @@ function PlaylistComponent() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold">{playlist.name}</h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-muted-foreground mt-1">
               {playlist.songCount} {playlist.songCount === 1 ? 'song' : 'songs'}
             </p>
           </div>
@@ -464,7 +464,7 @@ function PlaylistComponent() {
               <Button
                 variant="outline"
                 size="sm"
-                className="flex items-center gap-2 text-red-500 hover:text-red-700 border-red-200 hover:bg-red-50"
+                className="flex items-center gap-2 text-red-500 hover:text-red-700 border-red-200 hover:bg-red-100/50 dark:hover:bg-red-900/20"
                 onClick={() => setLeavePlaylistDialogOpen(true)}
               >
                 <LogOut className="h-4 w-4" />
@@ -554,18 +554,18 @@ function PlaylistComponent() {
           
           <div className="space-y-4">
             {loadingMembers ? (
-              <div className="text-center py-4 text-gray-500">
+              <div className="text-center py-4 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
                 Loading members...
               </div>
             ) : !teamDetails ? (
-              <div className="text-center py-4 text-gray-500">
+              <div className="text-center py-4 text-muted-foreground">
                 No team data found
               </div>
             ) : (
               <div className="space-y-3">
                 {(!teamDetails.members || teamDetails.members.length === 0) ? (
-                  <div className="text-center py-4 text-gray-500">
+                  <div className="text-center py-4 text-muted-foreground">
                     No members in this playlist
                   </div>
                 ) : (
@@ -573,7 +573,7 @@ function PlaylistComponent() {
                     <div key={`member-${member.id}-${index}`} className="flex items-center justify-between p-3 rounded-lg border">
                       <div className="flex-1">
                         <div className="font-medium">{member.nama || member.name || 'No name'}</div>
-                        <div className="text-sm text-gray-500">{member.email || 'No email'}</div>
+                        <div className="text-sm text-muted-foreground">{member.email || 'No email'}</div>
                       </div>
                       
                       {/* Remove Member Button - Only show for playlist owners */}
@@ -583,7 +583,7 @@ function PlaylistComponent() {
                           size="sm"
                           onClick={() => handleRemoveMemberClick(member)}
                           disabled={removingMemberId === member.id}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                          className="text-red-500 hover:text-red-700 hover:bg-red-100/50 dark:hover:bg-red-900/20"
                         >
                           {removingMemberId === member.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -606,7 +606,7 @@ function PlaylistComponent() {
                 variant="outline"
                 size="sm"
                 onClick={() => setDeleteTeamDialogOpen(true)}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200"
+                className="text-red-500 hover:text-red-700 hover:bg-red-100/50 dark:hover:bg-red-900/20 border-red-200"
                 disabled={loadingMembers}
               >
                 <Trash2 className="h-4 w-4 mr-1" />
@@ -720,7 +720,7 @@ function PlaylistComponent() {
       {/* Songs List */}
       <div className="space-y-2">
         {songs.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             No songs in this playlist
           </div>
         ) : (
@@ -731,17 +731,17 @@ function PlaylistComponent() {
             >
               {/* Index */}
               <div className="w-8 text-center mr-4">
-                <span className="text-gray-500 text-sm">
+                <span className="text-muted-foreground text-sm">
                   {index + 1}
                 </span>
               </div>
 
               {/* Song Info - Only title and artist */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-gray-900 truncate">
+                <h3 className="font-medium text-foreground truncate">
                   {song.title}
                 </h3>
-                <p className="text-sm text-gray-600 truncate">
+                <p className="text-sm text-muted-foreground truncate">
                   {Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}
                 </p>
               </div>
@@ -753,7 +753,7 @@ function PlaylistComponent() {
                   size="sm"
                   onClick={() => handleRemoveSongClick(song)}
                   disabled={removingIds.has(song.id)}
-                  className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100"
+                  className="text-red-500 hover:text-red-700 hover:bg-red-100/50 dark:hover:bg-red-900/20"
                 >
                   {removingIds.has(song.id) ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -803,7 +803,7 @@ function PlaylistComponent() {
         {songs.length > 0 && (
           <Button
             onClick={handlePlayPlaylist}
-            className="w-12 h-12 rounded-full bg-black text-white hover:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-200"
+            className="w-12 h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-200"
           >
             <Play className="h-4 w-4 ml-0.5" />
           </Button>

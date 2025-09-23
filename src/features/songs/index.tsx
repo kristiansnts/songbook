@@ -158,7 +158,7 @@ export function SongListView() {
   return (
     <div className="flex flex-col h-screen">
       {/* Fixed Header */}
-      <header className="flex justify-between items-center px-4 py-4 border-b bg-white">
+      <header className="flex justify-between items-center px-4 py-4 border-b bg-background dark:bg-background">
         {!isSelectMode ? (
           <>
             <div className="flex items-center">
@@ -198,10 +198,10 @@ export function SongListView() {
         )}
       </header>
 
-       <div className="px-4 py-6 bg-white">
+       <div className="px-4 py-6 bg-background dark:bg-background">
           <h1 className="text-4xl font-bold">{search.artist || 'Songs'}</h1>
           {pagination && (
-            <p className="text-gray-500 mt-1">
+            <p className="text-muted-foreground mt-1">
               {pagination.totalItems} song{pagination.totalItems !== 1 ? 's' : ''} total
               {pagination.totalPages > 1 && (
                 <span> • Page {pagination.currentPage} of {pagination.totalPages}</span>
@@ -211,7 +211,7 @@ export function SongListView() {
         </div>
 
       {/* Fixed Search */}
-      <div className="px-4 py-4 bg-white border-b space-y-4">
+      <div className="px-4 py-4 bg-background dark:bg-background border-b space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
@@ -282,7 +282,7 @@ export function SongListView() {
           )}
 
           {selectedChord && pagination && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Showing {pagination.totalItems} songs in key <strong>{selectedChord}</strong>
             </p>
           )}
@@ -346,7 +346,7 @@ export function SongListView() {
 
         {/* Pagination Controls */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="flex justify-center items-center gap-4 py-4 border-t bg-white">
+          <div className="flex justify-center items-center gap-4 py-4 border-t bg-background dark:bg-background">
             <Button
               variant="outline"
               size="sm"
@@ -358,7 +358,7 @@ export function SongListView() {
               Previous
             </Button>
 
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-muted-foreground">
               Page {pagination.currentPage} of {pagination.totalPages}
             </span>
 
@@ -378,8 +378,8 @@ export function SongListView() {
 
       {/* Fixed Bottom Actions - only in select mode */}
       {isSelectMode && (
-        <div className="border-t bg-white px-4 py-4 pb-6 flex justify-between items-center sticky bottom-0 z-10">
-          <span className="text-gray-600">
+        <div className="border-t bg-background dark:bg-background px-4 py-4 pb-6 flex justify-between items-center sticky bottom-0 z-10">
+          <span className="text-muted-foreground">
             {selectedSongs.size} song{selectedSongs.size !== 1 ? 's' : ''} selected
           </span>
           <div className="flex space-x-3">

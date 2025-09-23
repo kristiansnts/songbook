@@ -41,7 +41,7 @@ export function ArtistView() {
   return (
     <div className="flex flex-col h-screen">
       {/* Fixed Header */}
-      <header className="flex justify-between items-center px-4 py-4 border-b bg-white">
+      <header className="flex justify-between items-center px-4 py-4 border-b bg-background dark:bg-background">
         <div className="flex items-center">
           <Button
             variant="ghost"
@@ -56,12 +56,12 @@ export function ArtistView() {
       </header>
 
       {/* Fixed Title */}
-      <div className="px-4 py-6 bg-white">
+      <div className="px-4 py-6 bg-background dark:bg-background">
         <h1 className="text-4xl font-bold">Artists</h1>
       </div>
 
       {/* Fixed Search */}
-      <div className="px-4 pb-4 bg-white border-b">
+      <div className="px-4 pb-4 bg-background dark:bg-background border-b">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
@@ -86,7 +86,7 @@ export function ArtistView() {
       <main className="flex-1 overflow-y-auto px-4 py-4">
         {isLoading ? (
           <div className="flex justify-center py-8">
-            <div className="text-gray-500">Loading artists...</div>
+            <div className="text-muted-foreground">Loading artists...</div>
           </div>
         ) : error ? (
           <div className="flex justify-center py-8">
@@ -104,10 +104,10 @@ export function ArtistView() {
                 }}
               >
                 <div className="flex items-center">
-                  <User className="text-gray-600 mr-4 h-6 w-6" />
+                  <User className="text-muted-foreground mr-4 h-6 w-6" />
                   <span className="text-lg">{artist.name}</span>
                 </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
+                <ChevronRight className="h-5 w-5 text-muted-foreground" />
               </Button>
             ))}
           </div>

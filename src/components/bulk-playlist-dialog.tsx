@@ -179,18 +179,18 @@ export function BulkPlaylistDialog({
         
         <div className="space-y-4">
           {/* Selected Songs Summary */}
-          <div className="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto">
-            <div className="text-sm font-medium text-gray-900 mb-2">
+          <div className="bg-muted rounded-lg p-3 max-h-32 overflow-y-auto">
+            <div className="text-sm font-medium text-foreground mb-2">
               Selected Songs ({songs.length}):
             </div>
             <div className="space-y-1">
               {songs.slice(0, 3).map((song) => (
-                <div key={song.id} className="text-xs text-gray-600">
+                <div key={song.id} className="text-xs text-muted-foreground">
                   • {song.title} - {Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}
                 </div>
               ))}
               {songs.length > 3 && (
-                <div className="text-xs text-gray-500 italic">
+                <div className="text-xs text-muted-foreground italic">
                   ... and {songs.length - 3} more songs
                 </div>
               )}
@@ -209,7 +209,7 @@ export function BulkPlaylistDialog({
                   }
                 }}
               />
-              <h4 className="text-sm font-medium text-gray-900">Override base chord for all songs</h4>
+              <h4 className="text-sm font-medium text-foreground">Override base chord for all songs</h4>
             </div>
             
             {useCustomChord && (
@@ -221,9 +221,9 @@ export function BulkPlaylistDialog({
                       onClick={() => setSelectedChord(key)}
                       className={cn(
                         "h-8 w-8 rounded-lg text-sm font-semibold transition-colors",
-                        selectedChord === key 
-                          ? "bg-blue-500 text-white" 
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        selectedChord === key
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-foreground hover:bg-muted/80"
                       )}
                     >
                       {key}
@@ -231,7 +231,7 @@ export function BulkPlaylistDialog({
                   ))}
                 </div>
                 {selectedChord && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     Selected chord: <strong>{selectedChord}</strong> (will override all songs' original chords)
                   </p>
                 )}
@@ -239,22 +239,22 @@ export function BulkPlaylistDialog({
             )}
             
             {!useCustomChord && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Songs will be added with their original base chords
               </p>
             )}
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-900">Select existing playlists:</h4>
+            <h4 className="text-sm font-medium text-foreground">Select existing playlists:</h4>
             
             {loading ? (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="ml-2 text-sm text-gray-500">Loading playlists...</span>
+                <span className="ml-2 text-sm text-muted-foreground">Loading playlists...</span>
               </div>
             ) : playlists.length === 0 ? (
-              <div className="text-sm text-gray-500 py-2">There are no playlists you own</div>
+              <div className="text-sm text-muted-foreground py-2">There are no playlists you own</div>
             ) : (
               playlists.map((playlist) => (
                 <div key={playlist.id} className="flex items-center space-x-3">
@@ -263,8 +263,8 @@ export function BulkPlaylistDialog({
                     onCheckedChange={() => handlePlaylistToggle(playlist.id)}
                   />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{playlist.name}</p>
-                    <p className="text-xs text-gray-500">{playlist.songCount} songs</p>
+                    <p className="text-sm font-medium text-foreground">{playlist.name}</p>
+                    <p className="text-xs text-muted-foreground">{playlist.songCount} songs</p>
                   </div>
                 </div>
               ))
@@ -304,7 +304,6 @@ export function BulkPlaylistDialog({
                     size="sm"
                     onClick={handleCreateNewPlaylist}
                     disabled={!newPlaylistName.trim() || loading}
-                    className="bg-black text-white hover:bg-gray-800 disabled:bg-gray-300"
                   >
                     {loading ? (
                       <>
@@ -331,7 +330,7 @@ export function BulkPlaylistDialog({
             <Button
               onClick={handleAddToExistingPlaylists}
               disabled={!canAddToExistingPlaylists || loading}
-              className="flex-1 bg-black text-white hover:bg-gray-800 disabled:bg-gray-300"
+              className="flex-1"
             >
               {loading ? (
                 <>
