@@ -66,9 +66,9 @@ const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
         asChild
         isActive={isActive}
         tooltip={item.title}
-        className={isActive 
-          ? "bg-blue-50 text-blue-700 font-medium " 
-          : "bg-white text-gray-700 hover:bg-gray-50"
+        className={isActive
+          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+          : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         }
       >
         <Link to={item.url} onClick={() => setOpenMobile(false)}>
