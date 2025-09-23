@@ -65,7 +65,7 @@ export default function Library() {
       )
 
       setSearchResults({
-        songs: songsResult,
+        songs: songsResult.data,
         artists: filteredArtists,
         tags: tagsResult
       })
@@ -79,8 +79,9 @@ export default function Library() {
 
   const loadSongCount = async () => {
     try {
-      const allSongs = await songService.getAllSongs({ limit: 1000 })
-      setSongCount(allSongs.length)
+      // Make minimal API call to get total count from pagination
+      const response = await songService.getAllSongs({ page: 1, limit: 1 })
+      setSongCount(response.pagination.totalItems)
     } catch (error) {
       console.error('Error loading song count:', error)
       setSongCount(0)

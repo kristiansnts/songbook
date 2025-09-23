@@ -196,6 +196,7 @@ export class SongService {
       
       // Invalidate relevant caches
       SongService.clearCacheByPattern('getAllSongs')
+      SongService.clearCacheByPattern('getSongCount')
       this.invalidateDashboardCache()
       
       return newSong
@@ -220,12 +221,13 @@ export class SongService {
 
       const result = await response.json()
       const updatedSong = this.transformSongData(result)
-      
+
       // Invalidate relevant caches
       SongService.clearCacheByPattern('getAllSongs')
+      SongService.clearCacheByPattern('getSongCount')
       SongService.clearCacheByPattern(`getSong:{"id":"${id}"}`)
       this.invalidateDashboardCache()
-      
+
       return updatedSong
     } catch (error) {
       console.warn('Error updating song:', error)
@@ -247,6 +249,7 @@ export class SongService {
       
       // Invalidate relevant caches
       SongService.clearCacheByPattern('getAllSongs')
+      SongService.clearCacheByPattern('getSongCount')
       SongService.clearCacheByPattern(`getSong:{"id":"${id}"}`)
       this.invalidateDashboardCache()
     } catch (error) {
@@ -263,6 +266,22 @@ export class SongService {
     }
 
     return this.getAllSongs(filters)
+  }
+
+  async getSongCount(filters?: Omit<SongFilters, 'page' | 'limit'>): Promise<number> {
+    try {
+      // Use the existing getAllSongs with minimal data to get totalItems from pagination
+      const response = await this.getAllSongs({
+        page: 1,
+        limit: 1,
+        ...filters
+      })
+
+      return response.pagination.totalItems
+    } catch (error) {
+      console.warn('Error fetching song count:', error)
+      throw error
+    }
   }
 
   private invalidateDashboardCache(): void {
