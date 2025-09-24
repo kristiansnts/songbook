@@ -53,7 +53,7 @@ function SongViewPage() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <div className="text-gray-500">Loading song...</div>
+        <div className="text-muted-foreground">Loading song...</div>
       </div>
     )
   }
@@ -61,7 +61,7 @@ function SongViewPage() {
   if (error || !song) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
-        <div className="text-red-500">{error || 'Song not found'}</div>
+        <div className="text-destructive">{error || 'Song not found'}</div>
         <Button onClick={() => navigate({ to: '/user/song' })}>
           Back to Songs
         </Button>
@@ -72,7 +72,7 @@ function SongViewPage() {
   return (
     <div className="flex flex-col h-screen">
       {/* Fixed Header */}
-      <header className="flex items-center justify-between px-4 py-4 border-b bg-white">
+      <header className="flex items-center justify-between px-4 py-4 border-b border-border bg-background">
         <div className="flex items-center">
           <Button
             variant="ghost"
@@ -82,12 +82,12 @@ function SongViewPage() {
           >
             <ChevronLeft className="h-6 w-6" />
           </Button>
-          <span className="text-lg">Songs</span>
+          <span className="text-lg text-foreground">Songs</span>
         </div>
         
         <Button
           onClick={handleAddToPlaylist}
-          className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Add to Playlist</span>
