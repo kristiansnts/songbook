@@ -43,22 +43,22 @@ function SongContent({
   }, [song.lyrics_and_chords, song.base_chord, selectedKey]);
 
   return (
-    <div className="bg-white rounded-lg border p-6 mb-6">
+    <div className="bg-card border border-border rounded-lg p-6 mb-6">
       {/* Song Header */}
-      <div className="mb-4 pb-4 border-b">
+      <div className="mb-4 pb-4 border-b border-border">
         <div className="flex items-center gap-3 mb-2">
-          <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-sm font-medium">
+          <span className="bg-muted text-muted-foreground px-2 py-1 rounded-full text-sm font-medium">
             {index + 1}
           </span>
           <div>
-            <h2 className="text-xl font-bold text-gray-900">{song.title}</h2>
-            <p className="text-gray-600">{song.artist}</p>
+            <h2 className="text-xl font-bold text-card-foreground">{song.title}</h2>
+            <p className="text-muted-foreground">{song.artist}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-          <span>Original Key: <strong className="text-gray-700">{song.base_chord}</strong></span>
+        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+          <span>Original Key: <strong className="text-foreground">{song.base_chord}</strong></span>
           {defaultKey && defaultKey !== song.base_chord && (
-            <span>Playlist Key: <strong className="text-blue-600">{defaultKey}</strong></span>
+            <span>Playlist Key: <strong className="text-primary">{defaultKey}</strong></span>
           )}
         </div>
 
@@ -70,9 +70,9 @@ function SongContent({
               onClick={() => setSelectedKey(key)}
               className={cn(
                 "h-8 w-8 rounded-lg text-sm font-semibold transition-colors",
-                selectedKey === key 
-                  ? "bg-blue-500 text-white" 
-                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                selectedKey === key
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
               {key}
@@ -90,7 +90,7 @@ function SongContent({
             dangerouslySetInnerHTML={{ __html: memoizedTransposedContent() }}
           />
         ) : (
-          <p className="text-gray-500 italic">No lyrics available</p>
+          <p className="text-muted-foreground italic">No lyrics available</p>
         )}
       </div>
     </div>
@@ -137,11 +137,11 @@ function PlaylistViewerComponent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-center p-8">
-            <Loader2 className="h-6 w-6 animate-spin mr-2" />
-            Loading playlist...
+            <Loader2 className="h-6 w-6 animate-spin mr-2 text-muted-foreground" />
+            <span className="text-muted-foreground">Loading playlist...</span>
           </div>
         </div>
       </div>
@@ -150,11 +150,11 @@ function PlaylistViewerComponent() {
 
   if (!playlist || songs.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-center p-8">
             <div className="text-center">
-              <p className="text-gray-500 mb-4">No songs found in this playlist</p>
+              <p className="text-muted-foreground mb-4">No songs found in this playlist</p>
               <Button onClick={handleBackToPlaylist} variant="outline">
                 Back to Playlist
               </Button>
@@ -172,9 +172,9 @@ function PlaylistViewerComponent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white border-b px-4 py-4 sticky top-0 z-40">
+      <header className="bg-background border-b border-border px-4 py-4 sticky top-0 z-40">
         <div className="container mx-auto">
           <div className="flex items-center">
             <Button
@@ -186,8 +186,8 @@ function PlaylistViewerComponent() {
               <ChevronLeft className="h-6 w-6" />
             </Button>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">{playlist.playlist_name || playlist.name}</h1>
-              <p className="text-sm text-gray-500">
+              <h1 className="text-lg font-semibold text-foreground">{playlist.playlist_name || playlist.name}</h1>
+              <p className="text-sm text-muted-foreground">
                 {songs.length} {songs.length === 1 ? 'song' : 'songs'}
               </p>
             </div>
