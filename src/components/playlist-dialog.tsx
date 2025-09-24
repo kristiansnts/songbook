@@ -166,10 +166,10 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
         
         <div className="space-y-4">
           {song && (
-            <div className="bg-gray-50 rounded-lg p-3">
-              <h3 className="font-medium text-gray-900">{song.title}</h3>
-              <p className="text-sm text-gray-600">{Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}</p>
-              <p className="text-xs text-gray-500 mt-1">Original Key: {song.base_chord}</p>
+            <div className="bg-muted rounded-lg p-3">
+              <h3 className="font-medium text-foreground">{song.title}</h3>
+              <p className="text-sm text-muted-foreground">{Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}</p>
+              <p className="text-xs text-muted-foreground mt-1">Original Key: {song.base_chord}</p>
             </div>
           )}
 
@@ -185,7 +185,7 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
                   }
                 }}
               />
-              <h4 className="text-sm font-medium text-gray-900">Override base chord</h4>
+              <h4 className="text-sm font-medium text-foreground">Override base chord</h4>
             </div>
             
             {useCustomChord && (
@@ -197,16 +197,16 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
                       onClick={() => setSelectedChord(key)}
                       className={cn(
                         "h-8 w-8 rounded-lg text-sm font-semibold transition-colors",
-                        selectedChord === key 
-                          ? "bg-blue-500 text-white" 
-                          : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                        selectedChord === key
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
                       )}
                     >
                       {key}
                     </button>
                   ))}
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted-foreground">
                   Selected chord: <strong>{selectedChord}</strong> 
                   {selectedChord !== song?.base_chord && song?.base_chord && (
                     <span> (transposed from {song.base_chord})</span>
@@ -216,22 +216,22 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
             )}
             
             {!useCustomChord && (
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Song will be added with its original chord: <strong>{song?.base_chord || 'C'}</strong>
               </p>
             )}
           </div>
 
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-900">Select existing playlists:</h4>
+            <h4 className="text-sm font-medium text-foreground">Select existing playlists:</h4>
             
             {loading ? (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="ml-2 text-sm text-gray-500">Loading playlists...</span>
+                <span className="ml-2 text-sm text-muted-foreground">Loading playlists...</span>
               </div>
             ) : playlists.length === 0 ? (
-              <div className="text-sm text-gray-500 py-2">There are no playlists you own</div>
+              <div className="text-sm text-muted-foreground py-2">There are no playlists you own</div>
             ) : (
               playlists.map((playlist) => (
                 <div key={playlist.id} className="flex items-center space-x-3">
@@ -240,8 +240,8 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
                     onCheckedChange={() => handlePlaylistToggle(playlist.id)}
                   />
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{playlist.name}</p>
-                    <p className="text-xs text-gray-500">{playlist.songCount} songs</p>
+                    <p className="text-sm font-medium text-foreground">{playlist.name}</p>
+                    <p className="text-xs text-muted-foreground">{playlist.songCount} songs</p>
                   </div>
                 </div>
               ))
@@ -281,7 +281,7 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
                     size="sm"
                     onClick={handleCreateNewPlaylist}
                     disabled={!newPlaylistName.trim() || loading}
-                    className="bg-black text-white hover:bg-gray-800 disabled:bg-gray-300"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                   >
                     {loading ? (
                       <>
@@ -308,7 +308,7 @@ export function PlaylistDialog({ open, onOpenChange, song, onAddToPlaylist }: Pl
             <Button
               onClick={handleAddToExistingPlaylists}
               disabled={!canAddToExistingPlaylists || loading}
-              className="flex-1 bg-black text-white hover:bg-gray-800 disabled:bg-gray-300"
+              className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               {loading ? (
                 <>

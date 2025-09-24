@@ -38,8 +38,8 @@ export function SongViewer({ song }: SongViewerProps) {
     <div className="w-full max-w-3xl mx-auto px-3 py-4 space-y-4">
       {/* Compact Header Section */}
       <div className="space-y-1">
-        <h1 className="text-lg md:text-xl font-bold text-gray-900">{song.title}</h1>
-        <p className="text-sm md:text-base text-gray-600">{Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}</p>
+        <h1 className="text-lg md:text-xl font-bold text-foreground">{song.title}</h1>
+        <p className="text-sm md:text-base text-muted-foreground">{Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}</p>
       </div>
 
       {/* Compact Key Selector Grid */}
@@ -50,9 +50,9 @@ export function SongViewer({ song }: SongViewerProps) {
             onClick={() => setSelectedKey(key)}
             className={cn(
               "h-8 w-8 rounded-lg text-sm font-semibold transition-colors",
-              selectedKey === key 
-                ? "bg-blue-500 text-white" 
-                : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+              selectedKey === key
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground hover:bg-muted/80"
             )}
           >
             {key}
@@ -69,7 +69,7 @@ export function SongViewer({ song }: SongViewerProps) {
             dangerouslySetInnerHTML={{ __html: memoizedTransposedContent() }}
           />
         ) : (
-          <div className="text-center text-gray-500 py-8">
+          <div className="text-center text-muted-foreground py-8">
             <p className="text-sm">No lyrics and chords available for this song.</p>
           </div>
         )}
