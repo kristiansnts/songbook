@@ -27,6 +27,8 @@ export interface SongFilters {
   tag_ids?: string;
   page?: number;
   limit?: number;
+  sort_by?: 'title' | 'base_chord';
+  sort_order?: 'asc' | 'desc';
 }
 
 export interface SongListResponse {

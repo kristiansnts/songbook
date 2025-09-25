@@ -1,6 +1,8 @@
 // 🚀 SECURE FRONTEND AUTHENTICATION - Following songbanks-v1.1 pattern
 // This approach validates all permissions server-side, never trusting client data
 
+import { SongService } from '@/services/songService'
+
 export interface User {
   id: string;
   nama: string;
@@ -52,14 +54,17 @@ export class AuthManager {
         // ✅ Store ONLY the token - never store user data
         localStorage.setItem('token', result.data.token);
         this.token = result.data.token;
-        
+
+        // 🎵 Clear songs cache on login to ensure fresh data
+        SongService.clearSongsCache();
+
         // ✅ Use server response ONLY for initial redirect
         if (result.data.user.userType === 'pengurus') {
           window.location.href = '/admin/dashboard';
         } else if (result.data.user.userType === 'peserta') {
           window.location.href = '/user/dashboard';
         }
-        
+
         return { success: true, data: result.data };
       } else {
         return { success: false, message: result.message || 'Login failed' };

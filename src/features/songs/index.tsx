@@ -1,13 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { Search, ChevronLeft, ChevronRight, Filter, X } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Search, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { songService } from '@/services/songService'
 import { Song, PaginationMeta } from '@/types/song'
 import { KEYS } from '@/lib/transpose-utils'
-import { cn } from '@/lib/utils'
 import { BulkPlaylistDialog } from '@/components/bulk-playlist-dialog'
 import { toast } from 'sonner'
 
@@ -15,31 +15,34 @@ export function SongListView() {
   const navigate = useNavigate()
   const search = useSearch({ from: '/_authenticated/user/song/' }) as { artist?: string }
   const [songs, setSongs] = useState<Song[]>([])
-  const [pagination, setPagination] = useState<PaginationMeta | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [_pagination, _setPagination] = useState<PaginationMeta | null>(null)
+  const [_currentPage, _setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedSongs, setSelectedSongs] = useState<Set<number>>(new Set())
   const [searchTerm, setSearchTerm] = useState('')
   const [isSelectMode, setIsSelectMode] = useState(false)
   const [selectedChord, setSelectedChord] = useState<string>('')
-  const [showChordFilter, setShowChordFilter] = useState(false)
   const [showBulkPlaylistDialog, setShowBulkPlaylistDialog] = useState(false)
+  const [orderBy, setOrderBy] = useState<'title' | 'base_chord'>('title')
 
   useEffect(() => {
     const fetchSongs = async () => {
       try {
         setIsLoading(true)
+        // For alphabet grouping, fetch all songs with a large limit
         const filters = {
-          page: currentPage,
-          limit: 20,
+          page: 1,
+          limit: 10000, // Large limit to get all songs for proper alphabet grouping
           ...(searchTerm && { search: searchTerm }),
           ...(selectedChord && { base_chord: selectedChord }),
-          ...(search.artist && { search: search.artist })
+          ...(search.artist && { search: search.artist }),
+          sort_by: orderBy,
+          sort_order: 'asc' as const
         }
         const response = await songService.getAllSongs(filters)
         setSongs(response.data)
-        setPagination(response.pagination)
+        _setPagination(response.pagination)
         setError(null)
       } catch (_err) {
         setError('Failed to load songs')
@@ -49,7 +52,7 @@ export function SongListView() {
     }
 
     fetchSongs()
-  }, [currentPage, searchTerm, selectedChord, search.artist])
+  }, [searchTerm, selectedChord, search.artist, orderBy]) // Removed currentPage dependency
 
   const handleSongToggle = (songId: number) => {
     const newSelected = new Set(selectedSongs)
@@ -64,20 +67,38 @@ export function SongListView() {
   // Since filtering is now done server-side, use songs directly
   const filteredSongs = songs
 
-  const handlePrevPage = () => {
-    if (pagination?.hasPrevPage) {
-      setCurrentPage(prev => prev - 1)
-    }
+  // Group songs by first letter for alphabet display
+  const groupSongs = (songs: Song[], groupBy: 'title' | 'base_chord') => {
+    const groups = new Map<string, Song[]>()
+
+    songs.forEach(song => {
+      const key = groupBy === 'title'
+        ? song.title.charAt(0).toUpperCase()
+        : song.base_chord.charAt(0).toUpperCase()
+
+      if (!groups.has(key)) {
+        groups.set(key, [])
+      }
+      groups.get(key)!.push(song)
+    })
+
+    // Sort groups by key
+    const sortedGroups = Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b))
+    return sortedGroups
   }
 
-  const handleNextPage = () => {
-    if (pagination?.hasNextPage) {
-      setCurrentPage(prev => prev + 1)
-    }
+  const groupedSongs = groupSongs(filteredSongs, orderBy)
+
+  const _handlePrevPage = () => {
+    // Unused - pagination disabled for alphabet grouping
+  }
+
+  const _handleNextPage = () => {
+    // Unused - pagination disabled for alphabet grouping
   }
 
   const resetPagination = () => {
-    setCurrentPage(1)
+    // No longer needed since we fetch all songs
   }
 
   const handleSelectAll = () => {
@@ -151,8 +172,9 @@ export function SongListView() {
     resetPagination()
   }
 
-  const toggleChordFilter = () => {
-    setShowChordFilter(!showChordFilter)
+  const handleOrderByChange = (value: 'title' | 'base_chord') => {
+    setOrderBy(value)
+    resetPagination()
   }
 
   return (
@@ -198,14 +220,11 @@ export function SongListView() {
         )}
       </header>
 
-       <div className="px-4 py-6 bg-background dark:bg-background">
+       <div className="px-4 pt-6 pb-2 bg-background dark:bg-background">
           <h1 className="text-4xl font-bold">{search.artist || 'Songs'}</h1>
-          {pagination && (
+          {songs.length > 0 && (
             <p className="text-muted-foreground mt-1">
-              {pagination.totalItems} song{pagination.totalItems !== 1 ? 's' : ''} total
-              {pagination.totalPages > 1 && (
-                <span> • Page {pagination.currentPage} of {pagination.totalPages}</span>
-              )}
+              {songs.length} song{songs.length !== 1 ? 's' : ''} total
             </p>
           )}
         </div>
@@ -231,25 +250,36 @@ export function SongListView() {
           )}
         </div>
 
-        {/* Chord Filter Section */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={toggleChordFilter}
-                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
-              >
-                <Filter className="h-4 w-4" />
-                Filter by Chord
-                {selectedChord && (
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
-                    {selectedChord}
-                  </span>
-                )}
-              </Button>
-            </div>
+        {/* Order By and Filter Section - same line */}
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Order by:</span>
+            <Select value={orderBy} onValueChange={handleOrderByChange}>
+              <SelectTrigger className="w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="title">Title</SelectItem>
+                <SelectItem value="base_chord">Chord</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Chord: </span>
+            <Select value={selectedChord || "all"} onValueChange={(value) => handleChordFilter(value === "all" ? '' : value)}>
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="All chords" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All chords</SelectItem>
+                {KEYS.map((chord) => (
+                  <SelectItem key={chord} value={chord}>
+                    {chord}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             {selectedChord && (
               <Button
                 variant="ghost"
@@ -261,32 +291,13 @@ export function SongListView() {
               </Button>
             )}
           </div>
-
-          {showChordFilter && (
-            <div className="grid grid-cols-6 gap-2">
-              {KEYS.map((chord) => (
-                <button
-                  key={chord}
-                  onClick={() => handleChordFilter(chord)}
-                  className={cn(
-                    "h-8 rounded-md text-sm font-semibold transition-colors",
-                    selectedChord === chord
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-800 hover:bg-gray-200"
-                  )}
-                >
-                  {chord}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {selectedChord && pagination && (
-            <p className="text-sm text-muted-foreground">
-              Showing {pagination.totalItems} songs in key <strong>{selectedChord}</strong>
-            </p>
-          )}
         </div>
+
+        {selectedChord && songs.length > 0 && (
+          <p className="text-sm text-muted-foreground">
+            Showing {songs.filter(song => song.base_chord === selectedChord).length} songs in key <strong>{selectedChord}</strong>
+          </p>
+        )}
       </div>
 
       {/* Scrollable Song List */}
@@ -300,52 +311,64 @@ export function SongListView() {
             <div className="text-red-500">Error loading songs</div>
           </div>
         ) : (
-          <div className="space-y-1">
-            {filteredSongs.map((song) => (
-              <div key={song.id}>
-                {isSelectMode ? (
-                  <div className="flex items-center space-x-3 px-3 py-3">
-                    <Checkbox
-                      checked={selectedSongs.has(song.id)}
-                      onCheckedChange={() => handleSongToggle(song.id)}
-                    />
-                    <div className="flex-1 text-left">
-                      <h3 className="text-lg font-medium">{song.title}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-gray-500">{song.artist.join(', ')}</p>
-                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
-                          {song.base_chord}
-                        </span>
-                      </div>
+          <div className="space-y-4">
+            {groupedSongs.map(([letter, songs]) => (
+              <div key={letter}>
+                {/* Alphabet Letter Header */}
+                <div className="top-0 text-[#960001] py-3 px-4 mb-2 rounded-md font-bold text-xl z-10">
+                  {letter}
+                </div>
+
+                {/* Songs in this letter group */}
+                <div className="space-y-1">
+                  {songs.map((song) => (
+                    <div key={song.id}>
+                      {isSelectMode ? (
+                        <div className="flex items-center space-x-3 px-3 py-3">
+                          <Checkbox
+                            checked={selectedSongs.has(song.id)}
+                            onCheckedChange={() => handleSongToggle(song.id)}
+                          />
+                          <div className="flex-1 text-left">
+                            <h3 className="text-lg font-medium">{song.title}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-gray-500">{song.artist.join(', ')}</p>
+                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                                {song.base_chord}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-between p-3 h-auto"
+                          onClick={() => {
+                            navigate({ to: '/user/song/$id', params: { id: String(song.id) } })
+                          }}
+                        >
+                          <div className="flex-1 text-left">
+                            <h3 className="text-lg font-medium">{song.title}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-gray-500">{song.artist.join(', ')}</p>
+                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                                {song.base_chord}
+                              </span>
+                            </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-gray-400" />
+                        </Button>
+                      )}
                     </div>
-                  </div>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-between p-3 h-auto"
-                    onClick={() => {
-                      navigate({ to: '/user/song/$id', params: { id: String(song.id) } })
-                    }}
-                  >
-                    <div className="flex-1 text-left">
-                      <h3 className="text-lg font-medium">{song.title}</h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <p className="text-gray-500">{song.artist.join(', ')}</p>
-                        <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
-                          {song.base_chord}
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-gray-400" />
-                  </Button>
-                )}
+                  ))}
+                </div>
               </div>
             ))}
           </div>
         )}
 
-        {/* Pagination Controls */}
-        {pagination && pagination.totalPages > 1 && (
+        {/* Pagination Controls - Disabled for alphabet grouping */}
+        {/* {pagination && pagination.totalPages > 1 && (
           <div className="flex justify-center items-center gap-4 py-4 border-t bg-background dark:bg-background">
             <Button
               variant="outline"
@@ -373,7 +396,7 @@ export function SongListView() {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-        )}
+        )} */}
       </main>
 
       {/* Fixed Bottom Actions - only in select mode */}

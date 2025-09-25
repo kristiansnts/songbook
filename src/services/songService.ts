@@ -2,6 +2,7 @@ import { Song, CreateSongRequest, UpdateSongRequest, SongFilters, SongListRespon
 
 const BASE_URL = 'https://songbanks-v1-1.vercel.app/api'
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes in milliseconds
+const ALL_SONGS_CACHE_DURATION = 24 * 60 * 60 * 1000 // 24 hours for all songs cache
 
 interface CachedResponse<T> {
   data: T
@@ -11,18 +12,21 @@ interface CachedResponse<T> {
 
 export class SongService {
   private static cache = new Map<string, CachedResponse<any>>()
+  private static allSongsCache: SongListResponse | null = null
+  private static allSongsCacheTimestamp: number = 0
 
-  private static isExpired(cachedItem: CachedResponse<any>): boolean {
-    return Date.now() - cachedItem.timestamp > CACHE_DURATION
+  private static isExpired(cachedItem: CachedResponse<any>, customDuration?: number): boolean {
+    const duration = customDuration || CACHE_DURATION
+    return Date.now() - cachedItem.timestamp > duration
   }
 
   private static getCacheKey(method: string, params?: any): string {
     return `${method}:${JSON.stringify(params || {})}`
   }
 
-  private static getFromCache<T>(key: string): T | null {
+  private static getFromCache<T>(key: string, customDuration?: number): T | null {
     const cached = this.cache.get(key)
-    if (cached && !this.isExpired(cached)) {
+    if (cached && !this.isExpired(cached, customDuration)) {
       return cached.data
     }
     if (cached) {
@@ -51,6 +55,89 @@ export class SongService {
     this.cache.clear()
   }
 
+  public static clearSongsCache(): void {
+    // Clear all song-related caches when user logs in
+    for (const [key] of this.cache) {
+      if (key.includes('getAllSongs') || key.includes('getSong')) {
+        this.cache.delete(key)
+      }
+    }
+
+    // Clear the special all-songs cache
+    this.allSongsCache = null
+    this.allSongsCacheTimestamp = 0
+
+    // Clear from localStorage too
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('allSongsCache')
+      localStorage.removeItem('allSongsCacheTimestamp')
+    }
+
+    console.log('🎵 Songs cache cleared on login')
+  }
+
+  private static getAllSongsFromCache(): SongListResponse | null {
+    // Check memory cache first
+    if (this.allSongsCache && this.allSongsCacheTimestamp) {
+      const isExpired = Date.now() - this.allSongsCacheTimestamp > ALL_SONGS_CACHE_DURATION
+      if (!isExpired) {
+        console.log('🎵 Using memory cached all songs')
+        return this.allSongsCache
+      }
+    }
+
+    // Check localStorage cache
+    if (typeof window !== 'undefined') {
+      try {
+        const cachedData = localStorage.getItem('allSongsCache')
+        const cachedTimestamp = localStorage.getItem('allSongsCacheTimestamp')
+
+        if (cachedData && cachedTimestamp) {
+          const timestamp = parseInt(cachedTimestamp)
+          const isExpired = Date.now() - timestamp > ALL_SONGS_CACHE_DURATION
+
+          if (!isExpired) {
+            const parsedData = JSON.parse(cachedData)
+            // Also update memory cache
+            this.allSongsCache = parsedData
+            this.allSongsCacheTimestamp = timestamp
+            console.log('🎵 Using localStorage cached all songs')
+            return parsedData
+          }
+        }
+      } catch (error) {
+        console.warn('Error reading from localStorage cache:', error)
+      }
+    }
+
+    return null
+  }
+
+  private static setAllSongsCache(data: SongListResponse): void {
+    const timestamp = Date.now()
+
+    // Set memory cache
+    this.allSongsCache = data
+    this.allSongsCacheTimestamp = timestamp
+
+    // Set localStorage cache (only if data is not too large)
+    if (typeof window !== 'undefined') {
+      try {
+        const dataSize = JSON.stringify(data).length
+        // Only cache in localStorage if less than 2MB to avoid performance issues
+        if (dataSize < 2 * 1024 * 1024) {
+          localStorage.setItem('allSongsCache', JSON.stringify(data))
+          localStorage.setItem('allSongsCacheTimestamp', timestamp.toString())
+          console.log(`🎵 All songs cached (${Math.round(dataSize / 1024)}KB)`)
+        } else {
+          console.log('🎵 All songs cached in memory only (too large for localStorage)')
+        }
+      } catch (error) {
+        console.warn('Error writing to localStorage cache:', error)
+      }
+    }
+  }
+
   private getAuthToken(): string {
     if (typeof window === 'undefined') {
       return ''
@@ -68,15 +155,28 @@ export class SongService {
   }
 
   async getAllSongs(filters?: SongFilters): Promise<SongListResponse> {
-    const cacheKey = SongService.getCacheKey('getAllSongs', filters)
+    // Check if this is a request for all songs (large limit, no pagination)
+    const isAllSongsRequest = filters?.limit && filters.limit >= 1000
 
-    // Try cache first
-    const cachedResult = SongService.getFromCache<SongListResponse>(cacheKey)
-    if (cachedResult) {
-      return cachedResult
+    if (isAllSongsRequest) {
+      // For all-songs requests, use special cache and do client-side filtering
+      const cachedAllSongs = SongService.getAllSongsFromCache()
+      if (cachedAllSongs) {
+        // Apply client-side filtering to cached data
+        return this.filterSongsClientSide(cachedAllSongs, filters)
+      }
+    } else {
+      // For regular requests, use normal cache
+      const cacheKey = SongService.getCacheKey('getAllSongs', filters)
+      const cachedResult = SongService.getFromCache<SongListResponse>(cacheKey, CACHE_DURATION)
+      if (cachedResult) {
+        console.log('🎵 Using cached filtered songs data')
+        return cachedResult
+      }
     }
 
     try {
+      console.log(`🎵 Fetching ${isAllSongsRequest ? 'all songs' : 'songs'} from API`)
       const url = new URL(`${BASE_URL}/songs`)
 
       if (filters?.search && filters.search.trim()) {
@@ -93,6 +193,12 @@ export class SongService {
       }
       if (filters?.limit) {
         url.searchParams.set('limit', filters.limit.toString())
+      }
+      if (filters?.sort_by) {
+        url.searchParams.set('sort_by', filters.sort_by)
+      }
+      if (filters?.sort_order) {
+        url.searchParams.set('sort_order', filters.sort_order)
       }
 
       const response = await fetch(url.toString(), {
@@ -127,7 +233,15 @@ export class SongService {
         }
 
         // Cache the result
-        SongService.setCache(cacheKey, response_data)
+        if (isAllSongsRequest) {
+          // Cache all songs in special cache
+          SongService.setAllSongsCache(response_data)
+          // Also apply any filters and return filtered result
+          return this.filterSongsClientSide(response_data, filters)
+        } else {
+          // Cache filtered result normally
+          SongService.setCache(cacheKey, response_data)
+        }
 
         return response_data
       }
@@ -288,6 +402,63 @@ export class SongService {
     // Clear dashboard cache by dispatching custom event
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('invalidate-dashboard-cache'))
+    }
+  }
+
+  private filterSongsClientSide(allSongs: SongListResponse, filters?: SongFilters): SongListResponse {
+    let filteredSongs = [...allSongs.data]
+
+    // Apply search filter
+    if (filters?.search && filters.search.trim()) {
+      const searchTerm = filters.search.trim().toLowerCase()
+      filteredSongs = filteredSongs.filter(song =>
+        song.title.toLowerCase().includes(searchTerm) ||
+        song.artist.some(artist => artist.toLowerCase().includes(searchTerm)) ||
+        song.lyrics_and_chords.toLowerCase().includes(searchTerm)
+      )
+    }
+
+    // Apply chord filter
+    if (filters?.base_chord) {
+      filteredSongs = filteredSongs.filter(song => song.base_chord === filters.base_chord)
+    }
+
+    // Apply sorting
+    if (filters?.sort_by) {
+      filteredSongs.sort((a, b) => {
+        let valueA: string, valueB: string
+
+        if (filters.sort_by === 'title') {
+          valueA = a.title.toLowerCase()
+          valueB = b.title.toLowerCase()
+        } else if (filters.sort_by === 'base_chord') {
+          valueA = a.base_chord
+          valueB = b.base_chord
+        } else {
+          return 0
+        }
+
+        if (filters.sort_order === 'desc') {
+          return valueB.localeCompare(valueA)
+        } else {
+          return valueA.localeCompare(valueB)
+        }
+      })
+    }
+
+    console.log(`🎵 Client-side filtered: ${filteredSongs.length} songs from ${allSongs.data.length} cached songs`)
+
+    // Return filtered result with updated pagination
+    return {
+      data: filteredSongs,
+      pagination: {
+        currentPage: 1,
+        totalPages: 1,
+        totalItems: filteredSongs.length,
+        itemsPerPage: filteredSongs.length,
+        hasNextPage: false,
+        hasPrevPage: false,
+      }
     }
   }
 
