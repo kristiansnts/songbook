@@ -158,6 +158,9 @@ export class SongService {
     // Check if this is a request for all songs (large limit, no pagination)
     const isAllSongsRequest = filters?.limit && filters.limit >= 1000
 
+    // Define cacheKey for regular requests
+    const cacheKey = !isAllSongsRequest ? SongService.getCacheKey('getAllSongs', filters) : null
+
     if (isAllSongsRequest) {
       // For all-songs requests, use special cache and do client-side filtering
       const cachedAllSongs = SongService.getAllSongsFromCache()
@@ -167,8 +170,7 @@ export class SongService {
       }
     } else {
       // For regular requests, use normal cache
-      const cacheKey = SongService.getCacheKey('getAllSongs', filters)
-      const cachedResult = SongService.getFromCache<SongListResponse>(cacheKey, CACHE_DURATION)
+      const cachedResult = SongService.getFromCache<SongListResponse>(cacheKey!, CACHE_DURATION)
       if (cachedResult) {
         console.log('🎵 Using cached filtered songs data')
         return cachedResult
@@ -240,7 +242,9 @@ export class SongService {
           return this.filterSongsClientSide(response_data, filters)
         } else {
           // Cache filtered result normally
-          SongService.setCache(cacheKey, response_data)
+          if (cacheKey) {
+            SongService.setCache(cacheKey, response_data)
+          }
         }
 
         return response_data

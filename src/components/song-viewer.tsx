@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Song } from '@/types/song';
 import { cn } from '@/lib/utils';
 import { KEYS, transposeStoredChords } from '@/lib/transpose-utils';
+import { ChordSwitcher } from '@/components/ui/chord-switcher';
 
 interface SongViewerProps {
   song: Song;
@@ -9,6 +10,7 @@ interface SongViewerProps {
 
 export function SongViewer({ song }: SongViewerProps) {
   const [selectedKey, setSelectedKey] = useState(song.base_chord || 'C');
+  const [showChords, setShowChords] = useState(true);
   const lyricsRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to lyrics section on load
@@ -27,12 +29,71 @@ export function SongViewer({ song }: SongViewerProps) {
 
   const memoizedTransposedContent = useCallback(() => {
     // Transpose chords in the stored styled format
-    return transposeStoredChords(
-      song.lyrics_and_chords, 
-      song.base_chord || 'C', 
+    let content = transposeStoredChords(
+      song.lyrics_and_chords,
+      song.base_chord || 'C',
       selectedKey
     );
-  }, [song.lyrics_and_chords, song.base_chord, selectedKey]);
+
+    // Apply chord visibility using CSS
+    if (!showChords) {
+      // Enhanced CSS to hide chords and slash characters properly
+      const style = `
+        <style>
+          .c { display: none !important; }
+          /* Hide slash characters that appear before or after chord spans */
+          .lyrics-content *:has(.c) .c + *:not(.c):not(br):not(div) {
+            display: none !important;
+          }
+          /* Hide standalone slash characters */
+          .lyrics-content span:not(.c):empty + span:not(.c)[title*="/"],
+          .lyrics-content span:not(.c):contains("/") {
+            display: none !important;
+          }
+          /* More specific targeting of slash characters */
+          .lyrics-content {
+            --chord-display: none !important;
+          }
+          .lyrics-content .c,
+          .lyrics-content .c + span:not(.c):not([class]) {
+            display: var(--chord-display) !important;
+          }
+        </style>
+      `;
+      content = style + content;
+
+      // Additional processing: Remove slash characters that are typically part of chord notation
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+
+      // Find and remove text nodes that contain only "/" or are slash-related
+      const walker = document.createTreeWalker(
+        tempDiv,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+
+      const textNodesToRemove: Text[] = [];
+      let node;
+      while (node = walker.nextNode()) {
+        const textNode = node as Text;
+        if (textNode.textContent && textNode.textContent.trim() === '/') {
+          textNodesToRemove.push(textNode);
+        }
+      }
+
+      textNodesToRemove.forEach(textNode => {
+        if (textNode.parentNode) {
+          textNode.parentNode.removeChild(textNode);
+        }
+      });
+
+      content = tempDiv.innerHTML;
+    }
+
+    return content;
+  }, [song.lyrics_and_chords, song.base_chord, selectedKey, showChords]);
 
   return (
     <div className="w-full max-w-3xl mx-auto px-3 py-4 space-y-4">
@@ -59,6 +120,12 @@ export function SongViewer({ song }: SongViewerProps) {
           </button>
         ))}
       </div>
+
+      {/* Chord Switcher */}
+      <ChordSwitcher
+        showChords={showChords}
+        onToggle={setShowChords}
+      />
 
       {/* Compact Lyrics Section - More space for lyrics */}
       <div ref={lyricsRef}>

@@ -8,20 +8,23 @@ import { ChevronLeft, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { KEYS, transposeStoredChords } from '@/lib/transpose-utils'
 import { cn } from '@/lib/utils'
+import { ChordSwitcher } from '@/components/ui/chord-switcher'
 
 export const Route = createFileRoute('/_authenticated/user/playlist/view/$id')({
   component: PlaylistViewerComponent,
 })
 
 // Component to render individual song content with transpose functionality
-function SongContent({ 
-  song, 
-  index, 
-  defaultKey 
-}: { 
-  song: Song; 
+function SongContent({
+  song,
+  index,
+  defaultKey,
+  showChords
+}: {
+  song: Song;
   index: number;
   defaultKey?: string;
+  showChords: boolean;
 }) {
   const [selectedKey, setSelectedKey] = useState(defaultKey || song.base_chord || 'C');
 
@@ -34,13 +37,72 @@ function SongContent({
 
   const memoizedTransposedContent = useCallback(() => {
     if (!song.lyrics_and_chords) return '';
-    
-    return transposeStoredChords(
-      song.lyrics_and_chords, 
-      song.base_chord || 'C', 
+
+    let content = transposeStoredChords(
+      song.lyrics_and_chords,
+      song.base_chord || 'C',
       selectedKey
     );
-  }, [song.lyrics_and_chords, song.base_chord, selectedKey]);
+
+    // Apply chord visibility using CSS
+    if (!showChords) {
+      // Enhanced CSS to hide chords and slash characters properly
+      const style = `
+        <style>
+          .c { display: none !important; }
+          /* Hide slash characters that appear before or after chord spans */
+          .lyrics-content *:has(.c) .c + *:not(.c):not(br):not(div) {
+            display: none !important;
+          }
+          /* Hide standalone slash characters */
+          .lyrics-content span:not(.c):empty + span:not(.c)[title*="/"],
+          .lyrics-content span:not(.c):contains("/") {
+            display: none !important;
+          }
+          /* More specific targeting of slash characters */
+          .lyrics-content {
+            --chord-display: none !important;
+          }
+          .lyrics-content .c,
+          .lyrics-content .c + span:not(.c):not([class]) {
+            display: var(--chord-display) !important;
+          }
+        </style>
+      `;
+      content = style + content;
+
+      // Additional processing: Remove slash characters that are typically part of chord notation
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = content;
+
+      // Find and remove text nodes that contain only "/" or are slash-related
+      const walker = document.createTreeWalker(
+        tempDiv,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+
+      const textNodesToRemove: Text[] = [];
+      let node;
+      while (node = walker.nextNode()) {
+        const textNode = node as Text;
+        if (textNode.textContent && textNode.textContent.trim() === '/') {
+          textNodesToRemove.push(textNode);
+        }
+      }
+
+      textNodesToRemove.forEach(textNode => {
+        if (textNode.parentNode) {
+          textNode.parentNode.removeChild(textNode);
+        }
+      });
+
+      content = tempDiv.innerHTML;
+    }
+
+    return content;
+  }, [song.lyrics_and_chords, song.base_chord, selectedKey, showChords]);
 
   return (
     <div className="bg-card border border-border rounded-lg p-6 mb-6">
@@ -63,7 +125,7 @@ function SongContent({
         </div>
 
         {/* Key Selector Grid */}
-        <div className="grid grid-cols-6 gap-2 max-w-xs">
+        <div className="grid grid-cols-6 gap-2 max-w-xs mb-3">
           {KEYS.map((key) => (
             <button
               key={key}
@@ -79,6 +141,7 @@ function SongContent({
             </button>
           ))}
         </div>
+
       </div>
 
       {/* Song Lyrics and Chords */}
@@ -104,6 +167,7 @@ function PlaylistViewerComponent() {
   const [songs, setSongs] = useState<Song[]>([])
   const [playlistNotes, setPlaylistNotes] = useState<Array<{song_id: number, base_chord: string}>>([])
   const [loading, setLoading] = useState(true)
+  const [globalShowChords, setGlobalShowChords] = useState(true)
 
   const loadPlaylistData = useCallback(async () => {
     try {
@@ -176,21 +240,30 @@ function PlaylistViewerComponent() {
       {/* Header */}
       <header className="bg-background border-b border-border px-4 py-4 sticky top-0 z-40">
         <div className="container mx-auto">
-          <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBackToPlaylist}
-              className="mr-2 p-1"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">{playlist.playlist_name || playlist.name}</h1>
-              <p className="text-sm text-muted-foreground">
-                {songs.length} {songs.length === 1 ? 'song' : 'songs'}
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToPlaylist}
+                className="mr-2 p-1"
+              >
+                <ChevronLeft className="h-6 w-6" />
+              </Button>
+              <div>
+                <h1 className="text-lg font-semibold text-foreground">{playlist.playlist_name || playlist.name}</h1>
+                <p className="text-sm text-muted-foreground">
+                  {songs.length} {songs.length === 1 ? 'song' : 'songs'}
+                </p>
+              </div>
             </div>
+
+            {/* Global Chord Switcher */}
+            <ChordSwitcher
+              showChords={globalShowChords}
+              onToggle={setGlobalShowChords}
+              className="ml-4"
+            />
           </div>
         </div>
       </header>
@@ -199,11 +272,12 @@ function PlaylistViewerComponent() {
       <div className="container mx-auto px-4 py-6">
         <div className="max-w-4xl mx-auto">
           {songs.map((song, index) => (
-            <SongContent 
-              key={song.id} 
-              song={song} 
-              index={index} 
+            <SongContent
+              key={song.id}
+              song={song}
+              index={index}
               defaultKey={getDefaultKeyForSong(song.id)}
+              showChords={globalShowChords}
             />
           ))}
         </div>
