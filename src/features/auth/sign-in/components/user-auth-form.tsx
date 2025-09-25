@@ -14,7 +14,6 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { PasswordInput } from '@/components/password-input'
 import { useAuth } from '@/lib/auth'
 import { toast } from 'sonner'
 
@@ -107,17 +106,22 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('grid gap-5', className)}
+        className={cn('space-y-4', className)}
         {...props}
       >
         <FormField
           control={form.control}
           name='email'
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
+            <FormItem className='mt-3'>
+              <FormLabel htmlFor='username' className='text-sm font-medium text-gray-700'>Email</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input
+                  id='username'
+                  placeholder='Masukkan Email'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-black'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -127,17 +131,28 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           control={form.control}
           name='password'
           render={({ field }) => (
-            <FormItem className='relative'>
-              <FormLabel>Password</FormLabel>
+            <FormItem>
+              <FormLabel htmlFor='password-field' className='text-sm font-medium text-gray-700'>Password</FormLabel>
               <FormControl>
-                <PasswordInput placeholder='********' {...field} />
+                <Input
+                  type='password'
+                  id='password-field'
+                  placeholder='Masukkan Password'
+                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-black'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button className='mt-2' disabled={isLoading}>
-          Login
+        <Button
+          type='submit'
+          className='w-full mt-4 py-3 px-4 rounded-md text-white font-medium focus:outline-none focus:ring-2 focus:ring-red-500'
+          style={{ backgroundColor: '#960001' }}
+          disabled={isLoading}
+        >
+          {isLoading ? 'Signing In...' : 'Masuk'}
         </Button>
       </form>
     </Form>
