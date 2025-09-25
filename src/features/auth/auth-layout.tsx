@@ -4,11 +4,30 @@ interface Props {
 
 export default function AuthLayout({ children }: Props) {
   return (
-    <div className='bg-primary-foreground container grid h-svh max-w-none items-center justify-center'>
-      <div className='mx-auto flex w-full flex-col justify-center space-y-2 py-8 sm:w-[480px] sm:p-8'>
-        <div className='mb-4 flex items-center justify-center'>
+    <div className='min-h-screen bg-gray-100 flex items-center justify-center p-4'>
+      <div className='w-full max-w-xl'>
+        <div className='flex justify-center'>
+          <div className='w-full max-w-sm lg:max-w-lg'>
+            <div className='bg-white rounded-lg shadow-xl overflow-hidden'>
+              <div className='flex flex-col md:flex-row'>
+                {/* Image Section */}
+                <div
+                  className='w-full md:w-1/2 bg-cover bg-center bg-no-repeat min-h-[200px] md:min-h-[200px]'
+                  style={{
+                    backgroundImage: 'url(/images/logoutama.png)',
+                    backgroundColor: '#960001',
+                    backgroundSize: '80% auto',
+                    backgroundRepeat: 'no-repeat'
+                  }}
+                />
+                {/* Form Section */}
+                <div className='w-full md:w-1/2 p-6 md:p-8'>
+                  {children}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        {children}
       </div>
     </div>
   )
