@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/lib/auth'
 import { toast } from 'sonner'
+import { IconEye, IconEyeOff } from '@tabler/icons-react'
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>
 
@@ -33,6 +34,7 @@ const formSchema = z.object({
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
 
@@ -134,13 +136,22 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <FormItem>
               <FormLabel htmlFor='password-field' className='text-sm font-medium text-gray-700'>Password</FormLabel>
               <FormControl>
-                <Input
-                  type='password'
-                  id='password-field'
-                  placeholder='Masukkan Password'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-black'
-                  {...field}
-                />
+                <div className='relative'>
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    id='password-field'
+                    placeholder='Masukkan Password'
+                    className='w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-black'
+                    {...field}
+                  />
+                  <button
+                    type='button'
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                  </button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -152,7 +163,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           style={{ backgroundColor: '#960001' }}
           disabled={isLoading}
         >
-          {isLoading ? 'Signing In...' : 'Masuk'}
+          {isLoading ? 'Sedang Masuk ...' : 'Masuk'}
         </Button>
       </form>
     </Form>

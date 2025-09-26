@@ -200,7 +200,6 @@ export function SongListView() {
           </>
         ) : (
           <>
-             <>
             <div className="flex items-center">
               <Button
                 variant="ghost"
@@ -215,7 +214,6 @@ export function SongListView() {
             <Button variant="ghost" onClick={handleDone} className="text-blue-500">
               Done
             </Button>
-          </>
           </>
         )}
       </header>
@@ -250,10 +248,10 @@ export function SongListView() {
           )}
         </div>
 
-        {/* Order By and Filter Section - same line */}
-        <div className="flex items-center gap-6">
+        {/* Order By and Filter Section - space between */}
+        <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Order by:</span>
+            <span className="text-sm text-muted-foreground">Sort by:</span>
             <Select value={orderBy} onValueChange={handleOrderByChange}>
               <SelectTrigger className="w-32">
                 <SelectValue />
@@ -266,7 +264,6 @@ export function SongListView() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Chord: </span>
             <Select value={selectedChord || "all"} onValueChange={(value) => handleChordFilter(value === "all" ? '' : value)}>
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="All chords" />
