@@ -67,12 +67,6 @@ export class SongService {
     this.allSongsCache = null
     this.allSongsCacheTimestamp = 0
 
-    // Clear from localStorage too
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('allSongsCache')
-      localStorage.removeItem('allSongsCacheTimestamp')
-    }
-
     console.log('🎵 Songs cache cleared on login')
   }
 
@@ -86,30 +80,6 @@ export class SongService {
       }
     }
 
-    // Check localStorage cache
-    if (typeof window !== 'undefined') {
-      try {
-        const cachedData = localStorage.getItem('allSongsCache')
-        const cachedTimestamp = localStorage.getItem('allSongsCacheTimestamp')
-
-        if (cachedData && cachedTimestamp) {
-          const timestamp = parseInt(cachedTimestamp)
-          const isExpired = Date.now() - timestamp > ALL_SONGS_CACHE_DURATION
-
-          if (!isExpired) {
-            const parsedData = JSON.parse(cachedData)
-            // Also update memory cache
-            this.allSongsCache = parsedData
-            this.allSongsCacheTimestamp = timestamp
-            console.log('🎵 Using localStorage cached all songs')
-            return parsedData
-          }
-        }
-      } catch (error) {
-        console.warn('Error reading from localStorage cache:', error)
-      }
-    }
-
     return null
   }
 
@@ -120,22 +90,7 @@ export class SongService {
     this.allSongsCache = data
     this.allSongsCacheTimestamp = timestamp
 
-    // Set localStorage cache (only if data is not too large)
-    if (typeof window !== 'undefined') {
-      try {
-        const dataSize = JSON.stringify(data).length
-        // Only cache in localStorage if less than 2MB to avoid performance issues
-        if (dataSize < 2 * 1024 * 1024) {
-          localStorage.setItem('allSongsCache', JSON.stringify(data))
-          localStorage.setItem('allSongsCacheTimestamp', timestamp.toString())
-          console.log(`🎵 All songs cached (${Math.round(dataSize / 1024)}KB)`)
-        } else {
-          console.log('🎵 All songs cached in memory only (too large for localStorage)')
-        }
-      } catch (error) {
-        console.warn('Error writing to localStorage cache:', error)
-      }
-    }
+    console.log('🎵 All songs cached in memory')
   }
 
   private getAuthToken(): string {
