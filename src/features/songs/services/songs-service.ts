@@ -1,86 +1,56 @@
 import { Song } from '../data/schema'
 import { songs as defaultSongs } from '../data/songs'
 
-const SONGS_STORAGE_KEY = 'songbook_songs'
-
-// TODO: Will implement add to database when backend is ready
+// TODO: This service is deprecated - use songService from @/services/songService.ts instead
+// Keeping minimal implementation for backward compatibility
 export class SongsService {
   /**
-   * Get all songs from localStorage, fallback to default data
+   * @deprecated Use songService.getAllSongs() instead
+   * Get all songs - returns default data for backward compatibility
    */
   static getSongs(): Song[] {
-    try {
-      const stored = localStorage.getItem(SONGS_STORAGE_KEY)
-      if (stored) {
-        return JSON.parse(stored)
-      }
-      // If no stored data, initialize with default songs
-      this.saveSongs(defaultSongs)
-      return defaultSongs
-    } catch (_error) {
-      // Error reading from localStorage, fallback to default songs
-      return defaultSongs
-    }
+    return defaultSongs
   }
 
   /**
-   * Save songs array to localStorage
+   * @deprecated This method is no longer used - backend handles persistence
    */
-  static saveSongs(songs: Song[]): void {
-    try {
-      localStorage.setItem(SONGS_STORAGE_KEY, JSON.stringify(songs))
-    } catch (_error) {
-      // Error saving to localStorage, silently fail in development
-    }
+  static saveSongs(_songs: Song[]): void {
+    // No-op - backend handles persistence now
   }
 
   /**
-   * Add a new song
+   * @deprecated Use songService.createSong() instead
    */
   static addSong(songData: Omit<Song, 'id'>): Song {
-    const songs = this.getSongs()
     const newSong: Song = {
       ...songData,
       id: `SONG-${Date.now()}` // Simple ID generation for development
     }
     
-    const updatedSongs = [...songs, newSong]
-    this.saveSongs(updatedSongs)
-    
     return newSong
   }
 
   /**
-   * Update an existing song
+   * @deprecated Use songService.updateSong() instead
    */
   static updateSong(id: string, songData: Partial<Song>): Song | null {
     const songs = this.getSongs()
-    const songIndex = songs.findIndex(song => song.id === id)
+    const song = songs.find(song => song.id === id)
     
-    if (songIndex === -1) {
+    if (!song) {
       return null
     }
 
-    const updatedSong = { ...songs[songIndex], ...songData }
-    songs[songIndex] = updatedSong
-    
-    this.saveSongs(songs)
-    return updatedSong
+    return { ...song, ...songData }
   }
 
   /**
-   * Delete a song
+   * @deprecated Use songService.deleteSong() instead
    */
   static deleteSong(id: string): boolean {
     const songs = this.getSongs()
-    const filteredSongs = songs.filter(song => song.id !== id)
-    
-    if (filteredSongs.length === songs.length) {
-      return false // Song not found
-    }
-    
-    this.saveSongs(filteredSongs)
-    return true
+    return songs.some(song => song.id === id)
   }
 
   /**
