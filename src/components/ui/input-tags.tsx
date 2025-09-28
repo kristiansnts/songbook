@@ -145,13 +145,13 @@ export const InputTags = forwardRef<HTMLInputElement, InputTagsProps>(
           {showSuggestions && filteredSuggestions.length > 0 && (
             <div
               ref={suggestionsRef}
-              className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-40 overflow-y-auto"
+              className="absolute z-10 w-full mt-1 bg-background border border-border rounded-md shadow-lg max-h-40 overflow-y-auto"
             >
               {filteredSuggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   type="button"
-                  className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                  className="w-full text-left px-3 py-2 text-sm hover:bg-accent focus:bg-accent focus:outline-none text-foreground"
                   onClick={() => selectSuggestion(suggestion)}
                 >
                   {suggestion}
@@ -160,7 +160,7 @@ export const InputTags = forwardRef<HTMLInputElement, InputTagsProps>(
             </div>
           )}
         </div>
-        <div className="border rounded-md min-h-[2.5rem] overflow-y-auto p-2 flex gap-2 flex-wrap items-center">
+        <div className="border border-border rounded-md min-h-[2.5rem] overflow-y-auto p-2 flex gap-2 flex-wrap items-center bg-background">
           {value.map((item, idx) => (
             <Badge key={idx} variant="secondary" className="flex items-center gap-1">
               {item}
