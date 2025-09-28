@@ -60,21 +60,30 @@ export class SongResource extends Resource<Song> {
           .field('base_chord', field =>
             field
               .label('Base Chord')
-              .type('select')
+              .type('searchable-select')
               .required()
+              .searchPlaceholder('Search keys...')
+              .emptyMessage('No keys found.')
               .options([
                 { label: 'C', value: 'C' },
+                { label: 'Cm', value: 'Cm' },
                 { label: 'C#/Db', value: 'C#' },
                 { label: 'D', value: 'D' },
+                { label: 'Dm', value: 'Dm' },
+                { label: 'Em', value: 'Em' },
                 { label: 'D#/Eb', value: 'D#' },
                 { label: 'E', value: 'E' },
                 { label: 'F', value: 'F' },
+                { label: 'Fm', value: 'Fm' },
                 { label: 'F#/Gb', value: 'F#' },
                 { label: 'G', value: 'G' },
+                { label: 'Gm', value: 'Gm' },
                 { label: 'G#/Ab', value: 'G#' },
                 { label: 'A', value: 'A' },
+                { label: 'Am', value: 'Am' },
                 { label: 'A#/Bb', value: 'Bb' },
                 { label: 'B', value: 'B' },
+                { label: 'Bm', value: 'Bm' },
               ])
           )
           .field('tag_names', field =>
@@ -143,6 +152,13 @@ export class SongResource extends Resource<Song> {
             { label: 'A', value: 'A' },
             { label: 'A#/Bb', value: 'A#' },
             { label: 'B', value: 'B' },
+            { label: 'Cm', value: 'Cm' },
+            { label: 'Dm', value: 'Dm' },
+            { label: 'Em', value: 'Em' },
+            { label: 'Fm', value: 'Fm' },
+            { label: 'Gm', value: 'Gm' },
+            { label: 'Am', value: 'Am' },
+            { label: 'Bm', value: 'Bm' },
           ]
         },
       ])
@@ -222,6 +238,13 @@ export class SongResource extends Resource<Song> {
             { label: 'A', value: 'A' },
             { label: 'A#/Bb', value: 'A#' },
             { label: 'B', value: 'B' },
+            { label: 'Cm', value: 'Cm' },
+            { label: 'Dm', value: 'Dm' },
+            { label: 'Em', value: 'Em' },
+            { label: 'Fm', value: 'Fm' },
+            { label: 'Gm', value: 'Gm' },
+            { label: 'Am', value: 'Am' },
+            { label: 'Bm', value: 'Bm' },
           ]
         },
         {

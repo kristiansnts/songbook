@@ -20,6 +20,7 @@ import { PasswordInput } from '@/components/password-input'
 import { HtmlEditor } from '@/components/ui/html-editor'
 import { ChordLexicalEditor } from '@/components/ui/chord-lexical-editor'
 import { InputTags } from '@/components/ui/input-tags'
+import { Combobox } from '@/components/ui/combobox'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { 
   FormBuilderConfig, 
@@ -28,6 +29,7 @@ import {
   TextFieldConfig,
   NumberFieldConfig,
   SelectFieldConfig,
+  SearchableSelectFieldConfig,
   CheckboxFieldConfig,
   TextareaFieldConfig,
   RichtextFieldConfig,
@@ -324,6 +326,20 @@ function FieldInput({ field, formField }: { field: FieldConfig; formField: any }
         />
       )
     
+    case 'searchable-select':
+      const searchableSelectField = field as SearchableSelectFieldConfig
+      return (
+        <Combobox
+          value={formField.value}
+          onChange={formField.onChange}
+          options={searchableSelectField.options}
+          placeholder={field.placeholder}
+          searchPlaceholder={searchableSelectField.searchPlaceholder || 'Search...'}
+          emptyMessage={searchableSelectField.emptyMessage || 'No options found.'}
+          disabled={field.disabled}
+        />
+      )
+    
     case 'checkbox':
       const checkboxField = field as CheckboxFieldConfig
       return (
@@ -460,6 +476,7 @@ function generateZodSchema(sections: FormSection[]): z.ZodSchema<any> {
             break
           
           case 'select':
+          case 'searchable-select':
             fieldSchema = z.string()
             break
           
