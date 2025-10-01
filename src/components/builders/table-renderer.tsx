@@ -154,13 +154,13 @@ export function TableRenderer<T = any>({
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: config.onFilterChange ? undefined : getFilteredRowModel(), // Disable client-side filtering when server-side filtering is used
-    getPaginationRowModel: getPaginationRowModel(),
+    getPaginationRowModel: config.serverSidePagination ? undefined : getPaginationRowModel(), // Disable client-side pagination when server-side pagination is used
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     initialState: {
       pagination: {
-        pageSize: config.pageSize || 10,
+        pageSize: config.serverSidePagination?.itemsPerPage || config.pageSize || 10,
       },
     },
   })
