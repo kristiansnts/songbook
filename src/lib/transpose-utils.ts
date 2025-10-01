@@ -1,4 +1,4 @@
-export const KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B'];
+export const KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'Bb', 'B', 'Cm', 'Dm', 'Em', 'Fm', 'Gm', 'Am', 'Bm'];
 
 // Handle enharmonic equivalents
 export const normalizeKey = (key: string): string => {
@@ -16,6 +16,7 @@ export const normalizeKey = (key: string): string => {
 
 // Diatonic chords for each major key (using KEYS array names for consistency)
 export const DIATONIC_CHORDS: Record<string, string[]> = {
+  // Major keys
   'C': ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim'],
   'C#': ['C#', 'D#m', 'E#m', 'F#', 'G#', 'A#m', 'B#dim'], // E# is F, B# is C
   'D': ['D', 'Em', 'F#m', 'G', 'A', 'Bm', 'C#dim'],
@@ -28,6 +29,15 @@ export const DIATONIC_CHORDS: Record<string, string[]> = {
   'A': ['A', 'Bm', 'C#m', 'D', 'E', 'F#m', 'G#dim'],
   'Bb': ['Bb', 'Cm', 'Dm', 'Eb', 'F', 'Gm', 'Adim'],
   'B': ['B', 'C#m', 'D#m', 'E', 'F#', 'G#m', 'A#dim'],
+  
+  // Minor keys (natural minor scale)
+  'Cm': ['Cm', 'Ddim', 'Eb', 'Fm', 'Gm', 'Ab', 'Bb'],
+  'Dm': ['Dm', 'Edim', 'F', 'Gm', 'Am', 'Bb', 'C'],
+  'Em': ['Em', 'F#dim', 'G', 'Am', 'Bm', 'C', 'D'],
+  'Fm': ['Fm', 'Gdim', 'Ab', 'Bbm', 'Cm', 'Db', 'Eb'],
+  'Gm': ['Gm', 'Adim', 'Bb', 'Cm', 'Dm', 'Eb', 'F'],
+  'Am': ['Am', 'Bdim', 'C', 'Dm', 'Em', 'F', 'G'],
+  'Bm': ['Bm', 'C#dim', 'D', 'Em', 'F#m', 'G', 'A'],
 };
 
 // Chord transposition logic (Diatonic Transposition)

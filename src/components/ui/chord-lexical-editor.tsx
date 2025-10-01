@@ -136,7 +136,7 @@ function ToolbarPlugin() {
   }
 
   return (
-    <div className="border-b border-gray-200 bg-gray-50 p-2 flex flex-wrap items-center gap-1 sm:gap-2">
+    <div className="border-b border-border bg-muted p-2 flex flex-wrap items-center gap-1 sm:gap-2">
       <Button
         variant="ghost"
         size="sm"
@@ -241,19 +241,19 @@ export function ChordLexicalEditor({
   }, [])
 
   return (
-    <div className={cn('border border-gray-200 rounded-lg overflow-hidden', className)}>
+    <div className={cn('border border-border rounded-lg overflow-hidden', className)}>
       <LexicalComposer initialConfig={initialConfig}>
         <ToolbarPlugin />
-        <div className="bg-white min-h-[200px] relative">
+        <div className="bg-background min-h-[200px] relative">
           <PlainTextPlugin
             contentEditable={
               <ContentEditable 
-                className="prose prose-sm sm:prose-base max-w-none focus:outline-none p-3 sm:p-4 text-sm sm:text-base leading-relaxed whitespace-pre-wrap resize-none"
+                className="prose prose-sm sm:prose-base max-w-none focus:outline-none p-3 sm:p-4 text-sm sm:text-base leading-relaxed whitespace-pre-wrap resize-none text-foreground bg-transparent"
                 style={{ minHeight: '200px' }}
               />
             }
             placeholder={
-              <div className="absolute top-3 left-3 sm:top-4 sm:left-4 text-gray-400 pointer-events-none text-sm sm:text-base select-none">
+              <div className="absolute top-3 left-3 sm:top-4 sm:left-4 text-muted-foreground pointer-events-none text-sm sm:text-base select-none">
                 {placeholder}
               </div>
             }

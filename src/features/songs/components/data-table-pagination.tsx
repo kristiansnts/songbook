@@ -128,8 +128,8 @@ export function DataTablePagination<TData>({
             <SelectTrigger className='h-8 w-[70px]'>
               <SelectValue placeholder={pageSize} />
             </SelectTrigger>
-            <SelectContent side='top'>
-              {[10, 20, 30, 40, 50].map((pageSizeOption) => (
+            <SelectContent>
+              {[5, 10, 15, 20, 25].map((pageSizeOption) => (
                 <SelectItem key={pageSizeOption} value={`${pageSizeOption}`}>
                   {pageSizeOption}
                 </SelectItem>

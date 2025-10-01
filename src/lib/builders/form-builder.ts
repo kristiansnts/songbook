@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { FieldValues, UseFormProps } from 'react-hook-form'
 
-export type FieldType = 'text' | 'email' | 'password' | 'number' | 'select' | 'checkbox' | 'textarea' | 'richtext' | 'chordtext' | 'date' | 'phone' | 'tags'
+export type FieldType = 'text' | 'email' | 'password' | 'number' | 'select' | 'searchable-select' | 'checkbox' | 'textarea' | 'richtext' | 'chordtext' | 'date' | 'phone' | 'tags'
 
 export interface SelectOption {
   label: string
@@ -39,6 +39,13 @@ export interface SelectFieldConfig extends BaseFieldConfig {
   type: 'select'
   options: SelectOption[]
   multiple?: boolean
+}
+
+export interface SearchableSelectFieldConfig extends BaseFieldConfig {
+  type: 'searchable-select'
+  options: SelectOption[]
+  searchPlaceholder?: string
+  emptyMessage?: string
 }
 
 export interface CheckboxFieldConfig extends BaseFieldConfig {
@@ -81,6 +88,7 @@ export type FieldConfig =
   | TextFieldConfig 
   | NumberFieldConfig 
   | SelectFieldConfig 
+  | SearchableSelectFieldConfig
   | CheckboxFieldConfig 
   | TextareaFieldConfig 
   | RichtextFieldConfig
@@ -279,6 +287,8 @@ export class FieldBuilder {
   options(options: SelectOption[]): FieldBuilder {
     if (this.field.type === 'select') {
       (this.field as SelectFieldConfig).options = options
+    } else if (this.field.type === 'searchable-select') {
+      (this.field as SearchableSelectFieldConfig).options = options
     }
     return this
   }
@@ -286,6 +296,20 @@ export class FieldBuilder {
   multiple(multiple: boolean = true): FieldBuilder {
     if (this.field.type === 'select') {
       (this.field as SelectFieldConfig).multiple = multiple
+    }
+    return this
+  }
+
+  searchPlaceholder(placeholder: string): FieldBuilder {
+    if (this.field.type === 'searchable-select') {
+      (this.field as SearchableSelectFieldConfig).searchPlaceholder = placeholder
+    }
+    return this
+  }
+
+  emptyMessage(message: string): FieldBuilder {
+    if (this.field.type === 'searchable-select') {
+      (this.field as SearchableSelectFieldConfig).emptyMessage = message
     }
     return this
   }
