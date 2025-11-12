@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **NEW**: Swiper.js integration for horizontal swipe navigation in playlist view
+- **NEW**: Floating action buttons for chord toggle and home navigation in playlist view
+- Circular floating button (Music2 icon) to toggle chord visibility globally
+- Circular floating button (Home icon) to navigate back to songs list
+- Default Swiper pagination with clickable dots for easy song navigation
+- Infinite loop mode for continuous scrolling through playlist
+- Full-height swiper container with flex layout for responsive design
+- Select dropdown component for transpose key selection across all views
 - Complete song management system with CRUD operations
 - Song data model with TypeScript interfaces for type safety
 - Song resource class with navigation configuration and API integration
@@ -34,6 +42,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Debounced onChange handler (150ms) to prevent excessive processing during rapid typing/pasting
 
 ### Changed
+- **MAJOR**: Replaced vertical scrolling with horizontal swipe navigation in playlist view using Swiper.js
+- Changed playlist layout from stacked cards to full-screen slides for immersive experience
+- **IMPROVED**: Replaced transpose key button grid with select dropdown for better UX and space efficiency
+- Simplified transpose UI by removing "Original Key" and "Playlist Key" labels, showing only "Transpose:" with dropdown
+- Updated playlist view, song viewer, playlist dialog, and bulk playlist dialog to use consistent select dropdown for key selection
+- Modified playlist view container to use flexbox (h-screen) for proper full-height layout
 - Updated action button hover states to use solid background colors with white text
 - Modified badge rendering to use proper Tailwind color classes instead of generic names
 - Enhanced ActionConfig interface to support 'xs' size and refresh callbacks
@@ -66,12 +80,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Optimized chord detection processing with caching and debouncing for better user experience
 - **CRITICAL**: Fixed infinite paste/update loop in Lexical editor caused by InitialContentPlugin
 - Added initialization state management to prevent circular onChange events during content loading
+- **FIXED**: Enhanced chord hiding to also remove '#' (sharp) and 'b' (flat) symbols that aren't wrapped in chord spans
 
 ### Removed
+- Removed header with chord switcher from playlist view in favor of floating buttons
+- **BREAKING**: Removed vertical scrolling in playlist view - now uses horizontal swipe
+- **BREAKING**: Removed minor keys (Cm, Dm, Em, Fm, Gm, Am, Bm) from transpose KEYS array - now only major keys available
+- Removed stacked card layout in playlist view in favor of full-screen slides
+- Removed transpose key button grid UI in favor of select dropdown
+- Removed "Original Key" and "Playlist Key" display labels from playlist view
 - Removed mock data fallback from API error handling for clearer error states
 - Cleaned up unnecessary console logging in favor of toast notifications
 
 ### Todos History
+- [x] Install Swiper.js package
+- [x] Update playlist view to use Swiper for horizontal swipe
+- [x] Add custom pagination styling with numbered bullets
+- [x] Build and test swiper functionality
+- [x] Remove minor keys from KEYS array in transpose-utils.ts
+- [x] Replace key selector buttons with select dropdown in playlist view
+- [x] Simplify layout - remove Original Key and Playlist Key labels
+- [x] Update playlist-dialog.tsx to use select dropdown
+- [x] Update bulk-playlist-dialog.tsx to use select dropdown
+- [x] Build project to verify all changes
+- [x] Update CHANGELOG-CLAUDE.md with changes
 - [x] Define Song data model and TypeScript interfaces
 - [x] Create Song resource class with navigation configuration
 - [x] Set up API service layer for song endpoints
@@ -131,7 +163,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - TipTap editor focused on rich text formatting without transpose functionality
 - Song viewer provides accurate chord transposition for all key changes
 
-**Session Git Hash**: 6b5529108d1db9da6d5e40bc08358f675726ee9d
+### Done Condition
+- ✅ Swiper.js v11.1.15 installed successfully
+- ✅ Playlist view converted to horizontal swipe navigation
+- ✅ Default Swiper pagination with clickable dots implemented
+- ✅ Infinite loop mode enabled for continuous scrolling
+- ✅ Full-height layout with flexbox (h-screen) working correctly
+- ✅ Each slide supports vertical scrolling for long lyrics
+- ✅ Build completes successfully without errors
+- ✅ Minor keys (Cm, Dm, Em, Fm, Gm, Am, Bm) removed from KEYS array
+- ✅ All transpose key selectors replaced with select dropdown component
+- ✅ Simplified UI with only "Transpose:" label and dropdown
+- ✅ Updated files: transpose-utils.ts, playlist view, song-viewer, playlist-dialog, bulk-playlist-dialog
+- ✅ All components use consistent Select dropdown from shadcn/ui
+- ✅ Using default Swiper styles (no custom CSS needed)
+
+**Session Git Hash**: ac1804a3c218c5a64ff44f26a56e9b6662c34139
 
 ---
 

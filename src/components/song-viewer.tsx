@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Song } from '@/types/song';
-import { cn } from '@/lib/utils';
 import { KEYS, transposeStoredChords } from '@/lib/transpose-utils';
 import { ChordSwitcher } from '@/components/ui/chord-switcher';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface SongViewerProps {
   song: Song;
@@ -103,22 +103,23 @@ export function SongViewer({ song }: SongViewerProps) {
         <p className="text-sm md:text-base text-muted-foreground">{Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}</p>
       </div>
 
-      {/* Compact Key Selector Grid */}
-      <div className="grid grid-cols-6 gap-2 max-w-xs">
-        {KEYS.map((key) => (
-          <button
-            key={key}
-            onClick={() => setSelectedKey(key)}
-            className={cn(
-              "h-8 w-8 rounded-lg text-sm font-semibold transition-colors",
-              selectedKey === key
-                ? "bg-primary text-primary-foreground"
-                : "bg-muted text-muted-foreground hover:bg-muted/80"
-            )}
-          >
-            {key}
-          </button>
-        ))}
+      {/* Transpose Selector */}
+      <div className="flex items-center gap-3">
+        <label className="text-sm font-medium text-muted-foreground">
+          Transpose:
+        </label>
+        <Select value={selectedKey} onValueChange={setSelectedKey}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue placeholder="Select key" />
+          </SelectTrigger>
+          <SelectContent>
+            {KEYS.map((key) => (
+              <SelectItem key={key} value={key}>
+                {key}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Chord Switcher */}

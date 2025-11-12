@@ -4,11 +4,14 @@ import { playlistService } from '@/services/playlist-service'
 import { Playlist } from '@/types/playlist'
 import { Song } from '@/types/song'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, Loader2 } from 'lucide-react'
+import { ChevronLeft, Loader2, Home, Music2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { KEYS, transposeStoredChords } from '@/lib/transpose-utils'
-import { cn } from '@/lib/utils'
-import { ChordSwitcher } from '@/components/ui/chord-switcher'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Pagination } from 'swiper/modules'
+import 'swiper/css'
+import 'swiper/css/pagination'
 
 export const Route = createFileRoute('/_authenticated/user/playlist/view/$id')({
   component: PlaylistViewerComponent,
@@ -71,11 +74,11 @@ function SongContent({
       `;
       content = style + content;
 
-      // Additional processing: Remove slash characters that are typically part of chord notation
+      // Additional processing: Remove chord notation characters (/, #, b)
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = content;
 
-      // Find and remove text nodes that contain only "/" or are slash-related
+      // Find and remove text nodes that contain chord notation symbols
       const walker = document.createTreeWalker(
         tempDiv,
         NodeFilter.SHOW_TEXT,
@@ -87,7 +90,10 @@ function SongContent({
       let node;
       while (node = walker.nextNode()) {
         const textNode = node as Text;
-        if (textNode.textContent && textNode.textContent.trim() === '/') {
+        const trimmedText = textNode.textContent?.trim() || '';
+        // Remove nodes with slash, sharp, or flat symbols that are part of chord notation
+        if (trimmedText === '/' || trimmedText === '#' || trimmedText === 'b' ||
+            trimmedText === '/#' || trimmedText === '/b') {
           textNodesToRemove.push(textNode);
         }
       }
@@ -105,11 +111,11 @@ function SongContent({
   }, [song.lyrics_and_chords, song.base_chord, selectedKey, showChords]);
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6 mb-6">
-      {/* Song Header */}
-      <div className="mb-4 pb-4 border-b border-border">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="bg-muted text-muted-foreground px-2 py-1 rounded-full text-sm font-medium">
+    <div className="h-full w-full flex flex-col">
+      {/* Song Header - Fixed at top */}
+      <div className="mb-4 pb-4 border-b border-border flex-shrink-0">
+        <div className="flex items-center gap-3 mb-3">
+          <span className="bg-muted text-muted-foreground px-3 py-1 rounded-full text-sm font-medium">
             {index + 1}
           </span>
           <div>
@@ -117,37 +123,30 @@ function SongContent({
             <p className="text-muted-foreground">{song.artist}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-          <span>Original Key: <strong className="text-foreground">{song.base_chord}</strong></span>
-          {defaultKey && defaultKey !== song.base_chord && (
-            <span>Playlist Key: <strong className="text-primary">{defaultKey}</strong></span>
-          )}
+        {/* Transpose Selector */}
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-muted-foreground">
+            Transpose:
+          </label>
+          <Select value={selectedKey} onValueChange={setSelectedKey}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue placeholder="Select key" />
+            </SelectTrigger>
+            <SelectContent>
+              {KEYS.map((key) => (
+                <SelectItem key={key} value={key}>
+                  {key}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
-        {/* Key Selector Grid */}
-        <div className="grid grid-cols-6 gap-2 max-w-xs mb-3">
-          {KEYS.map((key) => (
-            <button
-              key={key}
-              onClick={() => setSelectedKey(key)}
-              className={cn(
-                "h-8 w-8 rounded-lg text-sm font-semibold transition-colors",
-                selectedKey === key
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              )}
-            >
-              {key}
-            </button>
-          ))}
-        </div>
-
       </div>
 
-      {/* Song Lyrics and Chords */}
-      <div className="lyrics-content">
+      {/* Song Lyrics and Chords - Scrollable content */}
+      <div className="lyrics-content flex-1 overflow-y-auto">
         {song.lyrics_and_chords && song.lyrics_and_chords.trim() !== '' ? (
-          <div 
+          <div
             key={selectedKey}
             className="prose-sm max-w-none text-sm md:text-base leading-normal"
             dangerouslySetInnerHTML={{ __html: memoizedTransposedContent() }}
@@ -235,52 +234,60 @@ function PlaylistViewerComponent() {
     return note?.base_chord;
   };
 
+  const handleHomeClick = () => {
+    navigate({ to: '/user/dashboard' })
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-background border-b border-border px-4 py-4 sticky top-0 z-40">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleBackToPlaylist}
-                className="mr-2 p-1"
-              >
-                <ChevronLeft className="h-6 w-6" />
-              </Button>
-              <div>
-                <h1 className="text-lg font-semibold text-foreground">{playlist.playlist_name || playlist.name}</h1>
-                <p className="text-sm text-muted-foreground">
-                  {songs.length} {songs.length === 1 ? 'song' : 'songs'}
-                </p>
-              </div>
-            </div>
-
-            {/* Global Chord Switcher */}
-            <ChordSwitcher
-              showChords={globalShowChords}
-              onToggle={setGlobalShowChords}
-              className="ml-4"
-            />
-          </div>
-        </div>
-      </header>
-
-      {/* All Songs Content */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="max-w-4xl mx-auto">
+    <div className="flex flex-col h-screen bg-background">
+      {/* Swiper Container - Horizontal Scrolling */}
+      <div className="flex-1 overflow-hidden">
+        <Swiper
+          modules={[Pagination]}
+          spaceBetween={50}
+          loop={true}
+          slidesPerView={1}
+          pagination={{ clickable: true }}
+          className="h-full w-full"
+        >
           {songs.map((song, index) => (
-            <SongContent
-              key={song.id}
-              song={song}
-              index={index}
-              defaultKey={getDefaultKeyForSong(song.id)}
-              showChords={globalShowChords}
-            />
+            <SwiperSlide key={song.id} className="h-full">
+              <div className="h-full overflow-y-auto px-4 py-6">
+                <div className="max-w-4xl mx-auto">
+                  <SongContent
+                    song={song}
+                    index={index}
+                    defaultKey={getDefaultKeyForSong(song.id)}
+                    showChords={globalShowChords}
+                  />
+                </div>
+              </div>
+            </SwiperSlide>
           ))}
-        </div>
+        </Swiper>
+      </div>
+
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-5 right-4 flex flex-col gap-3 z-50">
+        {/* Toggle Chords Button */}
+        <Button
+          size="icon"
+          onClick={() => setGlobalShowChords(!globalShowChords)}
+          className="h-14 w-14 rounded-full shadow-lg"
+          variant={globalShowChords ? "default" : "secondary"}
+        >
+          <Music2 className="h-6 w-6" />
+        </Button>
+
+        {/* Home Button */}
+        <Button
+          size="icon"
+          onClick={handleHomeClick}
+          className="h-14 w-14 rounded-full shadow-lg"
+          variant="outline"
+        >
+          <Home className="h-6 w-6" />
+        </Button>
       </div>
     </div>
   )
