@@ -255,11 +255,11 @@ export default function Library() {
                           className="w-full justify-between p-3 h-auto"
                           onClick={() => navigate({ to: '/user/artist/$name', params: { name: artist.name } })}
                         >
-                          <div className="flex items-center">
-                            <User className="text-gray-600 mr-4 h-6 w-6" />
-                            <span className="text-lg">{artist.name}</span>
+                          <div className="flex items-center min-w-0 flex-1">
+                            <User className="text-gray-600 mr-4 h-6 w-6 flex-shrink-0" />
+                            <span className="text-lg truncate">{artist.name}</span>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-gray-400" />
+                          <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 ml-2" />
                         </Button>
                       ))}
                     </div>
@@ -305,11 +305,11 @@ export default function Library() {
                           className="w-full justify-between p-3 h-auto"
                           onClick={() => navigate({ to: '/user/playlist/$id', params: { id: playlist.id.toString() } })}
                         >
-                          <div className="flex items-center">
-                            <Music className="text-gray-600 mr-4 h-6 w-6" />
-                            <span className="text-lg">{playlist.name}</span>
+                          <div className="flex items-center min-w-0 flex-1">
+                            <Music className="text-gray-600 mr-4 h-6 w-6 flex-shrink-0" />
+                            <span className="text-lg truncate">{playlist.name}</span>
                           </div>
-                          <div className="flex items-center">
+                          <div className="flex items-center flex-shrink-0 ml-2">
                             <span className="text-gray-500 mr-2">{playlist.songCount}</span>
                             {isVerifiedMember && playlist.access_type !== 'owner' && (
                               <Badge className="bg-blue-500 text-white hover:bg-blue-600 mr-2">
@@ -400,11 +400,11 @@ export default function Library() {
                       className="w-full justify-between p-3 h-auto"
                       onClick={() => navigate({ to: '/user/playlist/$id', params: { id: playlist.id.toString() } })}
                     >
-                      <div className="flex items-center">
-                        <Music className="text-gray-600 mr-4 h-6 w-6" />
-                        <span className="text-lg">{playlist.name}</span>
+                      <div className="flex items-center min-w-0 flex-1">
+                        <Music className="text-gray-600 mr-4 h-6 w-6 flex-shrink-0" />
+                        <span className="text-lg truncate">{playlist.name}</span>
                       </div>
-                      <div className="flex items-center">
+                      <div className="flex items-center flex-shrink-0 ml-2">
                         <span className="text-gray-500 mr-2">{playlist.songCount}</span>
                         {isVerifiedMember && playlist.access_type !== 'owner' && (
                           <Badge className="bg-blue-500 text-white hover:bg-blue-600 mr-2">

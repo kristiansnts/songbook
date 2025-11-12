@@ -119,11 +119,11 @@ function ArtistSongsPage() {
                   navigate({ to: '/user/song/$id', params: { id: song.id.toString() } })
                 }}
               >
-                <div className="flex-1 text-left">
-                  <h3 className="text-lg font-medium">{song.title}</h3>
-                  <p className="text-gray-500">{song.artist}</p>
+                <div className="flex-1 text-left min-w-0">
+                  <h3 className="text-lg font-medium truncate">{song.title}</h3>
+                  <p className="text-gray-500 truncate">{song.artist}</p>
                 </div>
-                <ChevronRight className="h-5 w-5 text-gray-400" />
+                <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 ml-2" />
               </Button>
             ))}
           </div>
