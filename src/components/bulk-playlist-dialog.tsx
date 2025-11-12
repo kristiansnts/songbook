@@ -10,7 +10,7 @@ import { playlistService } from '@/services/playlist-service'
 import { SongsService } from '@/features/songs/services/songs-service'
 import { toast } from 'sonner'
 import { KEYS } from '@/lib/transpose-utils'
-import { cn } from '@/lib/utils'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface BulkPlaylistDialogProps {
   open: boolean
@@ -213,29 +213,25 @@ export function BulkPlaylistDialog({
             </div>
             
             {useCustomChord && (
-              <>
-                <div className="grid grid-cols-6 gap-2">
-                  {KEYS.map((key) => (
-                    <button
-                      key={key}
-                      onClick={() => setSelectedChord(key)}
-                      className={cn(
-                        "h-8 w-8 rounded-lg text-sm font-semibold transition-colors",
-                        selectedChord === key
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-foreground hover:bg-muted/80"
-                      )}
-                    >
-                      {key}
-                    </button>
-                  ))}
-                </div>
+              <div className="space-y-2">
+                <Select value={selectedChord} onValueChange={setSelectedChord}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select key" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {KEYS.map((key) => (
+                      <SelectItem key={key} value={key}>
+                        {key}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {selectedChord && (
                   <p className="text-xs text-muted-foreground">
                     Selected chord: <strong>{selectedChord}</strong> (will override all songs' original chords)
                   </p>
                 )}
-              </>
+              </div>
             )}
             
             {!useCustomChord && (
