@@ -325,12 +325,13 @@ export function SongListView() {
                           <Checkbox
                             checked={selectedSongs.has(song.id)}
                             onCheckedChange={() => handleSongToggle(song.id)}
+                            className="flex-shrink-0"
                           />
-                          <div className="flex-1 text-left">
-                            <h3 className="text-lg font-medium">{song.title}</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              <p className="text-gray-500">{song.artist.join(', ')}</p>
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                          <div className="flex-1 text-left min-w-0">
+                            <h3 className="text-lg font-medium truncate">{song.title}</h3>
+                            <div className="flex items-center gap-2 mt-1 min-w-0">
+                              <p className="text-gray-500 truncate flex-1">{song.artist.join(', ')}</p>
+                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
                                 {song.base_chord}
                               </span>
                             </div>
@@ -344,16 +345,16 @@ export function SongListView() {
                             navigate({ to: '/user/song/$id', params: { id: String(song.id) } })
                           }}
                         >
-                          <div className="flex-1 text-left">
-                            <h3 className="text-lg font-medium">{song.title}</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              <p className="text-gray-500">{song.artist.join(', ')}</p>
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">
+                          <div className="flex-1 text-left min-w-0">
+                            <h3 className="text-lg font-medium truncate">{song.title}</h3>
+                            <div className="flex items-center gap-2 mt-1 min-w-0">
+                              <p className="text-gray-500 truncate flex-1">{song.artist.join(', ')}</p>
+                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
                                 {song.base_chord}
                               </span>
                             </div>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-gray-400" />
+                          <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 ml-2" />
                         </Button>
                       )}
                     </div>

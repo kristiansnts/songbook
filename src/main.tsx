@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
+import { Analytics } from '@vercel/analytics/react'
 import { FontProvider } from './context/font-context'
 import { ThemeProvider } from './context/theme-context'
 import './index.css'
@@ -31,6 +32,7 @@ if (!rootElement.innerHTML) {
       <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
         <FontProvider>
           <RouterProvider router={router} />
+          <Analytics />
         </FontProvider>
       </ThemeProvider>
     </StrictMode>

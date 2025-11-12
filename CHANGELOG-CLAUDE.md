@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Conditional navigation visibility system based on route pathname
+- Route-based hiding of Header and AppSidebar for immersive full-screen views
+- Text truncation with `truncate` class on all list items (artist names, song titles, artist names in song cards)
+- Proper flexbox constraints (`min-w-0`, `flex-1`, `flex-shrink-0`) to prevent text overflow
+- **NEW**: @vercel/analytics package installed for web analytics tracking
 - **NEW**: Swiper.js integration for horizontal swipe navigation in playlist view
 - **NEW**: Floating action buttons for chord toggle and home navigation in playlist view
 - Circular floating button (Music2 icon) to toggle chord visibility globally
@@ -42,6 +47,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Debounced onChange handler (150ms) to prevent excessive processing during rapid typing/pasting
 
 ### Changed
+- **IMPROVED**: AuthenticatedLayout now conditionally renders Header and Sidebar based on current route
+- Enhanced AuthenticatedLayout with `useLocation()` hook from TanStack Router for route detection
+- Modified content div width classes to only apply sidebar-related styles when navigation is visible
+- **FIXED**: Mobile responsive layout - sidebar width calculations now only apply on desktop (md breakpoint)
+- Added `overflow-x-hidden` to content wrapper to prevent horizontal scrolling on mobile
 - **MAJOR**: Replaced vertical scrolling with horizontal swipe navigation in playlist view using Swiper.js
 - Changed playlist layout from stacked cards to full-screen slides for immersive experience
 - **IMPROVED**: Replaced transpose key button grid with select dropdown for better UX and space efficiency
@@ -61,6 +71,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced editor performance and reduced bundle size with modern architecture
 
 ### Fixed
+- **CRITICAL**: Fixed horizontal text overflow on mobile in artist and song lists
+- Added text truncation to prevent long artist names and song titles from causing horizontal scroll
+- Implemented proper flexbox constraints to ensure content stays within viewport bounds
 - Fixed badge status updates not triggering proper UI rerenders
 - Resolved black badge display issue by implementing proper color mapping
 - Fixed action button sizes to match badge proportions for visual consistency
@@ -93,6 +106,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cleaned up unnecessary console logging in favor of toast notifications
 
 ### Todos History
+- [x] Analyze routes that should hide main navigation
+- [x] Implement navigation visibility logic in AuthenticatedLayout
+- [x] Test navigation visibility on different routes
+- [x] Investigate horizontal overflow on mobile dashboard
+- [x] Fix responsive layout for user dashboard
+- [x] Test mobile view after fixes
+- [x] Check artist list page for text overflow
+- [x] Check songs list page for text overflow
+- [x] Add text truncation/wrapping to prevent overflow
+- [x] Test mobile view after text fixes
+- [x] Fix text truncation on dashboard playlist names
+- [x] Build and test dashboard text fixes
+- [x] Install @vercel/analytics package
 - [x] Install Swiper.js package
 - [x] Update playlist view to use Swiper for horizontal swipe
 - [x] Add custom pagination styling with numbered bullets
@@ -178,7 +204,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ All components use consistent Select dropdown from shadcn/ui
 - ✅ Using default Swiper styles (no custom CSS needed)
 
-**Session Git Hash**: ac1804a3c218c5a64ff44f26a56e9b6662c34139
+### Done Condition
+- ✅ Main navigation (Header + Sidebar) hidden on `/user/song` and `/user/song/$id` routes
+- ✅ Main navigation hidden on `/user/artist` and `/user/artist/$name` routes
+- ✅ Main navigation hidden on `/user/playlist/view/$id` routes
+- ✅ Full-screen immersive view enabled for song, artist, and playlist viewer pages
+- ✅ AuthenticatedLayout uses route detection via `useLocation()` hook
+- ✅ Route matching logic handles both exact routes and sub-routes correctly
+- ✅ Content width dynamically adjusts based on navigation visibility
+- ✅ Mobile responsive layout fixed - no horizontal overflow on dashboard
+- ✅ Sidebar width calculations only apply on desktop (md+ breakpoints)
+- ✅ Content wrapper has overflow-x-hidden to prevent horizontal scrolling
+- ✅ Text truncation applied to all list items (artists, songs, titles, playlists)
+- ✅ Long artist names and song titles properly truncated with ellipsis on mobile
+- ✅ Long playlist names truncated in both search results and default library view
+- ✅ Dashboard playlist names properly truncated with ellipsis
+- ✅ Flexbox constraints prevent text from causing horizontal overflow
+- ✅ ChevronRight icons and badges use flex-shrink-0 to maintain proper spacing
+- ✅ @vercel/analytics package successfully installed (2 packages added)
+- ✅ Build completes successfully without TypeScript errors
+- ✅ Navigation system properly integrated with TanStack Router
+
+**Session Git Hash**: 7708ed84bdfa3a99cc4f5fa3ea7f235040d413b4
 
 ---
 
