@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Search term persistence in URL query parameters for song list view
+- URL search params synchronization between song list and detail pages
 - Conditional navigation visibility system based on route pathname
 - Route-based hiding of Header and AppSidebar for immersive full-screen views
 - Text truncation with `truncate` class on all list items (artist names, song titles, artist names in song cards)
@@ -47,11 +49,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Debounced onChange handler (150ms) to prevent excessive processing during rapid typing/pasting
 
 ### Changed
+- Search input now syncs with URL query parameters and updates on navigation
+- Song detail page back button preserves search state from previous page
 - **IMPROVED**: AuthenticatedLayout now conditionally renders Header and Sidebar based on current route
 - Enhanced AuthenticatedLayout with `useLocation()` hook from TanStack Router for route detection
 - Modified content div width classes to only apply sidebar-related styles when navigation is visible
 - **FIXED**: Mobile responsive layout - sidebar width calculations now only apply on desktop (md breakpoint)
 - Added `overflow-x-hidden` to content wrapper to prevent horizontal scrolling on mobile
+- **INTEGRATED**: Vercel Analytics component added to main.tsx for page view and event tracking
 - **MAJOR**: Replaced vertical scrolling with horizontal swipe navigation in playlist view using Swiper.js
 - Changed playlist layout from stacked cards to full-screen slides for immersive experience
 - **IMPROVED**: Replaced transpose key button grid with select dropdown for better UX and space efficiency
@@ -119,6 +124,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [x] Fix text truncation on dashboard playlist names
 - [x] Build and test dashboard text fixes
 - [x] Install @vercel/analytics package
+- [x] Import Analytics component in main.tsx
+- [x] Add Analytics component to app layout
+- [x] Build and verify Analytics integration
 - [x] Install Swiper.js package
 - [x] Update playlist view to use Swiper for horizontal swipe
 - [x] Add custom pagination styling with numbered bullets
@@ -222,6 +230,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ✅ Flexbox constraints prevent text from causing horizontal overflow
 - ✅ ChevronRight icons and badges use flex-shrink-0 to maintain proper spacing
 - ✅ @vercel/analytics package successfully installed (2 packages added)
+- ✅ Analytics component imported from '@vercel/analytics/react'
+- ✅ Analytics component integrated in main.tsx within app providers
+- ✅ Analytics will automatically track page views when deployed to Vercel
 - ✅ Build completes successfully without TypeScript errors
 - ✅ Navigation system properly integrated with TanStack Router
 

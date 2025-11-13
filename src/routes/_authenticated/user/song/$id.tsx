@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useParams, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useParams, useNavigate, useSearch } from '@tanstack/react-router'
 import { SongViewer } from '@/components/song-viewer'
 import { PlaylistDialog } from '@/components/playlist-dialog'
 import { authManager } from '@/lib/auth-manager'
@@ -11,6 +11,7 @@ import { ChevronLeft, Plus } from 'lucide-react'
 function SongViewPage() {
   const navigate = useNavigate()
   const { id } = useParams({ from: '/_authenticated/user/song/$id' })
+  const search = useSearch({ from: '/_authenticated/user/song/$id' }) as { search?: string; artist?: string }
   const [song, setSong] = useState<Song | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -62,7 +63,7 @@ function SongViewPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
         <div className="text-destructive">{error || 'Song not found'}</div>
-        <Button onClick={() => navigate({ to: '/user/song' })}>
+        <Button onClick={() => navigate({ to: '/user/song', search })}>
           Back to Songs
         </Button>
       </div>
@@ -77,7 +78,7 @@ function SongViewPage() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate({ to: '/user/song' })}
+            onClick={() => navigate({ to: '/user/song', search })}
             className="mr-2 p-1"
           >
             <ChevronLeft className="h-6 w-6" />
@@ -111,11 +112,15 @@ function SongViewPage() {
 }
 
 export const Route = createFileRoute('/_authenticated/user/song/$id')({
+  validateSearch: (search) => ({
+    search: (search.search as string) || undefined,
+    artist: (search.artist as string) || undefined,
+  }),
   beforeLoad: async () => {
     // 🛡️ User route protection - require peserta permission
     try {
       const hasPermission = await authManager.hasPermission('peserta')
-      
+
       if (!hasPermission) {
         throw redirect({
           to: '/unauthorized',
