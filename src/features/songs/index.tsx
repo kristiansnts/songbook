@@ -13,18 +13,23 @@ import { toast } from 'sonner'
 
 export function SongListView() {
   const navigate = useNavigate()
-  const search = useSearch({ from: '/_authenticated/user/song/' }) as { artist?: string }
+  const search = useSearch({ from: '/_authenticated/user/song/' }) as { artist?: string; search?: string }
   const [songs, setSongs] = useState<Song[]>([])
   const [_pagination, _setPagination] = useState<PaginationMeta | null>(null)
   const [_currentPage, _setCurrentPage] = useState(1)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedSongs, setSelectedSongs] = useState<Set<number>>(new Set())
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchTerm, setSearchTerm] = useState(search.search || '')
   const [isSelectMode, setIsSelectMode] = useState(false)
   const [selectedChord, setSelectedChord] = useState<string>('')
   const [showBulkPlaylistDialog, setShowBulkPlaylistDialog] = useState(false)
   const [orderBy, setOrderBy] = useState<'title' | 'base_chord'>('title')
+
+  // Sync searchTerm with URL search params
+  useEffect(() => {
+    setSearchTerm(search.search || '')
+  }, [search.search])
 
   useEffect(() => {
     const fetchSongs = async () => {
@@ -164,11 +169,27 @@ export function SongListView() {
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value)
+    navigate({
+      to: '/user/song',
+      search: {
+        ...search,
+        search: value || undefined
+      },
+      replace: true
+    })
     resetPagination()
   }
 
   const clearSearch = () => {
     setSearchTerm('')
+    navigate({
+      to: '/user/song',
+      search: {
+        ...search,
+        search: undefined
+      },
+      replace: true
+    })
     resetPagination()
   }
 
@@ -342,7 +363,7 @@ export function SongListView() {
                           variant="ghost"
                           className="w-full justify-between p-3 h-auto"
                           onClick={() => {
-                            navigate({ to: '/user/song/$id', params: { id: String(song.id) } })
+                            navigate({ to: '/user/song/$id', params: { id: String(song.id) }, search })
                           }}
                         >
                           <div className="flex-1 text-left min-w-0">
