@@ -1,11 +1,13 @@
-import * as React from "react"
-import type { Editor } from "@tiptap/react"
-import type { Content, UseEditorOptions } from "@tiptap/react"
-import { StarterKit } from "@tiptap/starter-kit"
-import { useEditor, useEditorState } from "@tiptap/react"
-import { Typography } from "@tiptap/extension-typography"
-import { TextStyle } from "@tiptap/extension-text-style"
-import { Placeholder, Selection } from "@tiptap/extensions"
+import * as React from 'react'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Typography } from '@tiptap/extension-typography'
+import { Placeholder, Selection } from '@tiptap/extensions'
+import type { Editor } from '@tiptap/react'
+import type { Content, UseEditorOptions } from '@tiptap/react'
+import { useEditor, useEditorState } from '@tiptap/react'
+import { StarterKit } from '@tiptap/starter-kit'
+import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import {
   Image,
   HorizontalRule,
@@ -14,15 +16,13 @@ import {
   UnsetAllMarks,
   ResetMarksOnEnter,
   FileHandler,
-} from "../extensions"
-import { cn } from "@/lib/utils"
-import { fileToBase64, getOutput, randomId } from "../utils"
-import { useThrottle } from "../hooks/use-throttle"
-import { toast } from "sonner"
+} from '../extensions'
+import { useThrottle } from '../hooks/use-throttle'
+import { fileToBase64, getOutput, randomId } from '../utils'
 
 export interface UseMinimalTiptapEditorProps extends UseEditorOptions {
   value?: Content
-  output?: "html" | "json" | "text"
+  output?: 'html' | 'json' | 'text'
   placeholder?: string
   editorClassName?: string
   throttleDelay?: number
@@ -51,16 +51,16 @@ const createExtensions = ({
   uploader?: (file: File) => Promise<string>
 }) => [
   StarterKit.configure({
-    blockquote: { HTMLAttributes: { class: "block-node" } },
+    blockquote: { HTMLAttributes: { class: 'block-node' } },
     // bold
-    bulletList: { HTMLAttributes: { class: "list-node" } },
-    code: { HTMLAttributes: { class: "inline", spellcheck: "false" } },
+    bulletList: { HTMLAttributes: { class: 'list-node' } },
+    code: { HTMLAttributes: { class: 'inline', spellcheck: 'false' } },
     codeBlock: false,
     // document
-    dropcursor: { width: 2, class: "ProseMirror-dropcursor border" },
+    dropcursor: { width: 2, class: 'ProseMirror-dropcursor border' },
     // gapcursor
     // hardBreak
-    heading: { HTMLAttributes: { class: "heading-node" } },
+    heading: { HTMLAttributes: { class: 'heading-node' } },
     // undoRedo
     horizontalRule: false,
     // italic
@@ -70,18 +70,18 @@ const createExtensions = ({
       enableClickSelection: true,
       openOnClick: false,
       HTMLAttributes: {
-        class: "link",
+        class: 'link',
       },
     },
-    orderedList: { HTMLAttributes: { class: "list-node" } },
-    paragraph: { HTMLAttributes: { class: "text-node" } },
+    orderedList: { HTMLAttributes: { class: 'list-node' } },
+    paragraph: { HTMLAttributes: { class: 'text-node' } },
     // strike
     // text
     // underline
     // trailingNode
   }),
   Image.configure({
-    allowedMimeTypes: ["image/*"],
+    allowedMimeTypes: ['image/*'],
     maxFileSize: 5 * 1024 * 1024,
     allowBase64: true,
     uploadFn: async (file) => {
@@ -95,7 +95,7 @@ const createExtensions = ({
           const id = randomId()
 
           return {
-            type: "image",
+            type: 'image',
             attrs: {
               id,
               src: blobUrl,
@@ -108,48 +108,48 @@ const createExtensions = ({
       )
     },
     onImageRemoved({ id, src }) {
-      console.log("Image removed", { id, src })
+      console.log('Image removed', { id, src })
     },
     onValidationError(errors) {
       errors.forEach((error) => {
-        toast.error("Image validation error", {
-          position: "bottom-right",
+        toast.error('Image validation error', {
+          position: 'bottom-right',
           description: error.reason,
         })
       })
     },
     onActionSuccess({ action }) {
       const mapping = {
-        copyImage: "Copy Image",
-        copyLink: "Copy Link",
-        download: "Download",
+        copyImage: 'Copy Image',
+        copyLink: 'Copy Link',
+        download: 'Download',
       }
       toast.success(mapping[action], {
-        position: "bottom-right",
-        description: "Image action success",
+        position: 'bottom-right',
+        description: 'Image action success',
       })
     },
     onActionError(error, { action }) {
       const mapping = {
-        copyImage: "Copy Image",
-        copyLink: "Copy Link",
-        download: "Download",
+        copyImage: 'Copy Image',
+        copyLink: 'Copy Link',
+        download: 'Download',
       }
       toast.error(`Failed to ${mapping[action]}`, {
-        position: "bottom-right",
+        position: 'bottom-right',
         description: error.message,
       })
     },
   }),
   FileHandler.configure({
     allowBase64: true,
-    allowedMimeTypes: ["image/*"],
+    allowedMimeTypes: ['image/*'],
     maxFileSize: 5 * 1024 * 1024,
     onDrop: (editor, files, pos) => {
       files.forEach(async (file) => {
         const src = await fileToBase64(file)
         editor.commands.insertContentAt(pos, {
-          type: "image",
+          type: 'image',
           attrs: { src },
         })
       })
@@ -158,15 +158,15 @@ const createExtensions = ({
       files.forEach(async (file) => {
         const src = await fileToBase64(file)
         editor.commands.insertContent({
-          type: "image",
+          type: 'image',
           attrs: { src },
         })
       })
     },
     onValidationError: (errors) => {
       errors.forEach((error) => {
-        toast.error("Image validation error", {
-          position: "bottom-right",
+        toast.error('Image validation error', {
+          position: 'bottom-right',
           description: error.reason,
         })
       })
@@ -185,8 +185,8 @@ const createExtensions = ({
 
 export const useMinimalTiptapEditor = ({
   value,
-  output = "html",
-  placeholder = "",
+  output = 'html',
+  placeholder = '',
   editorClassName,
   throttleDelay = 0,
   onUpdate,
@@ -223,10 +223,10 @@ export const useMinimalTiptapEditor = ({
     extensions: createExtensions({ placeholder, uploader }),
     editorProps: {
       attributes: {
-        autocomplete: "off",
-        autocorrect: "off",
-        autocapitalize: "off",
-        class: cn("focus:outline-hidden", editorClassName),
+        autocomplete: 'off',
+        autocorrect: 'off',
+        autocapitalize: 'off',
+        class: cn('focus:outline-hidden', editorClassName),
       },
     },
     onUpdate: ({ editor }) => handleUpdate(editor),

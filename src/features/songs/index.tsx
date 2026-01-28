@@ -1,19 +1,28 @@
+import { useState, useEffect } from 'react'
+import { useNavigate, useSearch } from '@tanstack/react-router'
+import { songService } from '@/services/songService'
+import { Song, PaginationMeta } from '@/types/song'
+import { Search, ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { toast } from 'sonner'
+import { KEYS } from '@/lib/transpose-utils'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Search, ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { useNavigate, useSearch } from '@tanstack/react-router'
-import { useState, useEffect } from 'react'
-import { songService } from '@/services/songService'
-import { Song, PaginationMeta } from '@/types/song'
-import { KEYS } from '@/lib/transpose-utils'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { BulkPlaylistDialog } from '@/components/bulk-playlist-dialog'
-import { toast } from 'sonner'
 
 export function SongListView() {
   const navigate = useNavigate()
-  const search = useSearch({ from: '/_authenticated/user/song/' }) as { artist?: string; search?: string }
+  const search = useSearch({ from: '/_authenticated/user/song/' }) as {
+    artist?: string
+    search?: string
+  }
   const [songs, setSongs] = useState<Song[]>([])
   const [_pagination, _setPagination] = useState<PaginationMeta | null>(null)
   const [_currentPage, _setCurrentPage] = useState(1)
@@ -43,7 +52,7 @@ export function SongListView() {
           ...(selectedChord && { base_chord: selectedChord }),
           ...(search.artist && { search: search.artist }),
           sort_by: orderBy,
-          sort_order: 'asc' as const
+          sort_order: 'asc' as const,
         }
         const response = await songService.getAllSongs(filters)
         setSongs(response.data)
@@ -76,10 +85,11 @@ export function SongListView() {
   const groupSongs = (songs: Song[], groupBy: 'title' | 'base_chord') => {
     const groups = new Map<string, Song[]>()
 
-    songs.forEach(song => {
-      const key = groupBy === 'title'
-        ? song.title.charAt(0).toUpperCase()
-        : song.base_chord.charAt(0).toUpperCase()
+    songs.forEach((song) => {
+      const key =
+        groupBy === 'title'
+          ? song.title.charAt(0).toUpperCase()
+          : song.base_chord.charAt(0).toUpperCase()
 
       if (!groups.has(key)) {
         groups.set(key, [])
@@ -88,7 +98,9 @@ export function SongListView() {
     })
 
     // Sort groups by key
-    const sortedGroups = Array.from(groups.entries()).sort(([a], [b]) => a.localeCompare(b))
+    const sortedGroups = Array.from(groups.entries()).sort(([a], [b]) =>
+      a.localeCompare(b)
+    )
     return sortedGroups
   }
 
@@ -110,7 +122,7 @@ export function SongListView() {
     if (selectedSongs.size === filteredSongs.length) {
       setSelectedSongs(new Set())
     } else {
-      setSelectedSongs(new Set(filteredSongs.map(song => song.id)))
+      setSelectedSongs(new Set(filteredSongs.map((song) => song.id)))
     }
   }
 
@@ -132,24 +144,29 @@ export function SongListView() {
     setShowBulkPlaylistDialog(true)
   }
 
-  const handleBulkPlaylistComplete = (playlistIds: string[], newPlaylistName?: string) => {
+  const handleBulkPlaylistComplete = (
+    playlistIds: string[],
+    newPlaylistName?: string
+  ) => {
     // Clear selection after successful addition
     setSelectedSongs(new Set())
     setIsSelectMode(false)
-    
+
     toast.success(
       `Songs successfully added to ${playlistIds.length} playlist(s)${newPlaylistName ? ` including "${newPlaylistName}"` : ''}`,
       {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       }
     )
   }
 
   // Get selected song objects for the dialog
-  const selectedSongObjects = filteredSongs.filter(song => selectedSongs.has(song.id))
+  const selectedSongObjects = filteredSongs.filter((song) =>
+    selectedSongs.has(song.id)
+  )
 
   const handleChordFilter = (chord: string) => {
     if (selectedChord === chord) {
@@ -173,9 +190,9 @@ export function SongListView() {
       to: '/user/song',
       search: {
         ...search,
-        search: value || undefined
+        search: value || undefined,
       },
-      replace: true
+      replace: true,
     })
     resetPagination()
   }
@@ -186,9 +203,9 @@ export function SongListView() {
       to: '/user/song',
       search: {
         ...search,
-        search: undefined
+        search: undefined,
       },
-      replace: true
+      replace: true,
     })
     resetPagination()
   }
@@ -199,98 +216,111 @@ export function SongListView() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className='flex h-screen flex-col'>
       {/* Fixed Header */}
-      <header className="flex justify-between items-center px-4 py-4 border-b bg-background dark:bg-background">
+      <header className='bg-background dark:bg-background flex items-center justify-between border-b px-4 py-4'>
         {!isSelectMode ? (
           <>
-            <div className="flex items-center">
+            <div className='flex items-center'>
               <Button
-                variant="ghost"
-                size="sm"
+                variant='ghost'
+                size='sm'
                 onClick={handleBackToLibrary}
-                className="mr-2 p-1"
+                className='mr-2 p-1'
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className='h-6 w-6' />
               </Button>
-              <span className="text-lg">{search.artist ? 'Artists' : 'Library'}</span>
+              <span className='text-lg'>
+                {search.artist ? 'Artists' : 'Library'}
+              </span>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleSelectMode}>
+            <Button variant='ghost' size='sm' onClick={handleSelectMode}>
               Select
             </Button>
           </>
         ) : (
           <>
-            <div className="flex items-center">
+            <div className='flex items-center'>
               <Button
-                variant="ghost"
-                size="sm"
+                variant='ghost'
+                size='sm'
                 onClick={handleBackToLibrary}
-                className="mr-2 p-1"
+                className='mr-2 p-1'
               >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className='h-6 w-6' />
               </Button>
-              <span className="text-lg">{search.artist ? 'Artists' : 'Library'}</span>
+              <span className='text-lg'>
+                {search.artist ? 'Artists' : 'Library'}
+              </span>
             </div>
-            <Button variant="ghost" onClick={handleDone} className="text-blue-500">
+            <Button
+              variant='ghost'
+              onClick={handleDone}
+              className='text-blue-500'
+            >
               Done
             </Button>
           </>
         )}
       </header>
 
-       <div className="px-4 pt-6 pb-2 bg-background dark:bg-background">
-          <h1 className="text-4xl font-bold">{search.artist || 'Songs'}</h1>
-          {songs.length > 0 && (
-            <p className="text-muted-foreground mt-1">
-              {songs.length} song{songs.length !== 1 ? 's' : ''} total
-            </p>
-          )}
-        </div>
+      <div className='bg-background dark:bg-background px-4 pt-6 pb-2'>
+        <h1 className='text-4xl font-bold'>{search.artist || 'Songs'}</h1>
+        {songs.length > 0 && (
+          <p className='text-muted-foreground mt-1'>
+            {songs.length} song{songs.length !== 1 ? 's' : ''} total
+          </p>
+        )}
+      </div>
 
       {/* Fixed Search */}
-      <div className="px-4 py-4 bg-background dark:bg-background border-b space-y-4">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+      <div className='bg-background dark:bg-background space-y-4 border-b px-4 py-4'>
+        <div className='relative'>
+          <Search className='absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400' />
           <Input
-            className="pl-10 pr-10"
-            placeholder="Search songs, artists, or lyrics"
-            type="text"
+            className='pr-10 pl-10'
+            placeholder='Search songs, artists, or lyrics'
+            type='text'
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
           />
           {searchTerm && (
             <button
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 h-5 w-5 flex items-center justify-center"
+              className='absolute top-1/2 right-3 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-gray-400 hover:text-gray-600'
             >
-              <X className="h-4 w-4" />
+              <X className='h-4 w-4' />
             </button>
           )}
         </div>
 
         {/* Order By and Filter Section - space between */}
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Sort by:</span>
+        <div className='flex w-full items-center justify-between'>
+          <div className='flex items-center gap-2'>
+            <span className='text-muted-foreground text-sm'>Sort by:</span>
             <Select value={orderBy} onValueChange={handleOrderByChange}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className='w-32'>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="title">Title</SelectItem>
-                <SelectItem value="base_chord">Chord</SelectItem>
+                <SelectItem value='title'>Title</SelectItem>
+                <SelectItem value='base_chord'>Chord</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Select value={selectedChord || "all"} onValueChange={(value) => handleChordFilter(value === "all" ? '' : value)}>
-              <SelectTrigger className="w-32">
-                <SelectValue placeholder="All chords" />
+          <div className='flex items-center gap-2'>
+            <Select
+              value={selectedChord || 'all'}
+              onValueChange={(value) =>
+                handleChordFilter(value === 'all' ? '' : value)
+              }
+            >
+              <SelectTrigger className='w-32'>
+                <SelectValue placeholder='All chords' />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All chords</SelectItem>
+                <SelectItem value='all'>All chords</SelectItem>
                 {KEYS.map((chord) => (
                   <SelectItem key={chord} value={chord}>
                     {chord}
@@ -300,59 +330,65 @@ export function SongListView() {
             </Select>
             {selectedChord && (
               <Button
-                variant="ghost"
-                size="sm"
+                variant='ghost'
+                size='sm'
                 onClick={clearChordFilter}
-                className="text-gray-500 hover:text-gray-700 p-1"
+                className='p-1 text-gray-500 hover:text-gray-700'
               >
-                <X className="h-4 w-4" />
+                <X className='h-4 w-4' />
               </Button>
             )}
           </div>
         </div>
 
         {selectedChord && songs.length > 0 && (
-          <p className="text-sm text-muted-foreground">
-            Showing {songs.filter(song => song.base_chord === selectedChord).length} songs in key <strong>{selectedChord}</strong>
+          <p className='text-muted-foreground text-sm'>
+            Showing{' '}
+            {songs.filter((song) => song.base_chord === selectedChord).length}{' '}
+            songs in key <strong>{selectedChord}</strong>
           </p>
         )}
       </div>
 
       {/* Scrollable Song List */}
-      <main className="flex-1 overflow-y-auto px-4 py-4">
+      <main className='flex-1 overflow-y-auto px-4 py-4'>
         {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="text-gray-500">Loading songs...</div>
+          <div className='flex justify-center py-8'>
+            <div className='text-gray-500'>Loading songs...</div>
           </div>
         ) : error ? (
-          <div className="flex justify-center py-8">
-            <div className="text-red-500">Error loading songs</div>
+          <div className='flex justify-center py-8'>
+            <div className='text-red-500'>Error loading songs</div>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className='space-y-4'>
             {groupedSongs.map(([letter, songs]) => (
               <div key={letter}>
                 {/* Alphabet Letter Header */}
-                <div className="top-0 text-[#960001] py-3 px-4 mb-2 rounded-md font-bold text-xl z-10">
+                <div className='top-0 z-10 mb-2 rounded-md px-4 py-3 text-xl font-bold text-[#960001]'>
                   {letter}
                 </div>
 
                 {/* Songs in this letter group */}
-                <div className="space-y-1">
+                <div className='space-y-1'>
                   {songs.map((song) => (
                     <div key={song.id}>
                       {isSelectMode ? (
-                        <div className="flex items-center space-x-3 px-3 py-3">
+                        <div className='flex items-center space-x-3 px-3 py-3'>
                           <Checkbox
                             checked={selectedSongs.has(song.id)}
                             onCheckedChange={() => handleSongToggle(song.id)}
-                            className="flex-shrink-0"
+                            className='flex-shrink-0'
                           />
-                          <div className="flex-1 text-left min-w-0">
-                            <h3 className="text-lg font-medium truncate">{song.title}</h3>
-                            <div className="flex items-center gap-2 mt-1 min-w-0">
-                              <p className="text-gray-500 truncate flex-1">{song.artist.join(', ')}</p>
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
+                          <div className='min-w-0 flex-1 text-left'>
+                            <h3 className='truncate text-lg font-medium'>
+                              {song.title}
+                            </h3>
+                            <div className='mt-1 flex min-w-0 items-center gap-2'>
+                              <p className='flex-1 truncate text-gray-500'>
+                                {song.artist.join(', ')}
+                              </p>
+                              <span className='flex-shrink-0 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600'>
                                 {song.base_chord}
                               </span>
                             </div>
@@ -360,22 +396,30 @@ export function SongListView() {
                         </div>
                       ) : (
                         <Button
-                          variant="ghost"
-                          className="w-full justify-between p-3 h-auto"
+                          variant='ghost'
+                          className='h-auto w-full justify-between p-3'
                           onClick={() => {
-                            navigate({ to: '/user/song/$id', params: { id: String(song.id) }, search })
+                            navigate({
+                              to: '/user/song/$id',
+                              params: { id: String(song.id) },
+                              search,
+                            })
                           }}
                         >
-                          <div className="flex-1 text-left min-w-0">
-                            <h3 className="text-lg font-medium truncate">{song.title}</h3>
-                            <div className="flex items-center gap-2 mt-1 min-w-0">
-                              <p className="text-gray-500 truncate flex-1">{song.artist.join(', ')}</p>
-                              <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
+                          <div className='min-w-0 flex-1 text-left'>
+                            <h3 className='truncate text-lg font-medium'>
+                              {song.title}
+                            </h3>
+                            <div className='mt-1 flex min-w-0 items-center gap-2'>
+                              <p className='flex-1 truncate text-gray-500'>
+                                {song.artist.join(', ')}
+                              </p>
+                              <span className='flex-shrink-0 rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600'>
                                 {song.base_chord}
                               </span>
                             </div>
                           </div>
-                          <ChevronRight className="h-5 w-5 text-gray-400 flex-shrink-0 ml-2" />
+                          <ChevronRight className='ml-2 h-5 w-5 flex-shrink-0 text-gray-400' />
                         </Button>
                       )}
                     </div>
@@ -420,18 +464,26 @@ export function SongListView() {
 
       {/* Fixed Bottom Actions - only in select mode */}
       {isSelectMode && (
-        <div className="border-t bg-background dark:bg-background px-4 py-4 pb-6 flex justify-between items-center sticky bottom-0 z-10">
-          <span className="text-muted-foreground">
-            {selectedSongs.size} song{selectedSongs.size !== 1 ? 's' : ''} selected
+        <div className='bg-background dark:bg-background sticky bottom-0 z-10 flex items-center justify-between border-t px-4 py-4 pb-6'>
+          <span className='text-muted-foreground'>
+            {selectedSongs.size} song{selectedSongs.size !== 1 ? 's' : ''}{' '}
+            selected
           </span>
-          <div className="flex space-x-3">
-            <Button variant="ghost" onClick={handleSelectAll} className="text-blue-500">
-              {selectedSongs.size === filteredSongs.length && filteredSongs.length > 0 ? 'Deselect All' : 'Select All'}
+          <div className='flex space-x-3'>
+            <Button
+              variant='ghost'
+              onClick={handleSelectAll}
+              className='text-blue-500'
+            >
+              {selectedSongs.size === filteredSongs.length &&
+              filteredSongs.length > 0
+                ? 'Deselect All'
+                : 'Select All'}
             </Button>
-            <Button 
+            <Button
               onClick={handleAddToPlaylist}
               disabled={selectedSongs.size === 0}
-              className="bg-black text-white hover:bg-gray-800 disabled:bg-gray-300"
+              className='bg-black text-white hover:bg-gray-800 disabled:bg-gray-300'
             >
               Add to Playlist
             </Button>

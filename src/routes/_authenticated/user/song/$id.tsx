@@ -1,17 +1,26 @@
-import { createFileRoute, redirect, useParams, useNavigate, useSearch } from '@tanstack/react-router'
-import { SongViewer } from '@/components/song-viewer'
-import { PlaylistDialog } from '@/components/playlist-dialog'
-import { authManager } from '@/lib/auth-manager'
-import { songService } from '@/services/songService'
 import { useState, useEffect } from 'react'
+import {
+  createFileRoute,
+  redirect,
+  useParams,
+  useNavigate,
+  useSearch,
+} from '@tanstack/react-router'
+import { songService } from '@/services/songService'
 import { Song } from '@/types/song'
-import { Button } from '@/components/ui/button'
 import { ChevronLeft, Plus } from 'lucide-react'
+import { authManager } from '@/lib/auth-manager'
+import { Button } from '@/components/ui/button'
+import { PlaylistDialog } from '@/components/playlist-dialog'
+import { SongViewer } from '@/components/song-viewer'
 
 function SongViewPage() {
   const navigate = useNavigate()
   const { id } = useParams({ from: '/_authenticated/user/song/$id' })
-  const search = useSearch({ from: '/_authenticated/user/song/$id' }) as { search?: string; artist?: string }
+  const search = useSearch({ from: '/_authenticated/user/song/$id' }) as {
+    search?: string
+    artist?: string
+  }
   const [song, setSong] = useState<Song | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -21,16 +30,24 @@ function SongViewPage() {
     setShowPlaylistDialog(true)
   }
 
-  const handlePlaylistAdd = (playlistIds: string[], newPlaylistName?: string) => {
+  const handlePlaylistAdd = (
+    playlistIds: string[],
+    newPlaylistName?: string
+  ) => {
     // TODO: Implement actual playlist API calls
-    console.log('Adding song to playlists:', playlistIds, 'New playlist:', newPlaylistName)
-    
+    console.log(
+      'Adding song to playlists:',
+      playlistIds,
+      'New playlist:',
+      newPlaylistName
+    )
+
     // Show success message (you can replace with proper toast notification)tgy9igy
     const playlistText = playlistIds.length > 1 ? 'playlists' : 'playlist'
-    const message = newPlaylistName 
+    const message = newPlaylistName
       ? `Added to "${newPlaylistName}" and ${playlistIds.length} existing ${playlistText}`
       : `Added to ${playlistIds.length} ${playlistText}`
-    
+
     // alert(message)
   }
 
@@ -53,16 +70,16 @@ function SongViewPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-muted-foreground">Loading song...</div>
+      <div className='flex min-h-screen items-center justify-center'>
+        <div className='text-muted-foreground'>Loading song...</div>
       </div>
     )
   }
 
   if (error || !song) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
-        <div className="text-destructive">{error || 'Song not found'}</div>
+      <div className='flex min-h-screen flex-col items-center justify-center space-y-4'>
+        <div className='text-destructive'>{error || 'Song not found'}</div>
         <Button onClick={() => navigate({ to: '/user/song', search })}>
           Back to Songs
         </Button>
@@ -71,32 +88,32 @@ function SongViewPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className='flex h-screen flex-col'>
       {/* Fixed Header */}
-      <header className="flex items-center justify-between px-4 py-4 border-b border-border bg-background">
-        <div className="flex items-center">
+      <header className='border-border bg-background flex items-center justify-between border-b px-4 py-4'>
+        <div className='flex items-center'>
           <Button
-            variant="ghost"
-            size="sm"
+            variant='ghost'
+            size='sm'
             onClick={() => navigate({ to: '/user/song', search })}
-            className="mr-2 p-1"
+            className='mr-2 p-1'
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className='h-6 w-6' />
           </Button>
-          <span className="text-lg text-foreground">Songs</span>
+          <span className='text-foreground text-lg'>Songs</span>
         </div>
-        
+
         <Button
           onClick={handleAddToPlaylist}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2"
+          className='bg-primary text-primary-foreground hover:bg-primary/90 flex items-center gap-2'
         >
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">Add to Playlist</span>
+          <Plus className='h-4 w-4' />
+          <span className='hidden sm:inline'>Add to Playlist</span>
         </Button>
       </header>
 
       {/* Scrollable Song Content */}
-      <main className="flex-1 overflow-y-auto">
+      <main className='flex-1 overflow-y-auto'>
         <SongViewer song={song} />
       </main>
 

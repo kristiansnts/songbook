@@ -1,6 +1,6 @@
 import { createFileRoute, useParams } from '@tanstack/react-router'
-import { EditPage } from '@/lib/resources/pages/edit-page'
 import { SongResource } from '@/panels/admin/resources/songs/songResource'
+import { EditPage } from '@/lib/resources/pages/edit-page'
 
 const songResource = new SongResource()
 
@@ -8,7 +8,7 @@ function SongEditPage() {
   const { id } = useParams({ from: '/_authenticated/admin/songs/edit/$id' })
 
   return (
-    <EditPage 
+    <EditPage
       resource={songResource}
       recordId={id}
       onSuccess={() => {

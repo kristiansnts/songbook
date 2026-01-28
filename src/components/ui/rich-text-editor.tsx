@@ -1,8 +1,8 @@
 import * as React from 'react'
-import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
 import { Bold, Italic, Underline, List, ListOrdered } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 
 interface RichTextEditorProps {
   value?: string
@@ -26,10 +26,15 @@ export function RichTextEditor({
     const start = textarea.selectionStart
     const end = textarea.selectionEnd
     const selectedText = value.substring(start, end)
-    const newText = value.substring(0, start) + before + selectedText + after + value.substring(end)
-    
+    const newText =
+      value.substring(0, start) +
+      before +
+      selectedText +
+      after +
+      value.substring(end)
+
     onChange?.(newText)
-    
+
     // Restore cursor position
     setTimeout(() => {
       textarea.focus()
@@ -40,25 +45,37 @@ export function RichTextEditor({
   const formatButtons = [
     { icon: Bold, action: () => insertFormatting('**', '**'), label: 'Bold' },
     { icon: Italic, action: () => insertFormatting('*', '*'), label: 'Italic' },
-    { icon: Underline, action: () => insertFormatting('<u>', '</u>'), label: 'Underline' },
-    { icon: List, action: () => insertFormatting('\n- ', ''), label: 'Bullet List' },
-    { icon: ListOrdered, action: () => insertFormatting('\n1. ', ''), label: 'Numbered List' },
+    {
+      icon: Underline,
+      action: () => insertFormatting('<u>', '</u>'),
+      label: 'Underline',
+    },
+    {
+      icon: List,
+      action: () => insertFormatting('\n- ', ''),
+      label: 'Bullet List',
+    },
+    {
+      icon: ListOrdered,
+      action: () => insertFormatting('\n1. ', ''),
+      label: 'Numbered List',
+    },
   ]
 
   return (
     <div className={cn('space-y-2', className)}>
-      <div className="flex flex-wrap gap-1 border-b pb-2">
+      <div className='flex flex-wrap gap-1 border-b pb-2'>
         {formatButtons.map(({ icon: Icon, action, label }) => (
           <Button
             key={label}
-            type="button"
-            variant="ghost"
-            size="sm"
+            type='button'
+            variant='ghost'
+            size='sm'
             onClick={action}
-            className="h-8 w-8 p-0"
+            className='h-8 w-8 p-0'
             title={label}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className='h-4 w-4' />
           </Button>
         ))}
       </div>
@@ -67,7 +84,7 @@ export function RichTextEditor({
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
-        className="min-h-[120px] resize-none"
+        className='min-h-[120px] resize-none'
       />
     </div>
   )

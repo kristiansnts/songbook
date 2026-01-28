@@ -1,10 +1,17 @@
-import { Resource } from '@/lib/resources/types'
-import { FormBuilder, TableBuilder } from '@/components/builders'
-import { FormBuilderConfig } from '@/lib/builders/form-builder'
-import { TableBuilderConfig } from '@/lib/builders/table-builder'
-import { Song, CreateSongRequest, UpdateSongRequest, SongFilters, SongListResponse, PaginationMeta } from '@/types/song'
 import { IconMusic } from '@tabler/icons-react'
 import { TagService } from '@/services/tagService'
+import {
+  Song,
+  CreateSongRequest,
+  UpdateSongRequest,
+  SongFilters,
+  SongListResponse,
+  PaginationMeta,
+} from '@/types/song'
+import { FormBuilderConfig } from '@/lib/builders/form-builder'
+import { TableBuilderConfig } from '@/lib/builders/table-builder'
+import { Resource } from '@/lib/resources/types'
+import { FormBuilder, TableBuilder } from '@/components/builders'
 
 export class SongResource extends Resource<Song> {
   constructor() {
@@ -38,18 +45,18 @@ export class SongResource extends Resource<Song> {
 
   getFormSchema(): FormBuilderConfig {
     return FormBuilder.create()
-      .section(section =>
+      .section((section) =>
         section
           .title('Song Information')
           .columns(2)
-          .field('title', field =>
+          .field('title', (field) =>
             field
               .label('Title')
               .type('text')
               .required()
               .placeholder('Enter song title')
           )
-          .field('artist', field =>
+          .field('artist', (field) =>
             field
               .label('Artists')
               .type('tags')
@@ -57,7 +64,7 @@ export class SongResource extends Resource<Song> {
               .placeholder('Enter artist names')
               .autoAddOnKeys(false)
           )
-          .field('base_chord', field =>
+          .field('base_chord', (field) =>
             field
               .label('Base Chord')
               .type('searchable-select')
@@ -86,7 +93,7 @@ export class SongResource extends Resource<Song> {
                 { label: 'Bm', value: 'Bm' },
               ])
           )
-          .field('tag_names', field =>
+          .field('tag_names', (field) =>
             field
               .label('Tags')
               .type('tags')
@@ -94,7 +101,7 @@ export class SongResource extends Resource<Song> {
               .suggestions(async () => {
                 try {
                   const tags = await TagService.getAllTags()
-                  return tags.map(tag => tag.name)
+                  return tags.map((tag) => tag.name)
                 } catch (error) {
                   console.error('Error loading tag suggestions:', error)
                   return [
@@ -110,21 +117,20 @@ export class SongResource extends Resource<Song> {
                     'Baptism',
                     'Communion',
                     'Wedding',
-                    'Funeral'
+                    'Funeral',
                   ]
                 }
               })
           )
       )
-      .section(section =>
-        section
-          .field('lyrics_and_chords', field =>
-            field
-              .label('Lyrics and Chords')
-              .type('chordtext')
-              .required()
-              .placeholder('Enter song lyrics with chord notations')
-          )
+      .section((section) =>
+        section.field('lyrics_and_chords', (field) =>
+          field
+            .label('Lyrics and Chords')
+            .type('chordtext')
+            .required()
+            .placeholder('Enter song lyrics with chord notations')
+        )
       )
       .build()
   }
@@ -159,11 +165,11 @@ export class SongResource extends Resource<Song> {
             { label: 'Gm', value: 'Gm' },
             { label: 'Am', value: 'Am' },
             { label: 'Bm', value: 'Bm' },
-          ]
+          ],
         },
       ])
       .defaultSort('title', 'asc')
-      .column('title', col => 
+      .column('title', (col) =>
         col
           .label('Title')
           .type('text')
@@ -171,7 +177,7 @@ export class SongResource extends Resource<Song> {
           .searchable()
           .sortable()
       )
-      .column('artist', col =>
+      .column('artist', (col) =>
         col
           .label('Artists')
           .type('text')
@@ -185,14 +191,10 @@ export class SongResource extends Resource<Song> {
             return artists ? String(artists) : ''
           })
       )
-      .column('base_chord', col => 
-        col
-          .label('Base Chord')
-          .type('badge')
-          .accessor('base_chord')
-          .sortable()
+      .column('base_chord', (col) =>
+        col.label('Base Chord').type('badge').accessor('base_chord').sortable()
       )
-      .column('tag_names', col => 
+      .column('tag_names', (col) =>
         col
           .label('Tags')
           .type('text')
@@ -206,7 +208,7 @@ export class SongResource extends Resource<Song> {
       )
       .emptyState(
         'No songs found',
-        'No songs are currently available. Create your first song to get started.',
+        'No songs are currently available. Create your first song to get started.'
       )
       .showViewOptions(false)
       .build()
@@ -215,7 +217,7 @@ export class SongResource extends Resource<Song> {
   // Async version for dynamic tag loading
   async getTableSchemaAsync(): Promise<TableBuilderConfig<Song>> {
     const tagOptions = await this.getTagOptions()
-    
+
     return TableBuilder.create<Song>()
       .searchPlaceholder('Search songs by title, artist, or lyrics...')
       .searchColumnId('title')
@@ -245,17 +247,17 @@ export class SongResource extends Resource<Song> {
             { label: 'Gm', value: 'Gm' },
             { label: 'Am', value: 'Am' },
             { label: 'Bm', value: 'Bm' },
-          ]
+          ],
         },
         {
           name: 'tag_names',
           label: 'Tags',
           type: 'select',
-          options: tagOptions
-        }
+          options: tagOptions,
+        },
       ])
       .defaultSort('title', 'asc')
-      .column('title', col => 
+      .column('title', (col) =>
         col
           .label('Title')
           .type('text')
@@ -263,7 +265,7 @@ export class SongResource extends Resource<Song> {
           .searchable()
           .sortable()
       )
-      .column('artist', col =>
+      .column('artist', (col) =>
         col
           .label('Artists')
           .type('text')
@@ -277,14 +279,10 @@ export class SongResource extends Resource<Song> {
             return artists ? String(artists) : ''
           })
       )
-      .column('base_chord', col => 
-        col
-          .label('Base Chord')
-          .type('badge')
-          .accessor('base_chord')
-          .sortable()
+      .column('base_chord', (col) =>
+        col.label('Base Chord').type('badge').accessor('base_chord').sortable()
       )
-      .column('tag_names', col => 
+      .column('tag_names', (col) =>
         col
           .label('Tags')
           .type('text')
@@ -298,7 +296,7 @@ export class SongResource extends Resource<Song> {
       )
       .emptyState(
         'No songs found',
-        'No songs are currently available. Create your first song to get started.',
+        'No songs are currently available. Create your first song to get started.'
       )
       .showViewOptions(false)
       .build()
@@ -311,7 +309,9 @@ export class SongResource extends Resource<Song> {
   }
 
   // New method that returns both data and pagination
-  async getRecordsWithPagination(filters?: SongFilters): Promise<SongListResponse> {
+  async getRecordsWithPagination(
+    filters?: SongFilters
+  ): Promise<SongListResponse> {
     try {
       // Build URL with filter parameters
       const url = new URL('https://songbanks-v1-1.vercel.app/api/songs')
@@ -335,7 +335,7 @@ export class SongResource extends Resource<Song> {
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
-          'accept': 'application/json',
+          accept: 'application/json',
         },
       })
 
@@ -350,7 +350,7 @@ export class SongResource extends Resource<Song> {
             itemsPerPage: limit,
             hasNextPage: false,
             hasPrevPage: false,
-          }
+          },
         }
       }
 
@@ -388,7 +388,9 @@ export class SongResource extends Resource<Song> {
             artist: artists,
             base_chord: song.base_chord || 'C',
             lyrics_and_chords: song.lyrics_and_chords || '',
-            tag_names: Array.isArray(song.tags) ? song.tags.map((tag: any) => tag.name) : [],
+            tag_names: Array.isArray(song.tags)
+              ? song.tags.map((tag: any) => tag.name)
+              : [],
             created_at: song.createdAt,
             updated_at: song.updatedAt,
           }
@@ -404,7 +406,7 @@ export class SongResource extends Resource<Song> {
             itemsPerPage: limit,
             hasNextPage: false,
             hasPrevPage: false,
-          }
+          },
         }
       } else {
         console.error('Invalid API response format:', result)
@@ -417,7 +419,7 @@ export class SongResource extends Resource<Song> {
             itemsPerPage: limit,
             hasNextPage: false,
             hasPrevPage: false,
-          }
+          },
         }
       }
     } catch (error) {
@@ -431,19 +433,22 @@ export class SongResource extends Resource<Song> {
           itemsPerPage: filters?.limit || 10,
           hasNextPage: false,
           hasPrevPage: false,
-        }
+        },
       }
     }
   }
 
   async getRecord(id: string): Promise<Song | null> {
     try {
-      const response = await fetch(`https://songbanks-v1-1.vercel.app/api/songs/${id}`, {
-        method: 'GET',
-        headers: {
-          'accept': 'application/json',
-        },
-      })
+      const response = await fetch(
+        `https://songbanks-v1-1.vercel.app/api/songs/${id}`,
+        {
+          method: 'GET',
+          headers: {
+            accept: 'application/json',
+          },
+        }
+      )
 
       if (!response.ok) {
         console.error(`API request failed with status: ${response.status}`)
@@ -451,7 +456,7 @@ export class SongResource extends Resource<Song> {
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200 && result.data) {
         const song = result.data
         let artists: string[] = ['Unknown Artist']
@@ -483,7 +488,9 @@ export class SongResource extends Resource<Song> {
           artist: artists,
           base_chord: song.base_chord || 'C',
           lyrics_and_chords: song.lyrics_and_chords || '',
-          tag_names: Array.isArray(song.tags) ? song.tags.map((tag: any) => tag.name) : [],
+          tag_names: Array.isArray(song.tags)
+            ? song.tags.map((tag: any) => tag.name)
+            : [],
           created_at: song.createdAt,
           updated_at: song.updatedAt,
         }
@@ -504,15 +511,18 @@ export class SongResource extends Resource<Song> {
     }
 
     try {
-      const response = await fetch('https://songbanks-v1-1.vercel.app/api/admin/songs', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
+      const response = await fetch(
+        'https://songbanks-v1-1.vercel.app/api/admin/songs',
+        {
+          method: 'POST',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -566,15 +576,18 @@ export class SongResource extends Resource<Song> {
     }
 
     try {
-      const response = await fetch(`https://songbanks-v1-1.vercel.app/api/admin/songs/${id}`, {
-        method: 'PUT',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
+      const response = await fetch(
+        `https://songbanks-v1-1.vercel.app/api/admin/songs/${id}`,
+        {
+          method: 'PUT',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -628,13 +641,16 @@ export class SongResource extends Resource<Song> {
     }
 
     try {
-      const response = await fetch(`https://songbanks-v1-1.vercel.app/api/admin/songs/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      })
+      const response = await fetch(
+        `https://songbanks-v1-1.vercel.app/api/admin/songs/${id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
@@ -656,12 +672,14 @@ export class SongResource extends Resource<Song> {
   }
 
   // Helper method to get tag options for filters
-  private async getTagOptions(): Promise<Array<{label: string, value: string}>> {
+  private async getTagOptions(): Promise<
+    Array<{ label: string; value: string }>
+  > {
     try {
       const tags = await TagService.getAllTags()
       return [
         { label: 'All Tags', value: '' },
-        ...tags.map(tag => ({ label: tag.name, value: tag.name }))
+        ...tags.map((tag) => ({ label: tag.name, value: tag.name })),
       ]
     } catch (error) {
       console.error('Error loading tag options:', error)
@@ -678,7 +696,11 @@ export class SongResource extends Resource<Song> {
   }
 
   // Custom search method for advanced filtering
-  async searchSongs(query: string, baseChord?: string, tagIds?: string): Promise<Song[]> {
+  async searchSongs(
+    query: string,
+    baseChord?: string,
+    tagIds?: string
+  ): Promise<Song[]> {
     const filters: SongFilters = {
       search: query,
       base_chord: baseChord,
@@ -691,7 +713,7 @@ export class SongResource extends Resource<Song> {
   async beforeSave(data: Partial<Song>): Promise<Partial<Song>> {
     // Clean up tag_names array
     if (data.tag_names && Array.isArray(data.tag_names)) {
-      data.tag_names = data.tag_names.filter(tag => tag && tag.trim())
+      data.tag_names = data.tag_names.filter((tag) => tag && tag.trim())
     }
     return data
   }

@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 import { authManager } from '@/lib/auth-manager'
+import { AuthenticatedLayout } from '@/components/layout/authenticated-layout'
 
 export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async () => {
@@ -13,7 +13,7 @@ export const Route = createFileRoute('/_authenticated')({
         },
       })
     }
-    
+
     // ✅ Validate user with server (per security guide)
     // For development: skip server validation if it fails
     try {
@@ -21,7 +21,9 @@ export const Route = createFileRoute('/_authenticated')({
       if (!user) {
         // In development, if server call fails but we have a token, continue
         if (authManager.getToken()) {
-          console.warn('Server validation failed but token exists, allowing access for development')
+          console.warn(
+            'Server validation failed but token exists, allowing access for development'
+          )
           return
         }
         throw redirect({
@@ -35,7 +37,9 @@ export const Route = createFileRoute('/_authenticated')({
       console.error('Authentication check failed:', error)
       // In development, if we have a token but server is not available, allow access
       if (authManager.getToken()) {
-        console.warn('Server not available but token exists, allowing access for development')
+        console.warn(
+          'Server not available but token exists, allowing access for development'
+        )
         return
       }
       throw redirect({

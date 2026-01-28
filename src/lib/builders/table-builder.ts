@@ -1,7 +1,16 @@
-import { ColumnDef, Row } from '@tanstack/react-table'
 import { ReactNode } from 'react'
+import { ColumnDef, Row } from '@tanstack/react-table'
 
-export type ColumnType = 'text' | 'badge' | 'date' | 'actions' | 'select' | 'image' | 'icon' | 'boolean' | 'number'
+export type ColumnType =
+  | 'text'
+  | 'badge'
+  | 'date'
+  | 'actions'
+  | 'select'
+  | 'image'
+  | 'icon'
+  | 'boolean'
+  | 'number'
 
 export interface BaseColumnConfig<T = any> {
   name: string
@@ -73,7 +82,7 @@ export interface NumberColumnConfig<T = any> extends BaseColumnConfig<T> {
   precision?: number
 }
 
-export type ColumnConfig<T = any> = 
+export type ColumnConfig<T = any> =
   | TextColumnConfig<T>
   | BadgeColumnConfig<T>
   | DateColumnConfig<T>
@@ -88,7 +97,13 @@ export interface ActionConfig<T = any> {
   label: string
   icon?: ReactNode
   onClick: (row: Row<T>, refresh?: () => void) => void | Promise<void>
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link'
+  variant?:
+    | 'default'
+    | 'secondary'
+    | 'destructive'
+    | 'outline'
+    | 'ghost'
+    | 'link'
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'icon'
   hidden?: (row: Row<T>) => boolean
   disabled?: (row: Row<T>) => boolean
@@ -189,7 +204,10 @@ export class TableBuilder<T = any> {
     return this
   }
 
-  column(name: string, callback: (column: ColumnBuilder<T>) => void): TableBuilder<T> {
+  column(
+    name: string,
+    callback: (column: ColumnBuilder<T>) => void
+  ): TableBuilder<T> {
     const columnBuilder = new ColumnBuilder<T>(name)
     callback(columnBuilder)
     this.config.columns.push(columnBuilder.build())
@@ -198,7 +216,9 @@ export class TableBuilder<T = any> {
 
   columns(columns: ColumnConfig<T>[] | ColumnBuilder<T>[]): TableBuilder<T> {
     if (columns.length > 0 && columns[0] instanceof ColumnBuilder) {
-      this.config.columns = (columns as ColumnBuilder<T>[]).map(builder => builder.build())
+      this.config.columns = (columns as ColumnBuilder<T>[]).map((builder) =>
+        builder.build()
+      )
     } else {
       this.config.columns = columns as ColumnConfig<T>[]
     }
@@ -226,7 +246,7 @@ export class TableBuilder<T = any> {
   }
 
   filters(filters: (FilterConfig | FilterBuilder)[]): TableBuilder<T> {
-    this.config.filters = filters.map(filter => 
+    this.config.filters = filters.map((filter) =>
       filter instanceof FilterBuilder ? filter.build() : filter
     )
     return this
@@ -267,7 +287,11 @@ export class TableBuilder<T = any> {
     return this
   }
 
-  emptyState(title: string, description?: string, icon?: ReactNode): TableBuilder<T> {
+  emptyState(
+    title: string,
+    description?: string,
+    icon?: ReactNode
+  ): TableBuilder<T> {
     this.config.emptyState = { title, description, icon }
     return this
   }
@@ -287,7 +311,10 @@ export class TableBuilder<T = any> {
     return this
   }
 
-  defaultSort(column: string, direction: 'asc' | 'desc' = 'asc'): TableBuilder<T> {
+  defaultSort(
+    column: string,
+    direction: 'asc' | 'desc' = 'asc'
+  ): TableBuilder<T> {
     this.config.defaultSort = { column, direction }
     return this
   }
@@ -361,135 +388,137 @@ export class ColumnBuilder<T = any> {
 
   format(formatter: (value: any) => string): ColumnBuilder<T> {
     if (this.column.type === 'text') {
-      (this.column as TextColumnConfig<T>).format = formatter
+      ;(this.column as TextColumnConfig<T>).format = formatter
     } else if (this.column.type === 'number') {
-      (this.column as NumberColumnConfig<T>).format = formatter
+      ;(this.column as NumberColumnConfig<T>).format = formatter
     }
     return this
   }
 
   truncate(truncate: boolean = true): ColumnBuilder<T> {
     if (this.column.type === 'text') {
-      (this.column as TextColumnConfig<T>).truncate = truncate
+      ;(this.column as TextColumnConfig<T>).truncate = truncate
     }
     return this
   }
 
   maxLength(length: number): ColumnBuilder<T> {
     if (this.column.type === 'text') {
-      (this.column as TextColumnConfig<T>).maxLength = length
+      ;(this.column as TextColumnConfig<T>).maxLength = length
     }
     return this
   }
 
   colors(colors: Record<string, string>): ColumnBuilder<T> {
     if (this.column.type === 'badge') {
-      (this.column as BadgeColumnConfig<T>).colors = colors
+      ;(this.column as BadgeColumnConfig<T>).colors = colors
     }
     return this
   }
 
-  variant(variant: 'default' | 'secondary' | 'destructive' | 'outline'): ColumnBuilder<T> {
+  variant(
+    variant: 'default' | 'secondary' | 'destructive' | 'outline'
+  ): ColumnBuilder<T> {
     if (this.column.type === 'badge') {
-      (this.column as BadgeColumnConfig<T>).variant = variant
+      ;(this.column as BadgeColumnConfig<T>).variant = variant
     }
     return this
   }
 
   dateFormat(format: string): ColumnBuilder<T> {
     if (this.column.type === 'date') {
-      (this.column as DateColumnConfig<T>).format = format
+      ;(this.column as DateColumnConfig<T>).format = format
     }
     return this
   }
 
   relative(relative: boolean = true): ColumnBuilder<T> {
     if (this.column.type === 'date') {
-      (this.column as DateColumnConfig<T>).relative = relative
+      ;(this.column as DateColumnConfig<T>).relative = relative
     }
     return this
   }
 
   actions(actions: ActionConfig<T>[]): ColumnBuilder<T> {
     if (this.column.type === 'actions') {
-      (this.column as ActionsColumnConfig<T>).actions = actions
+      ;(this.column as ActionsColumnConfig<T>).actions = actions
     }
     return this
   }
 
   enableSelectAll(enabled: boolean = true): ColumnBuilder<T> {
     if (this.column.type === 'select') {
-      (this.column as SelectColumnConfig<T>).enableSelectAll = enabled
+      ;(this.column as SelectColumnConfig<T>).enableSelectAll = enabled
     }
     return this
   }
 
   imageSize(size: 'sm' | 'md' | 'lg'): ColumnBuilder<T> {
     if (this.column.type === 'image') {
-      (this.column as ImageColumnConfig<T>).size = size
+      ;(this.column as ImageColumnConfig<T>).size = size
     }
     return this
   }
 
   imageShape(shape: 'square' | 'circle'): ColumnBuilder<T> {
     if (this.column.type === 'image') {
-      (this.column as ImageColumnConfig<T>).shape = shape
+      ;(this.column as ImageColumnConfig<T>).shape = shape
     }
     return this
   }
 
   imageFallback(fallback: string): ColumnBuilder<T> {
     if (this.column.type === 'image') {
-      (this.column as ImageColumnConfig<T>).fallback = fallback
+      ;(this.column as ImageColumnConfig<T>).fallback = fallback
     }
     return this
   }
 
   iconMap(iconMap: Record<string, ReactNode>): ColumnBuilder<T> {
     if (this.column.type === 'icon') {
-      (this.column as IconColumnConfig<T>).iconMap = iconMap
+      ;(this.column as IconColumnConfig<T>).iconMap = iconMap
     }
     return this
   }
 
   iconSize(size: 'sm' | 'md' | 'lg'): ColumnBuilder<T> {
     if (this.column.type === 'icon') {
-      (this.column as IconColumnConfig<T>).size = size
+      ;(this.column as IconColumnConfig<T>).size = size
     }
     return this
   }
 
   trueLabel(label: string): ColumnBuilder<T> {
     if (this.column.type === 'boolean') {
-      (this.column as BooleanColumnConfig<T>).trueLabel = label
+      ;(this.column as BooleanColumnConfig<T>).trueLabel = label
     }
     return this
   }
 
   falseLabel(label: string): ColumnBuilder<T> {
     if (this.column.type === 'boolean') {
-      (this.column as BooleanColumnConfig<T>).falseLabel = label
+      ;(this.column as BooleanColumnConfig<T>).falseLabel = label
     }
     return this
   }
 
   showIcons(show: boolean = true): ColumnBuilder<T> {
     if (this.column.type === 'boolean') {
-      (this.column as BooleanColumnConfig<T>).showIcons = show
+      ;(this.column as BooleanColumnConfig<T>).showIcons = show
     }
     return this
   }
 
   currency(currency: boolean = true): ColumnBuilder<T> {
     if (this.column.type === 'number') {
-      (this.column as NumberColumnConfig<T>).currency = currency
+      ;(this.column as NumberColumnConfig<T>).currency = currency
     }
     return this
   }
 
   precision(precision: number): ColumnBuilder<T> {
     if (this.column.type === 'number') {
-      (this.column as NumberColumnConfig<T>).precision = precision
+      ;(this.column as NumberColumnConfig<T>).precision = precision
     }
     return this
   }
@@ -520,7 +549,9 @@ export class ColumnBuilder<T = any> {
       throw new Error(`Column type is required for column: ${this.column.name}`)
     }
     if (!this.column.label) {
-      throw new Error(`Column label is required for column: ${this.column.name}`)
+      throw new Error(
+        `Column label is required for column: ${this.column.name}`
+      )
     }
     return this.column as ColumnConfig<T>
   }
@@ -553,19 +584,25 @@ export class IconColumn {
 
 export class BooleanColumn {
   static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
-    return new ColumnBuilder<T>(accessor as string).type('boolean').make(accessor)
+    return new ColumnBuilder<T>(accessor as string)
+      .type('boolean')
+      .make(accessor)
   }
 }
 
 export class NumberColumn {
   static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
-    return new ColumnBuilder<T>(accessor as string).type('number').make(accessor)
+    return new ColumnBuilder<T>(accessor as string)
+      .type('number')
+      .make(accessor)
   }
 }
 
 export class ActionsColumn {
   static make<T = any>(accessor: keyof T | string): ColumnBuilder<T> {
-    return new ColumnBuilder<T>(accessor as string).type('actions').make(accessor)
+    return new ColumnBuilder<T>(accessor as string)
+      .type('actions')
+      .make(accessor)
   }
 }
 
@@ -600,11 +637,16 @@ export class FilterBuilder {
     return this
   }
 
-  options(options: { [key: string]: string } | { label: string; value: string }[]): FilterBuilder {
+  options(
+    options: { [key: string]: string } | { label: string; value: string }[]
+  ): FilterBuilder {
     if (Array.isArray(options)) {
       this.filter.options = options
     } else {
-      this.filter.options = Object.entries(options).map(([value, label]) => ({ label, value }))
+      this.filter.options = Object.entries(options).map(([value, label]) => ({
+        label,
+        value,
+      }))
     }
     return this
   }
@@ -643,12 +685,21 @@ export class FilterBuilder {
 }
 
 // Legacy exports for backward compatibility
-export const TextColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('text')
-export const BadgeColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('badge')
-export const DateColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('date')
-export const ActionsColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('actions')
-export const SelectColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('select')
-export const ImageColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('image')
-export const IconColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('icon')
-export const BooleanColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('boolean')
-export const NumberColumnLegacy = <T = any>(name: string) => new ColumnBuilder<T>(name).type('number')
+export const TextColumnLegacy = <T = any>(name: string) =>
+  new ColumnBuilder<T>(name).type('text')
+export const BadgeColumnLegacy = <T = any>(name: string) =>
+  new ColumnBuilder<T>(name).type('badge')
+export const DateColumnLegacy = <T = any>(name: string) =>
+  new ColumnBuilder<T>(name).type('date')
+export const ActionsColumnLegacy = <T = any>(name: string) =>
+  new ColumnBuilder<T>(name).type('actions')
+export const SelectColumnLegacy = <T = any>(name: string) =>
+  new ColumnBuilder<T>(name).type('select')
+export const ImageColumnLegacy = <T = any>(name: string) =>
+  new ColumnBuilder<T>(name).type('image')
+export const IconColumnLegacy = <T = any>(name: string) =>
+  new ColumnBuilder<T>(name).type('icon')
+export const BooleanColumnLegacy = <T = any>(name: string) =>
+  new ColumnBuilder<T>(name).type('boolean')
+export const NumberColumnLegacy = <T = any>(name: string) =>
+  new ColumnBuilder<T>(name).type('number')

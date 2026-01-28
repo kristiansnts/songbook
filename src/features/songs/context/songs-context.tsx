@@ -85,24 +85,26 @@ export default function SongsProvider({ children }: Props) {
   }
 
   return (
-    <SongsContext value={{ 
-      open, 
-      setOpen, 
-      currentRow, 
-      setCurrentRow,
-      openModal,
-      closeModal,
-      viewDialogOpen,
-      setViewDialogOpen,
-      viewSong,
-      setViewSong,
-      openViewDialog,
-      songs,
-      refreshSongs,
-      addSong,
-      updateSong,
-      deleteSong
-    }}>
+    <SongsContext
+      value={{
+        open,
+        setOpen,
+        currentRow,
+        setCurrentRow,
+        openModal,
+        closeModal,
+        viewDialogOpen,
+        setViewDialogOpen,
+        viewSong,
+        setViewSong,
+        openViewDialog,
+        songs,
+        refreshSongs,
+        addSong,
+        updateSong,
+        deleteSong,
+      }}
+    >
       {children}
     </SongsContext>
   )

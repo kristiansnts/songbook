@@ -1,4 +1,8 @@
 import React from 'react'
+import { IconUserX, IconUserCheck, IconClock } from '@tabler/icons-react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -7,10 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { IconUserX, IconUserCheck, IconClock } from '@tabler/icons-react'
-import { toast } from 'sonner'
 
 interface PendingAccessModalProps {
   open: boolean
@@ -21,13 +21,13 @@ interface PendingAccessModalProps {
   onRequestSuccess?: () => void
 }
 
-export function PendingAccessModal({ 
-  open, 
-  onOpenChange, 
-  userName, 
+export function PendingAccessModal({
+  open,
+  onOpenChange,
+  userName,
   userEmail,
   userId,
-  onRequestSuccess
+  onRequestSuccess,
 }: PendingAccessModalProps) {
   const [isRequesting, setIsRequesting] = React.useState(false)
 
@@ -37,38 +37,41 @@ export function PendingAccessModal({
         description: 'Unable to submit request. Please try logging in again.',
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
       return
     }
 
     setIsRequesting(true)
-    
+
     try {
       // Get auth token from localStorage
       const token = localStorage.getItem('auth-token')
-      
+
       const headers: Record<string, string> = {
-        'accept': 'application/json',
+        accept: 'application/json',
         'Content-Type': 'application/json',
       }
-      
+
       // Add authorization header if token exists
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
       }
 
-      const response = await fetch('https://songbanks-v1-1.vercel.app/api/users/request-vol-access', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          user_id: userId
-        })
-      })
+      const response = await fetch(
+        'https://songbanks-v1-1.vercel.app/api/users/request-vol-access',
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            user_id: userId,
+          }),
+        }
+      )
 
       console.log('API Response status:', response.status)
-      
+
       let result
       try {
         result = await response.json()
@@ -84,53 +87,57 @@ export function PendingAccessModal({
         if (result && result.code === 200) {
           // Standard success response
           toast.success('Access request submitted successfully!', {
-            description: 'Your request has been sent to administrators for review.',
+            description:
+              'Your request has been sent to administrators for review.',
             action: {
               label: 'x',
-              onClick: () => toast.dismiss()
-            }
+              onClick: () => toast.dismiss(),
+            },
           })
         } else if (response.status === 202) {
           // HTTP 202 Accepted - request accepted for processing
           toast.success('Access request submitted successfully!', {
-            description: 'Your request has been sent to administrators for review.',
+            description:
+              'Your request has been sent to administrators for review.',
             action: {
               label: 'x',
-              onClick: () => toast.dismiss()
-            }
+              onClick: () => toast.dismiss(),
+            },
           })
         } else {
           // Other successful status codes
           toast.success('Access request submitted successfully!', {
-            description: 'Your request has been sent to administrators for review.',
+            description:
+              'Your request has been sent to administrators for review.',
             action: {
               label: 'x',
-              onClick: () => toast.dismiss()
-            }
+              onClick: () => toast.dismiss(),
+            },
           })
         }
-        
+
         onOpenChange(false)
         onRequestSuccess?.() // Trigger the request success callback
       } else {
-        const errorMessage = result?.message || `HTTP ${response.status}: ${response.statusText}`
+        const errorMessage =
+          result?.message || `HTTP ${response.status}: ${response.statusText}`
         console.error('API Error:', errorMessage, result)
         throw new Error(errorMessage)
       }
     } catch (error) {
       console.error('Error submitting access request:', error)
-      
+
       let errorMessage = 'Please try again later or contact support.'
       if (error instanceof Error) {
         errorMessage = error.message
       }
-      
+
       toast.error('Failed to submit access request', {
         description: errorMessage,
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
     } finally {
       setIsRequesting(false)
@@ -139,37 +146,37 @@ export function PendingAccessModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/20">
-            <IconClock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+      <DialogContent className='sm:max-w-md'>
+        <DialogHeader className='text-center'>
+          <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/20'>
+            <IconClock className='h-6 w-6 text-orange-600 dark:text-orange-400' />
           </div>
-          <DialogTitle className="text-xl font-semibold">
+          <DialogTitle className='text-xl font-semibold'>
             Account Pending Approval
           </DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogDescription className='text-base'>
             Your account is currently pending approval from administrators.
           </DialogDescription>
         </DialogHeader>
 
-        <Card className="border-l-4 border-l-orange-500">
-          <CardContent className="pt-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20">
-                  <IconUserX className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+        <Card className='border-l-4 border-l-orange-500'>
+          <CardContent className='pt-4'>
+            <div className='space-y-3'>
+              <div className='flex items-center gap-3'>
+                <div className='flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20'>
+                  <IconUserX className='h-4 w-4 text-blue-600 dark:text-blue-400' />
                 </div>
                 <div>
-                  <p className="font-medium text-sm">{userName}</p>
-                  <p className="text-sm text-muted-foreground">{userEmail}</p>
+                  <p className='text-sm font-medium'>{userName}</p>
+                  <p className='text-muted-foreground text-sm'>{userEmail}</p>
                 </div>
               </div>
-              
-              <div className="bg-muted/50 rounded-lg p-3">
-                <p className="text-sm text-muted-foreground">
+
+              <div className='bg-muted/50 rounded-lg p-3'>
+                <p className='text-muted-foreground text-sm'>
                   <strong>Current Status:</strong> Pending Review
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className='text-muted-foreground mt-1 text-sm'>
                   <strong>Role:</strong> Guest Access
                 </p>
               </div>
@@ -177,23 +184,24 @@ export function PendingAccessModal({
           </CardContent>
         </Card>
 
-        <div className="bg-blue-50 dark:bg-blue-950/50 rounded-lg p-4">
-          <div className="flex gap-3">
-            <IconUserCheck className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-            <div className="text-sm">
-              <p className="font-medium text-blue-900 dark:text-blue-100">
+        <div className='rounded-lg bg-blue-50 p-4 dark:bg-blue-950/50'>
+          <div className='flex gap-3'>
+            <IconUserCheck className='mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600 dark:text-blue-400' />
+            <div className='text-sm'>
+              <p className='font-medium text-blue-900 dark:text-blue-100'>
                 Request Full Access
               </p>
-              <p className="text-blue-700 dark:text-blue-300 mt-1">
-                Submit a request to administrators for full platform access. You'll be notified once your request is reviewed.
+              <p className='mt-1 text-blue-700 dark:text-blue-300'>
+                Submit a request to administrators for full platform access.
+                You'll be notified once your request is reviewed.
               </p>
             </div>
           </div>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-2">
+        <DialogFooter className='gap-2 sm:gap-2'>
           <Button
-            variant="outline"
+            variant='outline'
             onClick={() => onOpenChange(false)}
             disabled={isRequesting}
           >
@@ -202,16 +210,16 @@ export function PendingAccessModal({
           <Button
             onClick={handleRequestAccess}
             disabled={isRequesting}
-            className="bg-blue-600 hover:bg-blue-700"
+            className='bg-blue-600 hover:bg-blue-700'
           >
             {isRequesting ? (
               <>
-                <IconClock className="mr-2 h-4 w-4 animate-spin" />
+                <IconClock className='mr-2 h-4 w-4 animate-spin' />
                 Requesting...
               </>
             ) : (
               <>
-                <IconUserCheck className="mr-2 h-4 w-4" />
+                <IconUserCheck className='mr-2 h-4 w-4' />
                 Request Access
               </>
             )}

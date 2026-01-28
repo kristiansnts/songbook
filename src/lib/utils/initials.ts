@@ -12,7 +12,10 @@ export function getInitials(name: string): string {
     return 'U' // Default fallback for "User"
   }
 
-  const words = name.trim().split(/\s+/).filter(word => word.length > 0)
+  const words = name
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word.length > 0)
 
   if (words.length === 0) {
     return 'U'

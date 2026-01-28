@@ -1,13 +1,13 @@
+import { useState } from 'react'
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { Table } from '@tanstack/react-table'
+import { IconMusic, IconPlaylistAdd } from '@tabler/icons-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DataTableViewOptions } from '../components/data-table-view-options'
 import { priorities, statuses } from '../data/data'
-import { DataTableFacetedFilter } from './data-table-faceted-filter'
-import { IconMusic, IconPlaylistAdd } from '@tabler/icons-react'
-import { useState } from 'react'
 import { Song } from '../data/schema'
+import { DataTableFacetedFilter } from './data-table-faceted-filter'
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>
@@ -20,17 +20,18 @@ export function DataTableToolbar<TData>({
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0
   const selectedRows = table.getFilteredSelectedRowModel().rows
-  const selectedSongs = selectedRows.map(row => row.original as Song)
+  const selectedSongs = selectedRows.map((row) => row.original as Song)
 
   return (
     <div className='space-y-4'>
       {/* Bulk Actions Bar - Shows when songs are selected */}
       {selectedRows.length > 0 && (
-        <div className='flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2'>
+        <div className='flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-4 py-2'>
           <div className='flex items-center gap-2'>
             <IconMusic className='h-4 w-4 text-blue-600' />
             <span className='text-sm font-medium text-blue-900'>
-              {selectedRows.length} song{selectedRows.length > 1 ? 's' : ''} selected
+              {selectedRows.length} song{selectedRows.length > 1 ? 's' : ''}{' '}
+              selected
             </span>
           </div>
           <div className='flex items-center gap-2'>
@@ -38,7 +39,7 @@ export function DataTableToolbar<TData>({
               variant='outline'
               size='sm'
               onClick={() => table.toggleAllPageRowsSelected(false)}
-              className='text-blue-700 border-blue-300 hover:bg-blue-100'
+              className='border-blue-300 text-blue-700 hover:bg-blue-100'
             >
               Clear Selection
             </Button>
@@ -48,7 +49,7 @@ export function DataTableToolbar<TData>({
                 onClick={() => onBulkAddToPlaylist(selectedSongs)}
                 className='bg-blue-600 text-white hover:bg-blue-700'
               >
-                <IconPlaylistAdd className='h-4 w-4 mr-2' />
+                <IconPlaylistAdd className='mr-2 h-4 w-4' />
                 Add to Playlist
               </Button>
             )}

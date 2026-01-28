@@ -1,4 +1,10 @@
-import { Song, CreateSongRequest, UpdateSongRequest, SongFilters, SongListResponse } from '@/types/song'
+import {
+  Song,
+  CreateSongRequest,
+  UpdateSongRequest,
+  SongFilters,
+  SongListResponse,
+} from '@/types/song'
 
 const BASE_URL = 'https://songbanks-v1-1.vercel.app/api'
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes in milliseconds
@@ -15,7 +21,10 @@ export class SongService {
   private static allSongsCache: SongListResponse | null = null
   private static allSongsCacheTimestamp: number = 0
 
-  private static isExpired(cachedItem: CachedResponse<any>, customDuration?: number): boolean {
+  private static isExpired(
+    cachedItem: CachedResponse<any>,
+    customDuration?: number
+  ): boolean {
     const duration = customDuration || CACHE_DURATION
     return Date.now() - cachedItem.timestamp > duration
   }
@@ -24,7 +33,10 @@ export class SongService {
     return `${method}:${JSON.stringify(params || {})}`
   }
 
-  private static getFromCache<T>(key: string, customDuration?: number): T | null {
+  private static getFromCache<T>(
+    key: string,
+    customDuration?: number
+  ): T | null {
     const cached = this.cache.get(key)
     if (cached && !this.isExpired(cached, customDuration)) {
       return cached.data
@@ -39,7 +51,7 @@ export class SongService {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      key
+      key,
     })
   }
 
@@ -73,7 +85,8 @@ export class SongService {
   private static getAllSongsFromCache(): SongListResponse | null {
     // Check memory cache first
     if (this.allSongsCache && this.allSongsCacheTimestamp) {
-      const isExpired = Date.now() - this.allSongsCacheTimestamp > ALL_SONGS_CACHE_DURATION
+      const isExpired =
+        Date.now() - this.allSongsCacheTimestamp > ALL_SONGS_CACHE_DURATION
       if (!isExpired) {
         console.log('🎵 Using memory cached all songs')
         return this.allSongsCache
@@ -103,9 +116,9 @@ export class SongService {
   private getAuthHeaders(): HeadersInit {
     const token = this.getAuthToken()
     return {
-      'accept': 'application/json',
+      accept: 'application/json',
       'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
+      ...(token && { Authorization: `Bearer ${token}` }),
     }
   }
 
@@ -114,7 +127,9 @@ export class SongService {
     const isAllSongsRequest = filters?.limit && filters.limit >= 1000
 
     // Define cacheKey for regular requests
-    const cacheKey = !isAllSongsRequest ? SongService.getCacheKey('getAllSongs', filters) : null
+    const cacheKey = !isAllSongsRequest
+      ? SongService.getCacheKey('getAllSongs', filters)
+      : null
 
     if (isAllSongsRequest) {
       // For all-songs requests, use special cache and do client-side filtering
@@ -125,7 +140,10 @@ export class SongService {
       }
     } else {
       // For regular requests, use normal cache
-      const cachedResult = SongService.getFromCache<SongListResponse>(cacheKey!, CACHE_DURATION)
+      const cachedResult = SongService.getFromCache<SongListResponse>(
+        cacheKey!,
+        CACHE_DURATION
+      )
       if (cachedResult) {
         console.log('🎵 Using cached filtered songs data')
         return cachedResult
@@ -133,7 +151,9 @@ export class SongService {
     }
 
     try {
-      console.log(`🎵 Fetching ${isAllSongsRequest ? 'all songs' : 'songs'} from API`)
+      console.log(
+        `🎵 Fetching ${isAllSongsRequest ? 'all songs' : 'songs'} from API`
+      )
       const url = new URL(`${BASE_URL}/songs`)
 
       if (filters?.search && filters.search.trim()) {
@@ -161,7 +181,7 @@ export class SongService {
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
-          'accept': 'application/json',
+          accept: 'application/json',
         },
       })
 
@@ -186,7 +206,7 @@ export class SongService {
 
         const response_data: SongListResponse = {
           data: songs,
-          pagination
+          pagination,
         }
 
         // Cache the result
@@ -214,7 +234,7 @@ export class SongService {
 
   async getSong(id: string): Promise<Song> {
     const cacheKey = SongService.getCacheKey('getSong', { id })
-    
+
     // Try cache first
     const cachedResult = SongService.getFromCache<Song>(cacheKey)
     if (cachedResult) {
@@ -225,7 +245,7 @@ export class SongService {
       const response = await fetch(`${BASE_URL}/songs/${id}`, {
         method: 'GET',
         headers: {
-          'accept': 'application/json',
+          accept: 'application/json',
         },
       })
 
@@ -234,16 +254,16 @@ export class SongService {
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200 && result.data) {
         const song = this.transformSongData(result.data)
-        
+
         // Cache the result
         SongService.setCache(cacheKey, song)
-        
+
         return song
       }
-      
+
       throw new Error(`Invalid response format: ${JSON.stringify(result)}`)
     } catch (error) {
       console.warn('Error fetching song:', error)
@@ -261,17 +281,19 @@ export class SongService {
 
       if (!response.ok) {
         const errorText = await response.text()
-        throw new Error(`Failed to create song: ${response.status} - ${errorText}`)
+        throw new Error(
+          `Failed to create song: ${response.status} - ${errorText}`
+        )
       }
 
       const result = await response.json()
       const newSong = this.transformSongData(result)
-      
+
       // Invalidate relevant caches
       SongService.clearCacheByPattern('getAllSongs')
       SongService.clearCacheByPattern('getSongCount')
       this.invalidateDashboardCache()
-      
+
       return newSong
     } catch (error) {
       console.warn('Error creating song:', error)
@@ -289,7 +311,9 @@ export class SongService {
 
       if (!response.ok) {
         const errorText = await response.text()
-        throw new Error(`Failed to update song: ${response.status} - ${errorText}`)
+        throw new Error(
+          `Failed to update song: ${response.status} - ${errorText}`
+        )
       }
 
       const result = await response.json()
@@ -317,9 +341,11 @@ export class SongService {
 
       if (!response.ok) {
         const errorText = await response.text()
-        throw new Error(`Failed to delete song: ${response.status} - ${errorText}`)
+        throw new Error(
+          `Failed to delete song: ${response.status} - ${errorText}`
+        )
       }
-      
+
       // Invalidate relevant caches
       SongService.clearCacheByPattern('getAllSongs')
       SongService.clearCacheByPattern('getSongCount')
@@ -331,7 +357,11 @@ export class SongService {
     }
   }
 
-  async searchSongs(query: string, baseChord?: string, tagIds?: string): Promise<SongListResponse> {
+  async searchSongs(
+    query: string,
+    baseChord?: string,
+    tagIds?: string
+  ): Promise<SongListResponse> {
     const filters: SongFilters = {
       search: query,
       ...(baseChord && { base_chord: baseChord }),
@@ -341,13 +371,15 @@ export class SongService {
     return this.getAllSongs(filters)
   }
 
-  async getSongCount(filters?: Omit<SongFilters, 'page' | 'limit'>): Promise<number> {
+  async getSongCount(
+    filters?: Omit<SongFilters, 'page' | 'limit'>
+  ): Promise<number> {
     try {
       // Use the existing getAllSongs with minimal data to get totalItems from pagination
       const response = await this.getAllSongs({
         page: 1,
         limit: 1,
-        ...filters
+        ...filters,
       })
 
       return response.pagination.totalItems
@@ -364,22 +396,30 @@ export class SongService {
     }
   }
 
-  private filterSongsClientSide(allSongs: SongListResponse, filters?: SongFilters): SongListResponse {
+  private filterSongsClientSide(
+    allSongs: SongListResponse,
+    filters?: SongFilters
+  ): SongListResponse {
     let filteredSongs = [...allSongs.data]
 
     // Apply search filter
     if (filters?.search && filters.search.trim()) {
       const searchTerm = filters.search.trim().toLowerCase()
-      filteredSongs = filteredSongs.filter(song =>
-        song.title.toLowerCase().includes(searchTerm) ||
-        song.artist.some(artist => artist.toLowerCase().includes(searchTerm)) ||
-        song.lyrics_and_chords.toLowerCase().includes(searchTerm)
+      filteredSongs = filteredSongs.filter(
+        (song) =>
+          song.title.toLowerCase().includes(searchTerm) ||
+          song.artist.some((artist) =>
+            artist.toLowerCase().includes(searchTerm)
+          ) ||
+          song.lyrics_and_chords.toLowerCase().includes(searchTerm)
       )
     }
 
     // Apply chord filter
     if (filters?.base_chord) {
-      filteredSongs = filteredSongs.filter(song => song.base_chord === filters.base_chord)
+      filteredSongs = filteredSongs.filter(
+        (song) => song.base_chord === filters.base_chord
+      )
     }
 
     // Apply sorting
@@ -405,7 +445,9 @@ export class SongService {
       })
     }
 
-    console.log(`🎵 Client-side filtered: ${filteredSongs.length} songs from ${allSongs.data.length} cached songs`)
+    console.log(
+      `🎵 Client-side filtered: ${filteredSongs.length} songs from ${allSongs.data.length} cached songs`
+    )
 
     // Return filtered result with updated pagination
     return {
@@ -417,7 +459,7 @@ export class SongService {
         itemsPerPage: filteredSongs.length,
         hasNextPage: false,
         hasPrevPage: false,
-      }
+      },
     }
   }
 
@@ -451,7 +493,9 @@ export class SongService {
       artist: artists,
       base_chord: song.base_chord || 'C',
       lyrics_and_chords: song.lyrics_and_chords || '',
-      tag_names: Array.isArray(song.tags) ? song.tags.map((tag: any) => tag.name) : [],
+      tag_names: Array.isArray(song.tags)
+        ? song.tags.map((tag: any) => tag.name)
+        : [],
       created_at: song.createdAt,
       updated_at: song.updatedAt,
     }

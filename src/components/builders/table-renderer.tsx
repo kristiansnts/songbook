@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { format } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -13,31 +15,9 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { format } from 'date-fns'
-import { formatDistanceToNow } from 'date-fns'
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu'
 import { MoreHorizontal, Check, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
-import { ConfirmDialog } from '@/components/confirm-dialog'
-import { 
-  TableBuilderConfig, 
+import {
+  TableBuilderConfig,
   ColumnConfig,
   TextColumnConfig,
   BadgeColumnConfig,
@@ -47,8 +27,28 @@ import {
   IconColumnConfig,
   BooleanColumnConfig,
   NumberColumnConfig,
-  ActionConfig
+  ActionConfig,
 } from '@/lib/builders/table-builder'
+import { cn } from '@/lib/utils'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { DataTablePagination } from '@/features/songs/components/data-table-pagination'
 import { DataTableToolbar } from './table-toolbar'
 
@@ -57,18 +57,21 @@ interface TableRendererProps<T = any> {
   className?: string
 }
 
-export function TableRenderer<T = any>({ 
-  config, 
-  className 
+export function TableRenderer<T = any>({
+  config,
+  className,
 }: TableRendererProps<T>) {
   const [rowSelection, setRowSelection] = React.useState({})
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({})
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  )
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [refreshKey, setRefreshKey] = React.useState(0)
 
   const forceRefresh = React.useCallback(() => {
-    setRefreshKey(prev => prev + 1)
+    setRefreshKey((prev) => prev + 1)
   }, [])
 
   const columns = React.useMemo(() => {
@@ -83,15 +86,17 @@ export function TableRenderer<T = any>({
               table.getIsAllPageRowsSelected() ||
               (table.getIsSomePageRowsSelected() && 'indeterminate')
             }
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label='Select all'
           />
         ),
         cell: ({ row }) => (
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
+            aria-label='Select row'
           />
         ),
         enableSorting: false,
@@ -109,16 +114,22 @@ export function TableRenderer<T = any>({
         enableSorting: columnConfig.sortable ?? true,
         cell: ({ row }) => {
           const value = row.getValue(columnConfig.name)
-          return renderCell(columnConfig, value, row, config.onRefresh || forceRefresh)
+          return renderCell(
+            columnConfig,
+            value,
+            row,
+            config.onRefresh || forceRefresh
+          )
         },
       }
 
       // Note: Server-side filtering is now handled via onFilterChange callback
 
       if (columnConfig.width) {
-        column.size = typeof columnConfig.width === 'number' 
-          ? columnConfig.width 
-          : parseInt(columnConfig.width.toString())
+        column.size =
+          typeof columnConfig.width === 'number'
+            ? columnConfig.width
+            : parseInt(columnConfig.width.toString())
       }
 
       tableColumns.push(column)
@@ -131,7 +142,7 @@ export function TableRenderer<T = any>({
   React.useEffect(() => {
     if (config.onFilterChange && columnFilters.length >= 0) {
       const filterValues: Record<string, any> = {}
-      columnFilters.forEach(filter => {
+      columnFilters.forEach((filter) => {
         filterValues[filter.id] = filter.value
       })
       config.onFilterChange(filterValues)
@@ -153,14 +164,19 @@ export function TableRenderer<T = any>({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: config.onFilterChange ? undefined : getFilteredRowModel(), // Disable client-side filtering when server-side filtering is used
-    getPaginationRowModel: config.serverSidePagination ? undefined : getPaginationRowModel(), // Disable client-side pagination when server-side pagination is used
+    getFilteredRowModel: config.onFilterChange
+      ? undefined
+      : getFilteredRowModel(), // Disable client-side filtering when server-side filtering is used
+    getPaginationRowModel: config.serverSidePagination
+      ? undefined
+      : getPaginationRowModel(), // Disable client-side pagination when server-side pagination is used
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     initialState: {
       pagination: {
-        pageSize: config.serverSidePagination?.itemsPerPage || config.pageSize || 10,
+        pageSize:
+          config.serverSidePagination?.itemsPerPage || config.pageSize || 10,
       },
     },
   })
@@ -169,7 +185,7 @@ export function TableRenderer<T = any>({
 
   return (
     <div className={cn('space-y-4', className)}>
-      <DataTableToolbar 
+      <DataTableToolbar
         table={table}
         searchable={config.searchable}
         searchPlaceholder={config.searchPlaceholder}
@@ -180,10 +196,10 @@ export function TableRenderer<T = any>({
         showViewOptions={config.showViewOptions}
         onSearchBlur={config.onSearchBlur}
       />
-      
-      <div className="rounded-md border overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table className="w-full">
+
+      <div className='overflow-hidden rounded-md border'>
+        <div className='overflow-x-auto'>
+          <Table className='w-full'>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
@@ -211,20 +227,28 @@ export function TableRenderer<T = any>({
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
                       </TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                  <TableCell
+                    colSpan={columns.length}
+                    className='h-24 text-center'
+                  >
                     {config.emptyState ? (
-                      <div className="flex flex-col items-center gap-2">
+                      <div className='flex flex-col items-center gap-2'>
                         {config.emptyState.icon}
-                        <div className="text-sm font-medium">{config.emptyState.title}</div>
+                        <div className='text-sm font-medium'>
+                          {config.emptyState.title}
+                        </div>
                         {config.emptyState.description && (
-                          <div className="text-xs text-muted-foreground">
+                          <div className='text-muted-foreground text-xs'>
                             {config.emptyState.description}
                           </div>
                         )}
@@ -250,32 +274,41 @@ export function TableRenderer<T = any>({
   )
 }
 
-function renderCell<T>(columnConfig: ColumnConfig<T>, value: any, row: any, onRefresh?: () => void) {
+function renderCell<T>(
+  columnConfig: ColumnConfig<T>,
+  value: any,
+  row: any,
+  onRefresh?: () => void
+) {
   switch (columnConfig.type) {
     case 'text':
       return renderTextCell(columnConfig as TextColumnConfig<T>, value)
-    
+
     case 'badge':
       return renderBadgeCell(columnConfig as BadgeColumnConfig<T>, value)
-    
+
     case 'date':
       return renderDateCell(columnConfig as DateColumnConfig<T>, value)
-    
+
     case 'actions':
-      return renderActionsCell(columnConfig as ActionsColumnConfig<T>, row, onRefresh)
-    
+      return renderActionsCell(
+        columnConfig as ActionsColumnConfig<T>,
+        row,
+        onRefresh
+      )
+
     case 'image':
       return renderImageCell(columnConfig as ImageColumnConfig<T>, value)
-    
+
     case 'icon':
       return renderIconCell(columnConfig as IconColumnConfig<T>, value)
-    
+
     case 'boolean':
       return renderBooleanCell(columnConfig as BooleanColumnConfig<T>, value)
-    
+
     case 'number':
       return renderNumberCell(columnConfig as NumberColumnConfig<T>, value)
-    
+
     default:
       return String(value || '')
   }
@@ -283,7 +316,7 @@ function renderCell<T>(columnConfig: ColumnConfig<T>, value: any, row: any, onRe
 
 function renderTextCell<T>(config: TextColumnConfig<T>, value: any) {
   const text = config.format ? config.format(value) : String(value || '')
-  
+
   if (config.truncate && config.maxLength && text.length > config.maxLength) {
     return (
       <span title={text} className={config.className}>
@@ -291,14 +324,14 @@ function renderTextCell<T>(config: TextColumnConfig<T>, value: any) {
       </span>
     )
   }
-  
+
   return <span className={config.className}>{text}</span>
 }
 
 function renderBadgeCell<T>(config: BadgeColumnConfig<T>, value: any) {
   const text = String(value || '')
   const colorName = config.colors?.[value] || 'default'
-  
+
   const getBadgeColorClass = (color: string) => {
     switch (color) {
       case 'green':
@@ -313,9 +346,9 @@ function renderBadgeCell<T>(config: BadgeColumnConfig<T>, value: any) {
         return ''
     }
   }
-  
+
   return (
-    <Badge 
+    <Badge
       variant={config.variant || 'outline'}
       className={cn(config.className, getBadgeColorClass(colorName))}
     >
@@ -326,9 +359,9 @@ function renderBadgeCell<T>(config: BadgeColumnConfig<T>, value: any) {
 
 function renderDateCell<T>(config: DateColumnConfig<T>, value: any) {
   if (!value) return null
-  
+
   const date = new Date(value)
-  
+
   if (config.relative) {
     return (
       <span className={config.className}>
@@ -336,15 +369,25 @@ function renderDateCell<T>(config: DateColumnConfig<T>, value: any) {
       </span>
     )
   }
-  
-  const formatted = config.format 
+
+  const formatted = config.format
     ? format(date, config.format)
     : date.toLocaleDateString()
-  
+
   return <span className={config.className}>{formatted}</span>
 }
 
-function ActionButton<T>({ action, row, className, onRefresh }: { action: ActionConfig<T>, row: any, className?: string, onRefresh?: () => void }) {
+function ActionButton<T>({
+  action,
+  row,
+  className,
+  onRefresh,
+}: {
+  action: ActionConfig<T>
+  row: any
+  className?: string
+  onRefresh?: () => void
+}) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -384,7 +427,7 @@ function ActionButton<T>({ action, row, className, onRefresh }: { action: Action
     <>
       <Button
         variant={action.variant || 'ghost'}
-        size={action.size as any || 'sm'}
+        size={(action.size as any) || 'sm'}
         disabled={action.disabled?.(row) || isLoading}
         onClick={handleClick}
         className={cn(className, action.color && getColorClass(action.color))}
@@ -392,13 +435,16 @@ function ActionButton<T>({ action, row, className, onRefresh }: { action: Action
         {action.icon}
         {action.label}
       </Button>
-      
+
       {action.requiresConfirmation && (
         <ConfirmDialog
           open={confirmOpen}
           onOpenChange={setConfirmOpen}
           title={action.confirmationTitle || 'Confirm Action'}
-          desc={action.confirmationMessage || 'Are you sure you want to perform this action?'}
+          desc={
+            action.confirmationMessage ||
+            'Are you sure you want to perform this action?'
+          }
           destructive={action.variant === 'destructive'}
           isLoading={isLoading}
           handleConfirm={executeAction}
@@ -408,9 +454,13 @@ function ActionButton<T>({ action, row, className, onRefresh }: { action: Action
   )
 }
 
-function renderActionsCell<T>(config: ActionsColumnConfig<T>, row: any, onRefresh?: () => void) {
+function renderActionsCell<T>(
+  config: ActionsColumnConfig<T>,
+  row: any,
+  onRefresh?: () => void
+) {
   const visibleActions = config.actions.filter(
-    action => !action.hidden || !action.hidden(row)
+    (action) => !action.hidden || !action.hidden(row)
   )
 
   if (visibleActions.length === 0) return null
@@ -427,11 +477,30 @@ function renderActionsCell<T>(config: ActionsColumnConfig<T>, row: any, onRefres
     )
   }
 
-  return <ActionDropdown actions={visibleActions} row={row} className={config.className} onRefresh={onRefresh} />
+  return (
+    <ActionDropdown
+      actions={visibleActions}
+      row={row}
+      className={config.className}
+      onRefresh={onRefresh}
+    />
+  )
 }
 
-function ActionDropdown<T>({ actions, row, className, onRefresh }: { actions: ActionConfig<T>[], row: any, className?: string, onRefresh?: () => void }) {
-  const [confirmAction, setConfirmAction] = useState<ActionConfig<T> | null>(null)
+function ActionDropdown<T>({
+  actions,
+  row,
+  className,
+  onRefresh,
+}: {
+  actions: ActionConfig<T>[]
+  row: any
+  className?: string
+  onRefresh?: () => void
+}) {
+  const [confirmAction, setConfirmAction] = useState<ActionConfig<T> | null>(
+    null
+  )
   const [isLoading, setIsLoading] = useState(false)
 
   const handleActionClick = async (action: ActionConfig<T>) => {
@@ -470,17 +539,23 @@ function ActionDropdown<T>({ actions, row, className, onRefresh }: { actions: Ac
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className={cn('h-8 w-8 p-0', className)}>
-            <MoreHorizontal className="h-4 w-4" />
+          <Button
+            variant='ghost'
+            size='sm'
+            className={cn('h-8 w-8 p-0', className)}
+          >
+            <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align='end'>
           {actions.map((action, index) => (
             <DropdownMenuItem
               key={index}
               disabled={action.disabled?.(row) || isLoading}
               onClick={() => handleActionClick(action)}
-              className={action.color ? getDropdownColorClass(action.color) : ''}
+              className={
+                action.color ? getDropdownColorClass(action.color) : ''
+              }
             >
               {action.icon}
               {action.label}
@@ -488,13 +563,16 @@ function ActionDropdown<T>({ actions, row, className, onRefresh }: { actions: Ac
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      
+
       {confirmAction && (
         <ConfirmDialog
           open={!!confirmAction}
           onOpenChange={(open) => !open && setConfirmAction(null)}
           title={confirmAction.confirmationTitle || 'Confirm Action'}
-          desc={confirmAction.confirmationMessage || 'Are you sure you want to perform this action?'}
+          desc={
+            confirmAction.confirmationMessage ||
+            'Are you sure you want to perform this action?'
+          }
           destructive={confirmAction.variant === 'destructive'}
           isLoading={isLoading}
           handleConfirm={() => executeAction(confirmAction)}
@@ -515,18 +593,16 @@ function renderImageCell<T>(config: ImageColumnConfig<T>, value: any) {
   return (
     <Avatar className={cn(sizeClass, config.className)}>
       <AvatarImage src={value} />
-      <AvatarFallback>
-        {config.fallback || '?'}
-      </AvatarFallback>
+      <AvatarFallback>{config.fallback || '?'}</AvatarFallback>
     </Avatar>
   )
 }
 
 function renderIconCell<T>(config: IconColumnConfig<T>, value: any) {
   const icon = config.iconMap?.[value]
-  
+
   if (!icon) return null
-  
+
   const size = config.size || 'md'
   const sizeClass = {
     sm: 'h-4 w-4',
@@ -534,55 +610,50 @@ function renderIconCell<T>(config: IconColumnConfig<T>, value: any) {
     lg: 'h-6 w-6',
   }[size]
 
-  return (
-    <span className={cn(sizeClass, config.className)}>
-      {icon}
-    </span>
-  )
+  return <span className={cn(sizeClass, config.className)}>{icon}</span>
 }
 
 function renderBooleanCell<T>(config: BooleanColumnConfig<T>, value: any) {
   const isTrue = Boolean(value)
-  
+
   if (config.showIcons) {
     return (
       <span className={cn('flex items-center', config.className)}>
         {isTrue ? (
-          <Check className="h-4 w-4 text-green-500" />
+          <Check className='h-4 w-4 text-green-500' />
         ) : (
-          <X className="h-4 w-4 text-red-500" />
+          <X className='h-4 w-4 text-red-500' />
         )}
       </span>
     )
   }
-  
-  const text = isTrue 
-    ? (config.trueLabel || 'Yes')
-    : (config.falseLabel || 'No')
-  
+
+  const text = isTrue ? config.trueLabel || 'Yes' : config.falseLabel || 'No'
+
   return <span className={config.className}>{text}</span>
 }
 
 function renderNumberCell<T>(config: NumberColumnConfig<T>, value: any) {
   const num = Number(value)
-  
+
   if (isNaN(num)) return null
-  
+
   if (config.format) {
     return <span className={config.className}>{config.format(num)}</span>
   }
-  
+
   if (config.currency) {
     return (
       <span className={config.className}>
-        ${num.toLocaleString(undefined, { 
+        $
+        {num.toLocaleString(undefined, {
           minimumFractionDigits: config.precision || 2,
           maximumFractionDigits: config.precision || 2,
         })}
       </span>
     )
   }
-  
+
   return (
     <span className={config.className}>
       {num.toLocaleString(undefined, {

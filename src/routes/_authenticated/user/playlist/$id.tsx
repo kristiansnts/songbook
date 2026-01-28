@@ -1,17 +1,22 @@
-import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { playlistService } from '@/services/playlist-service'
 import { Playlist } from '@/types/playlist'
 import { Song } from '@/types/song'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+  ChevronLeft,
+  Search,
+  X,
+  Loader2,
+  Play,
+  Share,
+  Copy,
+  Trash2,
+  Users,
+  LogOut,
+} from 'lucide-react'
+import { toast } from 'sonner'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,9 +27,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { ChevronLeft, Search, X, Loader2, Play, Share, Copy, Trash2, Users, LogOut } from 'lucide-react'
-import { useNavigate } from '@tanstack/react-router'
-import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 
 export const Route = createFileRoute('/_authenticated/user/playlist/$id')({
   component: PlaylistComponent,
@@ -58,7 +69,7 @@ function PlaylistComponent() {
   const [memberToRemove, setMemberToRemove] = useState<any>(null)
   const [leavePlaylistDialogOpen, setLeavePlaylistDialogOpen] = useState(false)
   const [leavingPlaylist, setLeavingPlaylist] = useState(false)
-  
+
   useEffect(() => {
     loadPlaylistData()
     loadPlaylistTeams()
@@ -90,8 +101,8 @@ function PlaylistComponent() {
       setLoadingTeams(true)
       const teams = await playlistService.getPlaylistTeams()
       // Filter teams for this specific playlist
-      const currentPlaylistTeams = teams.filter((team: any) => 
-        team.playlist_id?.toString() === id.toString()
+      const currentPlaylistTeams = teams.filter(
+        (team: any) => team.playlist_id?.toString() === id.toString()
       )
       setPlaylistTeams(currentPlaylistTeams)
     } catch (error) {
@@ -103,8 +114,8 @@ function PlaylistComponent() {
   }
 
   const getCurrentPlaylistTeam = () => {
-    return playlistTeams.find((team: any) => 
-      team.playlist_id?.toString() === id.toString()
+    return playlistTeams.find(
+      (team: any) => team.playlist_id?.toString() === id.toString()
     )
   }
 
@@ -118,20 +129,23 @@ function PlaylistComponent() {
 
     try {
       setRemovingMemberId(memberToRemove.id)
-      
+
       // Call API to remove member using team ID
-      await playlistService.removeMemberFromPlaylist(playlist.playlist_team_id.toString(), memberToRemove.id)
-      
+      await playlistService.removeMemberFromPlaylist(
+        playlist.playlist_team_id.toString(),
+        memberToRemove.id
+      )
+
       // Reload team details to refresh the member list
       await loadTeamDetails()
-      
+
       toast.success('Member removed from playlist', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
-      
+
       // Close dialog and reset state
       setRemoveMemberDialogOpen(false)
       setMemberToRemove(null)
@@ -139,8 +153,8 @@ function PlaylistComponent() {
       toast.error('Failed to remove member', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
     } finally {
       setRemovingMemberId(null)
@@ -158,8 +172,10 @@ function PlaylistComponent() {
     try {
       setLoadingMembers(true)
       const teamId = playlist.playlist_team_id
-      const details = await playlistService.getPlaylistTeamDetails(teamId.toString())
-      
+      const details = await playlistService.getPlaylistTeamDetails(
+        teamId.toString()
+      )
+
       setTeamDetails(details)
     } catch (error) {
       console.warn('Failed to load team details:', error)
@@ -179,20 +195,22 @@ function PlaylistComponent() {
 
     try {
       setDeletingTeam(true)
-      await playlistService.deletePlaylistTeam(playlist.playlist_team_id.toString())
-      
+      await playlistService.deletePlaylistTeam(
+        playlist.playlist_team_id.toString()
+      )
+
       toast.success('Team deleted successfully', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
-      
+
       // Close dialogs and refresh data
       setDeleteTeamDialogOpen(false)
       setMembersDialogOpen(false)
       setTeamDetails(null)
-      
+
       // Reload playlist data to update playlist_team_id
       await loadPlaylistData()
       await loadPlaylistTeams()
@@ -200,8 +218,8 @@ function PlaylistComponent() {
       toast.error('Failed to delete team', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
     } finally {
       setDeletingTeam(false)
@@ -217,28 +235,28 @@ function PlaylistComponent() {
     if (!songToRemove) return
 
     try {
-      setRemovingIds(prev => new Set([...prev, songToRemove.id]))
-      
+      setRemovingIds((prev) => new Set([...prev, songToRemove.id]))
+
       await playlistService.removeSongFromPlaylist(id, songToRemove.id)
-      
+
       // Reload playlist data to get updated song list
       await loadPlaylistData()
-      
+
       toast.success('Song removed from playlist', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
     } catch (error) {
       toast.error('Failed to remove song from playlist', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
     } finally {
-      setRemovingIds(prev => {
+      setRemovingIds((prev) => {
         const newSet = new Set(prev)
         newSet.delete(songToRemove.id)
         return newSet
@@ -258,8 +276,8 @@ function PlaylistComponent() {
       toast.success('Left playlist successfully', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
 
       // Navigate back to dashboard
@@ -268,8 +286,8 @@ function PlaylistComponent() {
       toast.error('Failed to leave playlist', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
     } finally {
       setLeavingPlaylist(false)
@@ -284,9 +302,9 @@ function PlaylistComponent() {
   const handlePlayPlaylist = () => {
     if (songs.length > 0) {
       // Navigate to playlist viewer
-      navigate({ 
-        to: '/user/playlist/view/$id', 
-        params: { id }
+      navigate({
+        to: '/user/playlist/view/$id',
+        params: { id },
       })
     }
   }
@@ -295,22 +313,22 @@ function PlaylistComponent() {
     try {
       setDeleting(true)
       await playlistService.deletePlaylist(id)
-      
+
       toast.success('Playlist deleted successfully', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
-      
+
       // Navigate back to dashboard
       navigate({ to: '/user/dashboard' })
     } catch (error) {
       toast.error('Failed to delete playlist', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
     } finally {
       setDeleting(false)
@@ -323,7 +341,7 @@ function PlaylistComponent() {
     if (playlist?.sharable_link) {
       return playlist.sharable_link
     }
-    
+
     // Generate new share link
     try {
       const newShareLink = await playlistService.createShareLink(id)
@@ -335,8 +353,8 @@ function PlaylistComponent() {
         description: 'Could not generate API share link',
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
       return fallbackUrl
     }
@@ -350,7 +368,7 @@ function PlaylistComponent() {
       setShareDialogOpen(true)
       return
     }
-    
+
     // If no valid share link exists, show confirmation dialog
     setConfirmDialogOpen(true)
   }
@@ -358,7 +376,7 @@ function PlaylistComponent() {
   const handleConfirmCreateShareLink = async () => {
     setConfirmDialogOpen(false)
     setShareDialogOpen(true)
-    
+
     try {
       setGeneratingLink(true)
       const link = await getOrCreateShareLink()
@@ -374,7 +392,7 @@ function PlaylistComponent() {
         toast.error('No share link available')
         return
       }
-      
+
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(shareLink)
       } else {
@@ -395,8 +413,8 @@ function PlaylistComponent() {
       toast.success('Link copied to clipboard!', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
 
       // Reset copy success state after 2 seconds
@@ -405,127 +423,137 @@ function PlaylistComponent() {
       toast.error('Failed to copy link', {
         action: {
           label: 'x',
-          onClick: () => toast.dismiss()
-        }
+          onClick: () => toast.dismiss(),
+        },
       })
     }
   }
-  
+
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-center p-8">
-          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+      <div className='container mx-auto px-4 py-6'>
+        <div className='flex items-center justify-center p-8'>
+          <Loader2 className='mr-2 h-6 w-6 animate-spin' />
           Loading playlist...
         </div>
       </div>
     )
   }
-  
+
   if (!playlist) {
     return (
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-center p-8">
+      <div className='container mx-auto px-4 py-6'>
+        <div className='flex items-center justify-center p-8'>
           Playlist not found
         </div>
       </div>
     )
   }
-  
+
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className='container mx-auto px-4 py-6'>
       {/* Header */}
-      <header className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
+      <header className='mb-6 flex items-center justify-between'>
+        <div className='flex items-center'>
           <Button
-            variant="ghost"
-            size="sm"
+            variant='ghost'
+            size='sm'
             onClick={handleBackToLibrary}
-            className="mr-2 p-1"
+            className='mr-2 p-1'
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className='h-6 w-6' />
           </Button>
-          <span className="text-lg">Library</span>
+          <span className='text-lg'>Library</span>
         </div>
       </header>
 
       {/* Playlist Info */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
+      <div className='mb-6'>
+        <div className='flex items-center justify-between'>
           <div>
-            <h1 className="text-4xl font-bold">{playlist.name}</h1>
-            <p className="text-muted-foreground mt-1">
+            <h1 className='text-4xl font-bold'>{playlist.name}</h1>
+            <p className='text-muted-foreground mt-1'>
               {playlist.songCount} {playlist.songCount === 1 ? 'song' : 'songs'}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className='flex items-center gap-2'>
             {/* Leave Playlist Button - Only show for member users */}
-            {playlist?.access_type === 'member' && playlist?.playlist_team_id && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 text-red-500 hover:text-red-700 border-red-200 hover:bg-red-100/50 dark:hover:bg-red-900/20"
-                onClick={() => setLeavePlaylistDialogOpen(true)}
-              >
-                <LogOut className="h-4 w-4" />
-                Leave
-              </Button>
-            )}
+            {playlist?.access_type === 'member' &&
+              playlist?.playlist_team_id && (
+                <Button
+                  variant='outline'
+                  size='sm'
+                  className='flex items-center gap-2 border-red-200 text-red-500 hover:bg-red-100/50 hover:text-red-700 dark:hover:bg-red-900/20'
+                  onClick={() => setLeavePlaylistDialogOpen(true)}
+                >
+                  <LogOut className='h-4 w-4' />
+                  Leave
+                </Button>
+              )}
             <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
+              variant='outline'
+              size='sm'
+              className='flex items-center gap-2'
               onClick={handleSharePlaylist}
             >
-              <Share className="h-4 w-4" />
+              <Share className='h-4 w-4' />
               Share
             </Button>
           </div>
 
           <Dialog open={shareDialogOpen} onOpenChange={setShareDialogOpen}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className='sm:max-w-md'>
               <DialogHeader>
                 <DialogTitle>Share Playlist</DialogTitle>
                 <DialogDescription>
                   Anyone with this link can view this playlist
                 </DialogDescription>
               </DialogHeader>
-              <div className="flex items-center space-x-2">
-                <div className="grid flex-1 gap-2">
+              <div className='flex items-center space-x-2'>
+                <div className='grid flex-1 gap-2'>
                   <Input
-                    id="link"
-                    value={generatingLink ? 'Generating share link...' : shareLink}
+                    id='link'
+                    value={
+                      generatingLink ? 'Generating share link...' : shareLink
+                    }
                     readOnly
-                    className="h-9"
+                    className='h-9'
                     disabled={generatingLink}
                   />
                 </div>
                 <Button
-                  size="sm"
-                  className="px-3"
+                  size='sm'
+                  className='px-3'
                   onClick={handleCopyLink}
-                  variant={copySuccess ? "default" : "secondary"}
+                  variant={copySuccess ? 'default' : 'secondary'}
                   disabled={generatingLink || !shareLink}
                 >
                   {generatingLink ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className='h-4 w-4 animate-spin' />
                   ) : (
-                    <Copy className="h-4 w-4" />
+                    <Copy className='h-4 w-4' />
                   )}
-                  {generatingLink ? "Generating..." : copySuccess ? "Copied!" : "Copy"}
+                  {generatingLink
+                    ? 'Generating...'
+                    : copySuccess
+                      ? 'Copied!'
+                      : 'Copy'}
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
 
           {/* Confirmation Dialog for creating share link */}
-          <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+          <AlertDialog
+            open={confirmDialogOpen}
+            onOpenChange={setConfirmDialogOpen}
+          >
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>Create Share Link?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will create a shareable link that allows anyone with the link to view this playlist. 
-                  Do you want to continue?
+                  This will create a shareable link that allows anyone with the
+                  link to view this playlist. Do you want to continue?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -541,54 +569,61 @@ function PlaylistComponent() {
 
       {/* Members Dialog */}
       <Dialog open={membersDialogOpen} onOpenChange={setMembersDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className='sm:max-w-md'>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
+            <DialogTitle className='flex items-center gap-2'>
+              <Users className='h-5 w-5' />
               Playlist Members
             </DialogTitle>
             <DialogDescription>
               Manage members who have access to this playlist
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="space-y-4">
+
+          <div className='space-y-4'>
             {loadingMembers ? (
-              <div className="text-center py-4 text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
+              <div className='text-muted-foreground py-4 text-center'>
+                <Loader2 className='mx-auto mb-2 h-4 w-4 animate-spin' />
                 Loading members...
               </div>
             ) : !teamDetails ? (
-              <div className="text-center py-4 text-muted-foreground">
+              <div className='text-muted-foreground py-4 text-center'>
                 No team data found
               </div>
             ) : (
-              <div className="space-y-3">
-                {(!teamDetails.members || teamDetails.members.length === 0) ? (
-                  <div className="text-center py-4 text-muted-foreground">
+              <div className='space-y-3'>
+                {!teamDetails.members || teamDetails.members.length === 0 ? (
+                  <div className='text-muted-foreground py-4 text-center'>
                     No members in this playlist
                   </div>
                 ) : (
                   teamDetails.members.map((member: any, index: number) => (
-                    <div key={`member-${member.id}-${index}`} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div className="flex-1">
-                        <div className="font-medium">{member.nama || member.name || 'No name'}</div>
-                        <div className="text-sm text-muted-foreground">{member.email || 'No email'}</div>
+                    <div
+                      key={`member-${member.id}-${index}`}
+                      className='flex items-center justify-between rounded-lg border p-3'
+                    >
+                      <div className='flex-1'>
+                        <div className='font-medium'>
+                          {member.nama || member.name || 'No name'}
+                        </div>
+                        <div className='text-muted-foreground text-sm'>
+                          {member.email || 'No email'}
+                        </div>
                       </div>
-                      
+
                       {/* Remove Member Button - Only show for playlist owners */}
                       {playlist?.access_type === 'owner' && (
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant='ghost'
+                          size='sm'
                           onClick={() => handleRemoveMemberClick(member)}
                           disabled={removingMemberId === member.id}
-                          className="text-red-500 hover:text-red-700 hover:bg-red-100/50 dark:hover:bg-red-900/20"
+                          className='text-red-500 hover:bg-red-100/50 hover:text-red-700 dark:hover:bg-red-900/20'
                         >
                           {removingMemberId === member.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className='h-4 w-4 animate-spin' />
                           ) : (
-                            <X className="h-4 w-4" />
+                            <X className='h-4 w-4' />
                           )}
                         </Button>
                       )}
@@ -598,18 +633,18 @@ function PlaylistComponent() {
               </div>
             )}
           </div>
-          
+
           {/* Footer with Delete Team Button - Only show for playlist owners */}
           {playlist?.access_type === 'owner' && (
-            <div className="flex justify-end pt-4 border-t">
+            <div className='flex justify-end border-t pt-4'>
               <Button
-                variant="outline"
-                size="sm"
+                variant='outline'
+                size='sm'
                 onClick={() => setDeleteTeamDialogOpen(true)}
-                className="text-red-500 hover:text-red-700 hover:bg-red-100/50 dark:hover:bg-red-900/20 border-red-200"
+                className='border-red-200 text-red-500 hover:bg-red-100/50 hover:text-red-700 dark:hover:bg-red-900/20'
                 disabled={loadingMembers}
               >
-                <Trash2 className="h-4 w-4 mr-1" />
+                <Trash2 className='mr-1 h-4 w-4' />
                 Delete Team
               </Button>
             </div>
@@ -618,24 +653,30 @@ function PlaylistComponent() {
       </Dialog>
 
       {/* Delete Team Confirmation Dialog */}
-      <AlertDialog open={deleteTeamDialogOpen} onOpenChange={setDeleteTeamDialogOpen}>
+      <AlertDialog
+        open={deleteTeamDialogOpen}
+        onOpenChange={setDeleteTeamDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Team?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the team and remove all members from this playlist.
+              This action cannot be undone. This will permanently delete the
+              team and remove all members from this playlist.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deletingTeam}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deletingTeam}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteTeam}
               disabled={deletingTeam}
-              className="bg-red-500 hover:bg-red-600"
+              className='bg-red-500 hover:bg-red-600'
             >
               {deletingTeam ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   Deleting...
                 </>
               ) : (
@@ -647,27 +688,33 @@ function PlaylistComponent() {
       </AlertDialog>
 
       {/* Remove Member Confirmation Dialog */}
-      <AlertDialog open={removeMemberDialogOpen} onOpenChange={setRemoveMemberDialogOpen}>
+      <AlertDialog
+        open={removeMemberDialogOpen}
+        onOpenChange={setRemoveMemberDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Member?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove "{memberToRemove?.nama || memberToRemove?.name}" from this playlist team? 
-              This action cannot be undone.
+              Are you sure you want to remove "
+              {memberToRemove?.nama || memberToRemove?.name}" from this playlist
+              team? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={removingMemberId === memberToRemove?.id}>
+            <AlertDialogCancel
+              disabled={removingMemberId === memberToRemove?.id}
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmRemoveMember}
               disabled={removingMemberId === memberToRemove?.id}
-              className="bg-red-500 hover:bg-red-600"
+              className='bg-red-500 hover:bg-red-600'
             >
               {removingMemberId === memberToRemove?.id ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   Removing...
                 </>
               ) : (
@@ -679,24 +726,30 @@ function PlaylistComponent() {
       </AlertDialog>
 
       {/* Leave Playlist Confirmation Dialog */}
-      <AlertDialog open={leavePlaylistDialogOpen} onOpenChange={setLeavePlaylistDialogOpen}>
+      <AlertDialog
+        open={leavePlaylistDialogOpen}
+        onOpenChange={setLeavePlaylistDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Leave Playlist?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to leave "{playlist?.name}"? You will no longer have access to this playlist and its contents.
+              Are you sure you want to leave "{playlist?.name}"? You will no
+              longer have access to this playlist and its contents.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={leavingPlaylist}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={leavingPlaylist}>
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleLeavePlaylist}
               disabled={leavingPlaylist}
-              className="bg-red-500 hover:bg-red-600"
+              className='bg-red-500 hover:bg-red-600'
             >
               {leavingPlaylist ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   Leaving...
                 </>
               ) : (
@@ -708,57 +761,55 @@ function PlaylistComponent() {
       </AlertDialog>
 
       {/* Search */}
-      <div className="relative mb-6">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
-        <Input
-          className="pl-10"
-          placeholder="Search in playlist"
-          type="text"
-        />
+      <div className='relative mb-6'>
+        <Search className='absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-gray-400' />
+        <Input className='pl-10' placeholder='Search in playlist' type='text' />
       </div>
 
       {/* Songs List */}
-      <div className="space-y-2">
+      <div className='space-y-2'>
         {songs.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className='text-muted-foreground py-8 text-center'>
             No songs in this playlist
           </div>
         ) : (
           songs.map((song, index) => (
             <div
               key={song.id}
-              className="flex items-center p-4 rounded-lg group"
+              className='group flex items-center rounded-lg p-4'
             >
               {/* Index */}
-              <div className="w-8 text-center mr-4">
-                <span className="text-muted-foreground text-sm">
+              <div className='mr-4 w-8 text-center'>
+                <span className='text-muted-foreground text-sm'>
                   {index + 1}
                 </span>
               </div>
 
               {/* Song Info - Only title and artist */}
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-foreground truncate">
+              <div className='min-w-0 flex-1'>
+                <h3 className='text-foreground truncate font-medium'>
                   {song.title}
                 </h3>
-                <p className="text-sm text-muted-foreground truncate">
-                  {Array.isArray(song.artist) ? song.artist.join(', ') : song.artist}
+                <p className='text-muted-foreground truncate text-sm'>
+                  {Array.isArray(song.artist)
+                    ? song.artist.join(', ')
+                    : song.artist}
                 </p>
               </div>
 
               {/* Remove Button - Only show for playlist owners */}
               {playlist?.access_type === 'owner' && (
                 <Button
-                  variant="ghost"
-                  size="sm"
+                  variant='ghost'
+                  size='sm'
                   onClick={() => handleRemoveSongClick(song)}
                   disabled={removingIds.has(song.id)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-100/50 dark:hover:bg-red-900/20"
+                  className='text-red-500 hover:bg-red-100/50 hover:text-red-700 dark:hover:bg-red-900/20'
                 >
                   {removingIds.has(song.id) ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className='h-4 w-4 animate-spin' />
                   ) : (
-                    <X className="h-4 w-4" />
+                    <X className='h-4 w-4' />
                   )}
                 </Button>
               )}
@@ -768,18 +819,18 @@ function PlaylistComponent() {
       </div>
 
       {/* Floating Action Buttons */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+      <div className='fixed right-6 bottom-6 z-50 flex flex-col gap-3'>
         {/* Group/People Button - Only show if playlist has team ID */}
         {playlist?.playlist_team_id && (
           <Button
             onClick={handleMembersDialogOpen}
-            className="w-12 h-12 rounded-full bg-blue-500 text-white hover:bg-blue-600 shadow-lg hover:shadow-xl transition-all duration-200"
+            className='h-12 w-12 rounded-full bg-blue-500 text-white shadow-lg transition-all duration-200 hover:bg-blue-600 hover:shadow-xl'
             disabled={loadingTeams}
           >
             {loadingTeams ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className='h-4 w-4 animate-spin' />
             ) : (
-              <Users className="h-4 w-4" />
+              <Users className='h-4 w-4' />
             )}
           </Button>
         )}
@@ -788,49 +839,58 @@ function PlaylistComponent() {
         {playlist?.access_type === 'owner' && (
           <Button
             onClick={() => setDeleteDialogOpen(true)}
-            className="w-12 h-12 rounded-full bg-red-500 text-white hover:bg-red-600 shadow-lg hover:shadow-xl transition-all duration-200"
+            className='h-12 w-12 rounded-full bg-red-500 text-white shadow-lg transition-all duration-200 hover:bg-red-600 hover:shadow-xl'
             disabled={deleting}
           >
             {deleting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className='h-4 w-4 animate-spin' />
             ) : (
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className='h-4 w-4' />
             )}
           </Button>
         )}
-        
+
         {/* Play Button */}
         {songs.length > 0 && (
           <Button
             onClick={handlePlayPlaylist}
-            className="w-12 h-12 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-200"
+            className='bg-primary text-primary-foreground hover:bg-primary/90 h-12 w-12 rounded-full shadow-lg transition-all duration-200 hover:shadow-xl'
           >
-            <Play className="h-4 w-4 ml-0.5" />
+            <Play className='ml-0.5 h-4 w-4' />
           </Button>
         )}
       </div>
 
       {/* Remove Song Confirmation Dialog */}
-      <AlertDialog open={removeSongDialogOpen} onOpenChange={setRemoveSongDialogOpen}>
+      <AlertDialog
+        open={removeSongDialogOpen}
+        onOpenChange={setRemoveSongDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Song from Playlist?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove "{songToRemove?.title}" by {Array.isArray(songToRemove?.artist) ? songToRemove.artist.join(', ') : songToRemove?.artist} from this playlist?
+              Are you sure you want to remove "{songToRemove?.title}" by{' '}
+              {Array.isArray(songToRemove?.artist)
+                ? songToRemove.artist.join(', ')
+                : songToRemove?.artist}{' '}
+              from this playlist?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={songToRemove ? removingIds.has(songToRemove.id) : false}>
+            <AlertDialogCancel
+              disabled={songToRemove ? removingIds.has(songToRemove.id) : false}
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmRemoveSong}
               disabled={songToRemove ? removingIds.has(songToRemove.id) : false}
-              className="bg-red-500 hover:bg-red-600"
+              className='bg-red-500 hover:bg-red-600'
             >
               {songToRemove && removingIds.has(songToRemove.id) ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   Removing...
                 </>
               ) : (
@@ -847,7 +907,8 @@ function PlaylistComponent() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Playlist?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the playlist "{playlist?.name}" and all its contents.
+              This action cannot be undone. This will permanently delete the
+              playlist "{playlist?.name}" and all its contents.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -855,11 +916,11 @@ function PlaylistComponent() {
             <AlertDialogAction
               onClick={handleDeletePlaylist}
               disabled={deleting}
-              className="bg-red-500 hover:bg-red-600"
+              className='bg-red-500 hover:bg-red-600'
             >
               {deleting ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                   Deleting...
                 </>
               ) : (

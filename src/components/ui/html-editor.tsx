@@ -1,7 +1,7 @@
 import React from 'react'
 import { Bold, Italic, Underline, List, ListOrdered } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 interface HtmlEditorProps {
   value?: string
@@ -34,28 +34,30 @@ export function HtmlEditor({
   }
 
   const cleanHtml = (html: string): string => {
-    return html
-      // Normalize div to p tags
-      .replace(/<div><br><\/div>/g, '<p><br></p>')
-      .replace(/<div>/g, '<p>')
-      .replace(/<\/div>/g, '</p>')
-      // Remove all style attributes and color formatting
-      .replace(/\s*style="[^"]*"/g, '')
-      .replace(/\s*color="[^"]*"/g, '')
-      .replace(/\s*bgcolor="[^"]*"/g, '')
-      .replace(/\s*face="[^"]*"/g, '')
-      .replace(/\s*size="[^"]*"/g, '')
-      // Remove font tags completely
-      .replace(/<font[^>]*>/g, '')
-      .replace(/<\/font>/g, '')
-      // Clean up span tags with styling
-      .replace(/<span[^>]*color[^>]*>/g, '<span>')
-      .replace(/<span[^>]*style[^>]*>/g, '<span>')
-      .replace(/<span[^>]*background[^>]*>/g, '<span>')
-      .replace(/<span>\s*<\/span>/g, '')
-      .replace(/<span><\/span>/g, '')
-      // Remove any remaining empty tags
-      .replace(/<([^>]+)>\s*<\/\1>/g, '')
+    return (
+      html
+        // Normalize div to p tags
+        .replace(/<div><br><\/div>/g, '<p><br></p>')
+        .replace(/<div>/g, '<p>')
+        .replace(/<\/div>/g, '</p>')
+        // Remove all style attributes and color formatting
+        .replace(/\s*style="[^"]*"/g, '')
+        .replace(/\s*color="[^"]*"/g, '')
+        .replace(/\s*bgcolor="[^"]*"/g, '')
+        .replace(/\s*face="[^"]*"/g, '')
+        .replace(/\s*size="[^"]*"/g, '')
+        // Remove font tags completely
+        .replace(/<font[^>]*>/g, '')
+        .replace(/<\/font>/g, '')
+        // Clean up span tags with styling
+        .replace(/<span[^>]*color[^>]*>/g, '<span>')
+        .replace(/<span[^>]*style[^>]*>/g, '<span>')
+        .replace(/<span[^>]*background[^>]*>/g, '<span>')
+        .replace(/<span>\s*<\/span>/g, '')
+        .replace(/<span><\/span>/g, '')
+        // Remove any remaining empty tags
+        .replace(/<([^>]+)>\s*<\/\1>/g, '')
+    )
   }
 
   const handleContentChange = () => {
@@ -91,53 +93,58 @@ export function HtmlEditor({
   }
 
   const formatButtons = [
-    { 
-      icon: Bold, 
-      command: 'bold', 
+    {
+      icon: Bold,
+      command: 'bold',
       label: 'Bold',
-      isActive: () => document.queryCommandState('bold')
+      isActive: () => document.queryCommandState('bold'),
     },
-    { 
-      icon: Italic, 
-      command: 'italic', 
+    {
+      icon: Italic,
+      command: 'italic',
       label: 'Italic',
-      isActive: () => document.queryCommandState('italic')
+      isActive: () => document.queryCommandState('italic'),
     },
-    { 
-      icon: Underline, 
-      command: 'underline', 
+    {
+      icon: Underline,
+      command: 'underline',
       label: 'Underline',
-      isActive: () => document.queryCommandState('underline')
+      isActive: () => document.queryCommandState('underline'),
     },
-    { 
-      icon: List, 
-      command: 'insertUnorderedList', 
+    {
+      icon: List,
+      command: 'insertUnorderedList',
       label: 'Bullet List',
-      isActive: () => document.queryCommandState('insertUnorderedList')
+      isActive: () => document.queryCommandState('insertUnorderedList'),
     },
-    { 
-      icon: ListOrdered, 
-      command: 'insertOrderedList', 
+    {
+      icon: ListOrdered,
+      command: 'insertOrderedList',
       label: 'Numbered List',
-      isActive: () => document.queryCommandState('insertOrderedList')
+      isActive: () => document.queryCommandState('insertOrderedList'),
     },
   ]
 
   return (
-    <div className={cn('w-full border border-input rounded-md bg-background', className)}>
+    <div
+      className={cn(
+        'border-input bg-background w-full rounded-md border',
+        className
+      )}
+    >
       {/* Toolbar */}
-      <div className="border-b border-border p-2 flex gap-1 flex-wrap bg-muted/30">
+      <div className='border-border bg-muted/30 flex flex-wrap gap-1 border-b p-2'>
         {formatButtons.map(({ icon: Icon, command, label, isActive }) => (
           <Button
             key={label}
-            type="button"
+            type='button'
             variant={isActive() ? 'default' : 'ghost'}
-            size="sm"
+            size='sm'
             onClick={() => executeCommand(command)}
-            className="h-8 w-8 p-0"
+            className='h-8 w-8 p-0'
             title={label}
           >
-            <Icon className="h-4 w-4" />
+            <Icon className='h-4 w-4' />
           </Button>
         ))}
       </div>
@@ -151,8 +158,8 @@ export function HtmlEditor({
         className={cn(
           'min-h-[120px] w-full p-3 text-sm focus:outline-none',
           'prose prose-sm max-w-none',
-          '[&_strong]:font-bold [&_em]:italic [&_u]:underline',
-          '[&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6',
+          '[&_em]:italic [&_strong]:font-bold [&_u]:underline',
+          '[&_ol]:list-decimal [&_ol]:pl-6 [&_ul]:list-disc [&_ul]:pl-6',
           '[&_li]:my-1 [&_p]:my-2'
         )}
         data-placeholder={placeholder}

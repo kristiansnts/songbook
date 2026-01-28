@@ -112,19 +112,12 @@ export function DataTablePagination<TData>({
             {table.getFilteredRowModel().rows.length} row(s) selected.
           </>
         )}
-        {isServerSide && (
-          <>
-            {totalItems} total item(s).
-          </>
-        )}
+        {isServerSide && <>{totalItems} total item(s).</>}
       </div>
       <div className='flex items-center sm:space-x-6 lg:space-x-8'>
         <div className='flex items-center space-x-2'>
           <p className='hidden text-sm font-medium sm:block'>Rows per page</p>
-          <Select
-            value={`${pageSize}`}
-            onValueChange={handlePageSizeChange}
-          >
+          <Select value={`${pageSize}`} onValueChange={handlePageSizeChange}>
             <SelectTrigger className='h-8 w-[70px]'>
               <SelectValue placeholder={pageSize} />
             </SelectTrigger>

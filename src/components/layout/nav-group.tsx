@@ -66,9 +66,10 @@ const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
         asChild
         isActive={isActive}
         tooltip={item.title}
-        className={isActive
-          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-          : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        className={
+          isActive
+            ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+            : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
         }
       >
         <Link to={item.url} onClick={() => setOpenMobile(false)}>
@@ -178,28 +179,30 @@ function checkIsActive(href: string, item: NavItem, mainNav = false) {
   if (href === item.url) {
     return true
   }
-  
+
   // Handle dashboard without query params (should only match Dashboard item)
   if (item.url === '/user/dashboard' && href === '/user/dashboard') {
     return true
   }
-  
+
   // Handle items with query parameters - only match if query params match
   if (item.url && item.url.includes('?')) {
     return href === item.url
   }
-  
+
   // Handle child navigation
   if (item?.items?.filter((i) => i.url === href).length) {
     return true
   }
-  
+
   // Handle main navigation
-  if (mainNav &&
-      href.split('/')[1] !== '' &&
-      href.split('/')[1] === item?.url?.split('/')[1]) {
+  if (
+    mainNav &&
+    href.split('/')[1] !== '' &&
+    href.split('/')[1] === item?.url?.split('/')[1]
+  ) {
     return true
   }
-  
+
   return false
 }

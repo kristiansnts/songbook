@@ -38,7 +38,7 @@ export class ArtistService {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      key
+      key,
     })
   }
 
@@ -48,7 +48,7 @@ export class ArtistService {
 
   async getAllArtists(): Promise<Artist[]> {
     const cacheKey = ArtistService.getCacheKey('getAllArtists')
-    
+
     // Try cache first
     const cachedResult = ArtistService.getFromCache<Artist[]>(cacheKey)
     if (cachedResult) {
@@ -59,7 +59,7 @@ export class ArtistService {
       const response = await fetch(`${BASE_URL}/artists`, {
         method: 'GET',
         headers: {
-          'accept': 'application/json',
+          accept: 'application/json',
         },
       })
 
@@ -68,16 +68,18 @@ export class ArtistService {
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200 && Array.isArray(result.data)) {
-        const artists = result.data.map((artist, index) => this.transformArtistData(artist, index))
-        
+        const artists = result.data.map((artist, index) =>
+          this.transformArtistData(artist, index)
+        )
+
         // Cache the result
         ArtistService.setCache(cacheKey, artists)
-        
+
         return artists
       }
-      
+
       throw new Error(`Invalid response format: ${JSON.stringify(result)}`)
     } catch (error) {
       console.warn('Error fetching artists:', error)

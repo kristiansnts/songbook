@@ -1,9 +1,9 @@
+import { useState, useEffect } from 'react'
 import { createFileRoute, useParams } from '@tanstack/react-router'
 import { SongResource } from '@/panels/admin/resources/songs/songResource'
-import { SongViewer } from '@/components/song-viewer'
-import { BasePage } from '@/lib/resources/pages/base-page'
-import { useState, useEffect } from 'react'
 import { Song } from '@/types/song'
+import { BasePage } from '@/lib/resources/pages/base-page'
+import { SongViewer } from '@/components/song-viewer'
 
 const songResource = new SongResource()
 
@@ -48,8 +48,8 @@ function SongViewPage() {
           ],
         }}
       >
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className='flex h-64 items-center justify-center'>
+          <div className='border-primary h-8 w-8 animate-spin rounded-full border-b-2'></div>
         </div>
       </BasePage>
     )
@@ -70,8 +70,8 @@ function SongViewPage() {
           ],
         }}
       >
-        <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">{error || 'Song not found'}</p>
+        <div className='py-12 text-center'>
+          <p className='mb-4 text-gray-500'>{error || 'Song not found'}</p>
         </div>
       </BasePage>
     )

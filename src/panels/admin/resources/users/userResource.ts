@@ -1,11 +1,11 @@
-import { Resource } from '@/lib/resources/types'
-import { FormBuilder, TableBuilder } from '@/components/builders'
+import { IconUsers } from '@tabler/icons-react'
+import { UserRoleEnum } from '@/enums/User/UserRoleEnum'
+import { UserStatusEnum } from '@/enums/User/UserStatusEnum'
 import { FormBuilderConfig } from '@/lib/builders/form-builder'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
+import { Resource } from '@/lib/resources/types'
+import { FormBuilder, TableBuilder } from '@/components/builders'
 import { User } from './user-schema'
-import { IconUsers } from '@tabler/icons-react'
-import { UserStatusEnum } from '@/enums/User/UserStatusEnum'
-import { UserRoleEnum } from '@/enums/User/UserRoleEnum'
 
 export class UserResource extends Resource<User> {
   constructor() {
@@ -38,23 +38,17 @@ export class UserResource extends Resource<User> {
   }
 
   getFormSchema(): FormBuilderConfig {
-    return FormBuilder.create()
-      .build()
+    return FormBuilder.create().build()
   }
 
   getTableSchema(): TableBuilderConfig<User> {
     return TableBuilder.create<User>()
       .searchPlaceholder('Search users by name or email...')
       .searchColumnId('nama') // Use nama as the search column for the built-in search
-      .column('nama', col => 
-        col
-          .label('Name')
-          .type('text')
-          .accessor('nama')
-          .searchable()
-          .sortable()
+      .column('nama', (col) =>
+        col.label('Name').type('text').accessor('nama').searchable().sortable()
       )
-      .column('username', col => 
+      .column('username', (col) =>
         col
           .label('Email/Username')
           .type('text')
@@ -64,12 +58,11 @@ export class UserResource extends Resource<User> {
       )
       .emptyState(
         'No users found',
-        'No users are currently available. This could be due to network issues or no users being registered in the system.',
+        'No users are currently available. This could be due to network issues or no users being registered in the system.'
       )
       .showViewOptions(false)
       .build()
   }
-
 
   // Data operations - fetch users from correct API endpoint
   async getRecords(searchQuery?: string): Promise<User[]> {
@@ -90,8 +83,8 @@ export class UserResource extends Resource<User> {
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          accept: 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       })
 
@@ -101,7 +94,7 @@ export class UserResource extends Resource<User> {
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200 && Array.isArray(result.data)) {
         // Transform API data to match our User interface
         return result.data.map((user: any) => ({
@@ -109,8 +102,8 @@ export class UserResource extends Resource<User> {
           nama: user.nama || 'Unknown',
           username: user.email || 'unknown@example.com',
           email: user.email || 'unknown@example.com',
-          role: user.role as UserRoleEnum || 'guest',
-          status: user.status as UserStatusEnum || 'pending',
+          role: (user.role as UserRoleEnum) || 'guest',
+          status: (user.status as UserStatusEnum) || 'pending',
         }))
       } else {
         console.error('Invalid API response format:', result)
@@ -125,14 +118,12 @@ export class UserResource extends Resource<User> {
   async getRecord(id: string): Promise<User | null> {
     try {
       const allUsers = await this.getRecords()
-      return allUsers.find(user => user.id === id) || null
+      return allUsers.find((user) => user.id === id) || null
     } catch (error) {
       console.error('Error fetching user from API:', error)
       return null
     }
   }
-
-
 
   async updateRecord(id: string, data: Partial<User>): Promise<User> {
     const token = this.getAuthToken()
@@ -149,20 +140,23 @@ export class UserResource extends Resource<User> {
         }
       })
 
-      const response = await fetch(`https://songbanks-v1-1.vercel.app/api/admin/user-access/${id}?${queryParams.toString()}`, {
-        method: 'PUT',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      })
+      const response = await fetch(
+        `https://songbanks-v1-1.vercel.app/api/admin/user-access/${id}?${queryParams.toString()}`,
+        {
+          method: 'PUT',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200) {
         // Return updated user data, merging with the original data structure
         const currentUser = await this.getRecord(id)
@@ -180,30 +174,35 @@ export class UserResource extends Resource<User> {
     }
   }
 
-
-
   // Custom method to update user status via API
-  async updateUserStatus(id: string, status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND, currentUserData?: User): Promise<User> {
+  async updateUserStatus(
+    id: string,
+    status: UserStatusEnum.ACTIVE | UserStatusEnum.SUSPEND,
+    currentUserData?: User
+  ): Promise<User> {
     const token = this.getAuthToken()
     if (!token) {
       throw new Error('No authentication token found. Please log in again.')
     }
 
     try {
-      const response = await fetch(`https://songbanks-v1-1.vercel.app/api/admin/user-access/${id}?status=${status}`, {
-        method: 'PUT',
-        headers: {
-          'accept': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      })
+      const response = await fetch(
+        `https://songbanks-v1-1.vercel.app/api/admin/user-access/${id}?status=${status}`,
+        {
+          method: 'PUT',
+          headers: {
+            accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200) {
         // First try to get the current user data from API
         const currentUser = await this.getRecord(id)
@@ -213,7 +212,7 @@ export class UserResource extends Resource<User> {
             status,
           }
         }
-        
+
         // If API fetch fails, use the provided currentUserData as fallback
         if (currentUserData) {
           return {
@@ -221,7 +220,7 @@ export class UserResource extends Resource<User> {
             status,
           }
         }
-        
+
         // Last resort fallback (should rarely happen)
         return {
           id: String(id),

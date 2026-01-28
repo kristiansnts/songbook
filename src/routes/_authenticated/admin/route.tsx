@@ -5,7 +5,7 @@ export const Route = createFileRoute('/_authenticated/admin')({
   beforeLoad: async () => {
     // 🛡️ Admin route protection - require pengurus permission
     const hasPermission = await authManager.hasPermission('pengurus')
-    
+
     if (!hasPermission) {
       throw redirect({
         to: '/unauthorized',

@@ -5,9 +5,9 @@ import { SearchProvider } from '@/context/search-context'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { Header } from '@/components/layout/header'
-import { ThemeSwitch } from '@/components/theme-switch'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import SkipToMain from '@/components/skip-to-main'
+import { ThemeSwitch } from '@/components/theme-switch'
 
 interface Props {
   children?: React.ReactNode
@@ -25,8 +25,9 @@ export function AuthenticatedLayout({ children }: Props) {
   ]
 
   // Check if current route should hide navigation
-  const shouldHideNavigation = hideNavigationRoutes.some(route =>
-    location.pathname === route || location.pathname.startsWith(route + '/')
+  const shouldHideNavigation = hideNavigationRoutes.some(
+    (route) =>
+      location.pathname === route || location.pathname.startsWith(route + '/')
   )
 
   return (
@@ -38,9 +39,12 @@ export function AuthenticatedLayout({ children }: Props) {
           id='content'
           className={cn(
             'w-full max-w-full',
-            !shouldHideNavigation && 'md:ml-auto md:peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]',
-            !shouldHideNavigation && 'md:peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
-            !shouldHideNavigation && 'md:transition-[width] md:duration-200 md:ease-linear',
+            !shouldHideNavigation &&
+              'md:ml-auto md:peer-data-[state=collapsed]:w-[calc(100%-var(--sidebar-width-icon)-1rem)]',
+            !shouldHideNavigation &&
+              'md:peer-data-[state=expanded]:w-[calc(100%-var(--sidebar-width))]',
+            !shouldHideNavigation &&
+              'md:transition-[width] md:duration-200 md:ease-linear',
             'flex h-svh flex-col',
             'group-data-[scroll-locked=1]/body:h-full',
             'has-[main.fixed-main]:group-data-[scroll-locked=1]/body:h-svh',

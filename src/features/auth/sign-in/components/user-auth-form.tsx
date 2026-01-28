@@ -3,6 +3,9 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
+import { IconEye, IconEyeOff } from '@tabler/icons-react'
+import { toast } from 'sonner'
+import { useAuth } from '@/lib/auth'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,9 +17,6 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { useAuth } from '@/lib/auth'
-import { toast } from 'sonner'
-import { IconEye, IconEyeOff } from '@tabler/icons-react'
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>
 
@@ -25,11 +25,9 @@ const formSchema = z.object({
     .string()
     .min(1, { message: 'Please enter your email' })
     .email({ message: 'Invalid email address' }),
-  password: z
-    .string()
-    .min(1, {
-      message: 'Please enter your password',
-    })
+  password: z.string().min(1, {
+    message: 'Please enter your password',
+  }),
 })
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
@@ -48,20 +46,20 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    
+
     try {
       const result = await login(data.email, data.password)
       if (result.success) {
         // Check if there's a saved playlist sharetoken
         const savedShareToken = localStorage.getItem('pending_playlist_join')
-        
+
         if (savedShareToken) {
           // Redirect to the playlist join page
           toast.success('Login successful! Redirecting to playlist...', {
             action: {
               label: 'x',
-              onClick: () => toast.dismiss()
-            }
+              onClick: () => toast.dismiss(),
+            },
           })
           navigate({ to: `/playlist/join/${savedShareToken}` })
         } else if (result.isApprovedMember) {
@@ -69,8 +67,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           toast.success('Welcome! You have been approved.', {
             action: {
               label: 'x',
-              onClick: () => toast.dismiss()
-            }
+              onClick: () => toast.dismiss(),
+            },
           })
           navigate({ to: '/approved' })
         } else {
@@ -78,8 +76,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           toast.success('Login successful!', {
             action: {
               label: 'x',
-              onClick: () => toast.dismiss()
-            }
+              onClick: () => toast.dismiss(),
+            },
           })
           navigate({ to: '/dashboard' })
         }
@@ -93,8 +91,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         toast.error('Invalid credentials. Please contact administrator.', {
           action: {
             label: 'x',
-            onClick: () => toast.dismiss()
-          }
+            onClick: () => toast.dismiss(),
+          },
         })
       }
     } catch {
@@ -116,12 +114,17 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           name='email'
           render={({ field }) => (
             <FormItem className='mt-3'>
-              <FormLabel htmlFor='username' className='text-sm font-medium text-gray-700'>Email</FormLabel>
+              <FormLabel
+                htmlFor='username'
+                className='text-sm font-medium text-gray-700'
+              >
+                Email
+              </FormLabel>
               <FormControl>
                 <Input
                   id='username'
                   placeholder='Masukkan Email'
-                  className='w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-black'
+                  className='w-full rounded-md border border-gray-300 px-3 py-2 text-black focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none'
                   {...field}
                 />
               </FormControl>
@@ -134,22 +137,31 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           name='password'
           render={({ field }) => (
             <FormItem>
-              <FormLabel htmlFor='password-field' className='text-sm font-medium text-gray-700'>Password</FormLabel>
+              <FormLabel
+                htmlFor='password-field'
+                className='text-sm font-medium text-gray-700'
+              >
+                Password
+              </FormLabel>
               <FormControl>
                 <div className='relative'>
                   <Input
                     type={showPassword ? 'text' : 'password'}
                     id='password-field'
                     placeholder='Masukkan Password'
-                    className='w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 text-black'
+                    className='w-full rounded-md border border-gray-300 px-3 py-2 pr-10 text-black focus:border-red-500 focus:ring-2 focus:ring-red-500 focus:outline-none'
                     {...field}
                   />
                   <button
                     type='button'
-                    className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
+                    className='absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600'
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                    {showPassword ? (
+                      <IconEyeOff size={20} />
+                    ) : (
+                      <IconEye size={20} />
+                    )}
                   </button>
                 </div>
               </FormControl>
@@ -159,7 +171,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         />
         <Button
           type='submit'
-          className='w-full mt-4 py-3 px-4 rounded-md text-white font-medium focus:outline-none focus:ring-2 focus:ring-red-500'
+          className='mt-4 w-full rounded-md px-4 py-3 font-medium text-white focus:ring-2 focus:ring-red-500 focus:outline-none'
           style={{ backgroundColor: '#960001' }}
           disabled={isLoading}
         >

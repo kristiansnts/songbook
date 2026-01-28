@@ -10,7 +10,8 @@ export const songs = [
     status: 'in progress',
     label: 'hymn',
     lyric: 'Amazing grace, how sweet the sound...',
-    lyricAndChords: 'G       C       G\nAmazing grace, how sweet the sound\nG        D       G\nThat saved a wretch like me',
+    lyricAndChords:
+      'G       C       G\nAmazing grace, how sweet the sound\nG        D       G\nThat saved a wretch like me',
   },
   {
     id: 'SONG-7878',
@@ -20,7 +21,8 @@ export const songs = [
     status: 'backlog',
     label: 'hymn',
     lyric: 'O Lord my God, when I in awesome wonder...',
-    lyricAndChords: 'C        F       C\nO Lord my God, when I in awesome wonder\nC         G        C\nConsider all the worlds thy hands have made',
+    lyricAndChords:
+      'C        F       C\nO Lord my God, when I in awesome wonder\nC         G        C\nConsider all the worlds thy hands have made',
   },
   {
     id: 'SONG-7839',
@@ -30,8 +32,9 @@ export const songs = [
     status: 'todo',
     label: 'traditional',
     lyric: 'Be thou my vision, O Lord of my heart...',
-    lyricAndChords: 'D        G       D\nBe thou my vision, O Lord of my heart\nA        D       G      D\nNaught be all else to me, save that thou art',
-  }
+    lyricAndChords:
+      'D        G       D\nBe thou my vision, O Lord of my heart\nA        D       G      D\nNaught be all else to me, save that thou art',
+  },
 ]
 
 // Export function to get songs from localStorage or default data
