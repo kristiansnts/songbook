@@ -102,12 +102,12 @@ export class PlaylistService {
       const result = await response.json()
 
       if (result.code === 200 && Array.isArray(result.data)) {
-        // Get all songs to calculate song counts
-        const allSongs = await songService.getAllSongs()
+        // Get all songs to lookup full details if needed
+        const allSongsResponse = await songService.getAllSongs({ limit: 1000 })
 
         const playlists = await Promise.all(
           result.data.map(async (playlist: any) =>
-            this.transformPlaylistData(playlist, allSongs)
+            this.transformPlaylistData(playlist, allSongsResponse)
           )
         )
 
@@ -157,9 +157,9 @@ export class PlaylistService {
       const result = await response.json()
 
       if (result.code === 200 && result.data) {
-        // Get all songs to calculate song count
-        const allSongs = await songService.getAllSongs()
-        const playlist = this.transformPlaylistData(result.data, allSongs)
+        // Get all songs to lookup full details if needed
+        const allSongsResponse = await songService.getAllSongs({ limit: 1000 })
+        const playlist = this.transformPlaylistData(result.data, allSongsResponse)
 
         // Cache the result
         PlaylistService.setCache(cacheKey, playlist)
@@ -198,8 +198,8 @@ export class PlaylistService {
       const result = await response.json()
 
       if ((result.code === 200 || result.code === 201) && result.data) {
-        const allSongs = await songService.getAllSongs()
-        const newPlaylist = this.transformPlaylistData(result.data, allSongs)
+        const allSongsResponse = await songService.getAllSongs({ limit: 1000 })
+        const newPlaylist = this.transformPlaylistData(result.data, allSongsResponse)
 
         // Invalidate relevant caches
         PlaylistService.clearCacheByPattern('getAllPlaylists')
@@ -233,8 +233,8 @@ export class PlaylistService {
       }
 
       const result = await response.json()
-      const allSongs = await songService.getAllSongs()
-      const updatedPlaylist = this.transformPlaylistData(result, allSongs)
+      const allSongsResponse = await songService.getAllSongs({ limit: 1000 })
+      const updatedPlaylist = this.transformPlaylistData(result, allSongsResponse)
 
       // Invalidate relevant caches
       PlaylistService.clearCacheByPattern('getAllPlaylists')
@@ -624,7 +624,23 @@ export class PlaylistService {
     }
   }
 
-  private transformPlaylistData(playlist: any, _allSongs: any[]): Playlist {
+  private transformPlaylistData(
+    playlist: any,
+    allSongsResponse: any
+  ): Playlist {
+    // Extract song list from SongListResponse if provided
+    const allSongs = Array.isArray(allSongsResponse?.data)
+      ? allSongsResponse.data
+      : []
+
+    // Helper to find song in allSongs list
+    const findFullSong = (songId: any) => {
+      if (!songId) return null
+      return allSongs.find(
+        (s: Song) => s.id.toString() === songId.toString()
+      )
+    }
+
     // Handle songs array - can be full song objects or just IDs
     let songCount = 0
     let songs: Song[] = []
@@ -634,19 +650,45 @@ export class PlaylistService {
       try {
         const parsedSongs = JSON.parse(playlist.songs)
         if (Array.isArray(parsedSongs)) {
-          songs = parsedSongs.map((song: any) =>
-            typeof song === 'object' ? this.transformSongData(song) : song
-          )
+          songs = parsedSongs
+            .map((song: any) => {
+              if (typeof song === 'object' && song !== null) {
+                // If it's an object, check if it's already full or needs lookup
+                if (song.title && song.artist) {
+                  return this.transformSongData(song)
+                }
+                const fullSong = findFullSong(song.id || song.song_id)
+                return fullSong || this.transformSongData(song)
+              } else if (song !== null) {
+                // If it's just an ID
+                const fullSong = findFullSong(song)
+                return fullSong || this.transformSongData({ id: song })
+              }
+              return null
+            })
+            .filter((s): s is Song => s !== null)
           songCount = songs.length
         }
       } catch (error) {
         console.warn('Failed to parse playlist songs:', error)
       }
     } else if (playlist.songs && Array.isArray(playlist.songs)) {
-      // Handle songs as array of objects (detailed playlist API response)
-      songs = playlist.songs.map((song: any) =>
-        typeof song === 'object' ? this.transformSongData(song) : song
-      )
+      // Handle songs as array of objects or IDs
+      songs = playlist.songs
+        .map((song: any) => {
+          if (typeof song === 'object' && song !== null) {
+            if (song.title && song.artist) {
+              return this.transformSongData(song)
+            }
+            const fullSong = findFullSong(song.id || song.song_id)
+            return fullSong || this.transformSongData(song)
+          } else if (song !== null) {
+            const fullSong = findFullSong(song)
+            return fullSong || this.transformSongData({ id: song })
+          }
+          return null
+        })
+        .filter((s): s is Song => s !== null)
       songCount = songs.length
     }
 
