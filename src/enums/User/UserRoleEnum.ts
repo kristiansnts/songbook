@@ -5,34 +5,34 @@ export enum UserRoleEnum {
 }
 
 export interface HasLabel {
-  getLabel(): string;
+  getLabel(): string
 }
 
 export class UserRoleEnumHelper implements HasLabel {
   constructor(private value: UserRoleEnum) {}
 
   static fromValue(value: string): UserRoleEnumHelper {
-    const enumValue = Object.values(UserRoleEnum).find(v => v === value);
+    const enumValue = Object.values(UserRoleEnum).find((v) => v === value)
     if (!enumValue) {
-      throw new Error(`Invalid UserRole value: ${value}`);
+      throw new Error(`Invalid UserRole value: ${value}`)
     }
-    return new UserRoleEnumHelper(enumValue);
+    return new UserRoleEnumHelper(enumValue)
   }
 
   getValue(): UserRoleEnum {
-    return this.value;
+    return this.value
   }
 
   getLabel(): string {
     switch (this.value) {
       case UserRoleEnum.ADMIN:
-        return 'Administrator';
+        return 'Administrator'
       case UserRoleEnum.MEMBER:
-        return 'Member';
+        return 'Member'
       case UserRoleEnum.GUEST:
-        return 'Guest';
+        return 'Guest'
       default:
-        return 'Unknown';
+        return 'Unknown'
     }
   }
 
@@ -41,13 +41,13 @@ export class UserRoleEnumHelper implements HasLabel {
       [UserRoleEnum.ADMIN]: 'Administrator',
       [UserRoleEnum.MEMBER]: 'Member',
       [UserRoleEnum.GUEST]: 'Guest',
-    };
+    }
   }
 
   static getOptions(): Array<{ value: UserRoleEnum; label: string }> {
-    return Object.values(UserRoleEnum).map(role => ({
+    return Object.values(UserRoleEnum).map((role) => ({
       value: role,
       label: new UserRoleEnumHelper(role).getLabel(),
-    }));
+    }))
   }
 }

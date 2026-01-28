@@ -1,6 +1,6 @@
 import React from 'react'
-import { TableRenderer } from '@/components/builders'
 import { Resource } from '@/lib/resources/types'
+import { TableRenderer } from '@/components/builders'
 import { BasePage } from './base-page'
 
 interface ListPageProps<T = any> {
@@ -11,12 +11,12 @@ interface ListPageProps<T = any> {
   className?: string
 }
 
-export function ListPage<T = any>({ 
-  resource, 
-  data, 
-  loading = false, 
+export function ListPage<T = any>({
+  resource,
+  data,
+  loading = false,
   onRefresh,
-  className 
+  className,
 }: ListPageProps<T>) {
   const pageConfig = resource.getListPageConfig()
   const tableConfig = resource.getTableSchema()
@@ -29,23 +29,29 @@ export function ListPage<T = any>({
     onRefresh,
     bulkActions: [
       ...(tableConfig.bulkActions || []),
-      ...resource.getBulkActions().map(action => ({
+      ...resource.getBulkActions().map((action) => ({
         label: action.label,
         icon: action.icon,
         onClick: async (rows: any) => {
           await action.action(rows)
           onRefresh?.()
         },
-        variant: (action.color ? 'default' : 'outline') as 'default' | 'secondary' | 'destructive' | 'outline',
+        variant: (action.color ? 'default' : 'outline') as
+          | 'default'
+          | 'secondary'
+          | 'destructive'
+          | 'outline',
         requiresConfirmation: action.requiresConfirmation,
         confirmationTitle: action.confirmationTitle,
         confirmationMessage: action.confirmationMessage,
-      }))
-    ]
+      })),
+    ],
   }
 
   // Add default actions to table columns if not already present
-  const hasActionsColumn = tableConfig.columns?.some(col => col.type === 'actions')
+  const hasActionsColumn = tableConfig.columns?.some(
+    (col) => col.type === 'actions'
+  )
   if (!hasActionsColumn) {
     const defaultActions = [
       {
@@ -59,13 +65,13 @@ export function ListPage<T = any>({
             const canDelete = await resource.beforeDelete(row.original)
             if (!canDelete) return
           }
-          
+
           await resource.deleteRecord(row.original.id)
-          
+
           if (resource.afterDelete) {
             await resource.afterDelete(row.original)
           }
-          
+
           onRefresh?.()
         },
         variant: 'destructive' as const,
@@ -83,17 +89,13 @@ export function ListPage<T = any>({
         type: 'actions' as const,
         actions: defaultActions,
         width: '10%',
-      }
+      },
     ]
   }
 
   return (
-    <BasePage 
-      resource={resource} 
-      config={pageConfig} 
-      className={className}
-    >
-      <div className="space-y-4">
+    <BasePage resource={resource} config={pageConfig} className={className}>
+      <div className='space-y-4'>
         <TableRenderer config={enhancedTableConfig} />
       </div>
     </BasePage>

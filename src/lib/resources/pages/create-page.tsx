@@ -1,8 +1,8 @@
 import React from 'react'
-import { FormRenderer } from '@/components/builders'
-import { Resource } from '@/lib/resources/types'
-import { BasePage } from './base-page'
 import { useNavigate } from '@tanstack/react-router'
+import { Resource } from '@/lib/resources/types'
+import { FormRenderer } from '@/components/builders'
+import { BasePage } from './base-page'
 
 interface CreatePageProps<T = any> {
   resource: Resource<T>
@@ -12,12 +12,12 @@ interface CreatePageProps<T = any> {
   className?: string
 }
 
-export function CreatePage<T = any>({ 
-  resource, 
+export function CreatePage<T = any>({
+  resource,
   onSuccess,
   onCancel,
   initialData,
-  className 
+  className,
 }: CreatePageProps<T>) {
   const navigate = useNavigate()
   const pageConfig = resource.getCreatePageConfig()
@@ -73,12 +73,8 @@ export function CreatePage<T = any>({
   }
 
   return (
-    <BasePage 
-      resource={resource} 
-      config={pageConfig} 
-      className={className}
-    >
-      <div className="max-w-4xl">
+    <BasePage resource={resource} config={pageConfig} className={className}>
+      <div className='max-w-4xl'>
         <FormRenderer config={enhancedFormConfig} />
       </div>
     </BasePage>
@@ -90,34 +86,38 @@ export function useCreatePage<T>(resource: Resource<T>) {
   const [loading, setLoading] = React.useState(false)
   const [error, setError] = React.useState<string | null>(null)
 
-  const create = React.useCallback(async (data: Partial<T>) => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      // Apply beforeSave hook if available
-      let processedData = data
-      if (resource.beforeSave) {
-        processedData = await resource.beforeSave(data)
+  const create = React.useCallback(
+    async (data: Partial<T>) => {
+      try {
+        setLoading(true)
+        setError(null)
+
+        // Apply beforeSave hook if available
+        let processedData = data
+        if (resource.beforeSave) {
+          processedData = await resource.beforeSave(data)
+        }
+
+        // Create the record
+        const record = await resource.createRecord(processedData)
+
+        // Apply afterSave hook if available
+        if (resource.afterSave) {
+          await resource.afterSave(record)
+        }
+
+        return record
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to create record'
+        setError(errorMessage)
+        throw err
+      } finally {
+        setLoading(false)
       }
-
-      // Create the record
-      const record = await resource.createRecord(processedData)
-
-      // Apply afterSave hook if available
-      if (resource.afterSave) {
-        await resource.afterSave(record)
-      }
-
-      return record
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create record'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setLoading(false)
-    }
-  }, [resource])
+    },
+    [resource]
+  )
 
   return {
     create,

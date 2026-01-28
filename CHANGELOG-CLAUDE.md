@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Plan-based feature limits system based on user level (Free, Standard, Premium)
+- UpgradeModal component for displaying upgrade prompts with plan benefits
+- Plan limits utility functions (canCreatePlaylist, canAddSongsToPlaylist, etc.)
+- Playlist count badge showing usage limits (e.g., "2/3 playlists")
+- Song count badge in playlist selector showing limits (e.g., "15/25 songs")
+- Upgrade prompts in Library view when playlist limit is reached
+- Upgrade prompts in playlist dialogs when limits are exceeded
+- Plan limit checks before allowing playlist creation
+- Plan limit checks before allowing song additions to playlists
+- 403 error handling for plan limit exceeded responses
+- "Full" badge on playlists that have reached song capacity
+- Disabled state for "Create Playlist" button when at limit
+- Disabled checkboxes for playlists at song capacity
+- Warning banner in Library view when user is missing userlevel field
+- Console logging to help debug plan limit issues
+- TROUBLESHOOTING-PLAN-LIMITS.md guide for debugging limit enforcement
 - Search term persistence in URL query parameters for song list view
 - URL search params synchronization between song list and detail pages
 - Conditional navigation visibility system based on route pathname
@@ -49,6 +65,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Debounced onChange handler (150ms) to prevent excessive processing during rapid typing/pasting
 
 ### Changed
+- **MAJOR**: Implemented plan-based feature limits matching backend restrictions
+- Playlist service now throws PLAN_LIMIT_EXCEEDED errors on 403 responses
+- Playlist creation checks user level before showing create dialog
+- Join playlist flow now handles plan limits with upgrade modal
+- Song addition to playlists validates song count limits for Standard plan users
+- Library view displays playlist usage limits for Free plan users (x/3 playlists)
+- Playlist dialogs show song count limits for Standard plan users (x/25 songs)
+- Upgrade modal messages changed to Indonesian with LevelUp contact instructions
+- Upgrade flow directs users to contact LevelUp for Squad/Core membership
 - Search input now syncs with URL query parameters and updates on navigation
 - Song detail page back button preserves search state from previous page
 - **IMPROVED**: AuthenticatedLayout now conditionally renders Header and Sidebar based on current route
@@ -111,6 +136,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cleaned up unnecessary console logging in favor of toast notifications
 
 ### Todos History
+- [x] Implement plan-based feature limits from new-plan.md
+- [x] Create UpgradeModal component for upgrade prompts
+- [x] Create plan-limits.ts utility library
+- [x] Update playlist-service to handle 403 errors with PLAN_LIMIT_EXCEEDED
+- [x] Update Library component with playlist limit checks and badges
+- [x] Update playlist-dialog with song limit checks and upgrade handling
+- [x] Update bulk-playlist-dialog with song limit checks and upgrade handling
+- [x] Update join playlist route with 403 error handling
+- [x] Update SongsService to propagate PLAN_LIMIT_EXCEEDED errors
+- [x] Build and test implementation
 - [x] Analyze routes that should hide main navigation
 - [x] Implement navigation visibility logic in AuthenticatedLayout
 - [x] Test navigation visibility on different routes
@@ -179,6 +214,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [x] Integrate TanStack Query for data fetching and caching (removed due to missing dependency)
 - [x] Test all CRUD operations and search/filter functionality
 - [x] Update CHANGELOG-CLAUDE.md with implementation details
+
+### Done Condition - Plan-Based Feature Limits (2026-01-27)
+- ✅ Plan-based feature limits fully implemented for frontend
+- ✅ User level < 2 (Free): Maximum 3 playlists, unlimited songs per playlist
+- ✅ User level = 2 (Squad): Maximum 25 playlists, unlimited songs per playlist
+- ✅ User level > 2 (Core): Unlimited playlists, unlimited songs per playlist
+- ✅ UpgradeModal component created with Indonesian messages and LevelUp contact flow
+- ✅ Plan limit utility functions created for checking and displaying limits
+- ✅ Playlist creation blocked with upgrade prompt when limit reached
+- ✅ Join playlist handles 403 errors with upgrade modal
+- ✅ Library view shows playlist count badges (e.g., "3/25 playlists" for Squad)
+- ✅ Disabled states applied to buttons when limits reached
+- ✅ All 403 PLAN_LIMIT_EXCEEDED errors properly caught and handled
+- ✅ Build completes successfully without TypeScript errors
+- ✅ Upgrade messages in Indonesian directing users to contact LevelUp
+- Reference commit: 694bfc191a8d64e1f281d9d1b417b7ce10149e69
 
 ### Done Condition
 - Song management system fully implemented with complete CRUD operations

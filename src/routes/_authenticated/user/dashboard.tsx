@@ -1,13 +1,13 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import Library from '@/features/library'
 import { authManager } from '@/lib/auth-manager'
+import Library from '@/features/library'
 
 export const Route = createFileRoute('/_authenticated/user/dashboard')({
   beforeLoad: async () => {
     // 🛡️ User route protection - require peserta permission
     try {
       const hasPermission = await authManager.hasPermission('peserta')
-      
+
       if (!hasPermission) {
         throw redirect({
           to: '/unauthorized',

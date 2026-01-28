@@ -1,17 +1,17 @@
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarRail,
-} from '@/components/ui/sidebar'
+import { useState, useEffect } from 'react'
+import { Sidebar, SidebarContent, SidebarRail } from '@/components/ui/sidebar'
 import { NavGroup } from '@/components/layout/nav-group'
 import { getSidebarData } from './data/sidebar-data'
-import { useState, useEffect } from 'react'
 import { type SidebarData } from './types'
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [sidebarData, setSidebarData] = useState<SidebarData>({
-    user: { name: 'User', email: 'user@example.com', avatar: '/avatars/shadcn.jpg' },
-    navGroups: []
+    user: {
+      name: 'User',
+      email: 'user@example.com',
+      avatar: '/avatars/shadcn.jpg',
+    },
+    navGroups: [],
   })
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         console.error('Failed to load sidebar data:', error)
       }
     }
-    
+
     loadSidebarData()
   }, [])
 

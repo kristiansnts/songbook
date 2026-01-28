@@ -1,9 +1,9 @@
 import React from 'react'
+import { useNavigate } from '@tanstack/react-router'
 import { Resource } from '@/lib/resources/types'
-import { BasePage } from './base-page'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useNavigate } from '@tanstack/react-router'
+import { BasePage } from './base-page'
 
 interface ViewPageProps<T = any> {
   resource: Resource<T>
@@ -13,12 +13,12 @@ interface ViewPageProps<T = any> {
   className?: string
 }
 
-export function ViewPage<T = any>({ 
-  resource, 
+export function ViewPage<T = any>({
+  resource,
   recordId,
   onEdit,
   onDelete,
-  className 
+  className,
 }: ViewPageProps<T>) {
   const navigate = useNavigate()
   const [record, setRecord] = React.useState<T | null>(null)
@@ -102,13 +102,13 @@ export function ViewPage<T = any>({
 
   if (loading) {
     return (
-      <BasePage 
-        resource={resource} 
-        config={enhancedPageConfig} 
+      <BasePage
+        resource={resource}
+        config={enhancedPageConfig}
         className={className}
       >
-        <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className='flex items-center justify-center p-8'>
+          <div className='border-primary h-8 w-8 animate-spin rounded-full border-b-2'></div>
         </div>
       </BasePage>
     )
@@ -116,13 +116,13 @@ export function ViewPage<T = any>({
 
   if (error) {
     return (
-      <BasePage 
-        resource={resource} 
-        config={enhancedPageConfig} 
+      <BasePage
+        resource={resource}
+        config={enhancedPageConfig}
         className={className}
       >
-        <div className="text-center p-8">
-          <p className="text-red-600">{error}</p>
+        <div className='p-8 text-center'>
+          <p className='text-red-600'>{error}</p>
         </div>
       </BasePage>
     )
@@ -130,25 +130,25 @@ export function ViewPage<T = any>({
 
   if (!record) {
     return (
-      <BasePage 
-        resource={resource} 
-        config={enhancedPageConfig} 
+      <BasePage
+        resource={resource}
+        config={enhancedPageConfig}
         className={className}
       >
-        <div className="text-center p-8">
-          <p className="text-muted-foreground">Record not found</p>
+        <div className='p-8 text-center'>
+          <p className='text-muted-foreground'>Record not found</p>
         </div>
       </BasePage>
     )
   }
 
   return (
-    <BasePage 
-      resource={resource} 
-      config={enhancedPageConfig} 
+    <BasePage
+      resource={resource}
+      config={enhancedPageConfig}
       className={className}
     >
-      <div className="max-w-4xl">
+      <div className='max-w-4xl'>
         <RecordViewer record={record} />
       </div>
     </BasePage>
@@ -156,22 +156,24 @@ export function ViewPage<T = any>({
 }
 
 // Generic record viewer component
-function RecordViewer<T extends Record<string, any>>({ record }: { record: T }) {
+function RecordViewer<T extends Record<string, any>>({
+  record,
+}: {
+  record: T
+}) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Record Details</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           {Object.entries(record).map(([key, value]) => (
-            <div key={key} className="space-y-1">
-              <label className="text-sm font-medium text-muted-foreground capitalize">
+            <div key={key} className='space-y-1'>
+              <label className='text-muted-foreground text-sm font-medium capitalize'>
                 {key.replace(/([A-Z])/g, ' $1').trim()}
               </label>
-              <div className="text-sm">
-                {formatValue(value)}
-              </div>
+              <div className='text-sm'>{formatValue(value)}</div>
             </div>
           ))}
         </div>
@@ -185,18 +187,18 @@ function formatValue(value: any): string {
   if (value === null || value === undefined) {
     return '-'
   }
-  
+
   if (typeof value === 'boolean') {
     return value ? 'Yes' : 'No'
   }
-  
+
   if (typeof value === 'object') {
     if (value instanceof Date) {
       return value.toLocaleDateString()
     }
     return JSON.stringify(value, null, 2)
   }
-  
+
   return String(value)
 }
 

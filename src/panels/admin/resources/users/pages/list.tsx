@@ -1,8 +1,8 @@
 import React from 'react'
+import { Table } from '@tanstack/react-table'
+import { BasePage } from '@/lib/resources/pages/base-page'
 import { TableRenderer } from '@/components/builders'
 import { UserResource } from '../userResource'
-import { BasePage } from '@/lib/resources/pages/base-page'
-import { Table } from '@tanstack/react-table'
 
 const resource = new UserResource()
 
@@ -35,10 +35,13 @@ function useUserListPage() {
     loadData(currentApiSearch)
   }, [loadData, currentApiSearch])
 
-  const performApiSearch = React.useCallback((query: string) => {
-    setCurrentApiSearch(query)
-    loadData(query)
-  }, [loadData])
+  const performApiSearch = React.useCallback(
+    (query: string) => {
+      setCurrentApiSearch(query)
+      loadData(query)
+    },
+    [loadData]
+  )
 
   return {
     data,
@@ -52,14 +55,21 @@ function useUserListPage() {
 
 export default function UserListPage() {
   try {
-    const { data, loading, error, refresh, performApiSearch, currentApiSearch } = useUserListPage()
+    const {
+      data,
+      loading,
+      error,
+      refresh,
+      performApiSearch,
+      currentApiSearch,
+    } = useUserListPage()
     const [lastApiQuery, setLastApiQuery] = React.useState('')
 
     if (error) {
       return (
-        <div className="container mx-auto p-6">
-          <div className="text-center">
-            <p className="text-red-600">Error: {error}</p>
+        <div className='container mx-auto p-6'>
+          <div className='text-center'>
+            <p className='text-red-600'>Error: {error}</p>
           </div>
         </div>
       )
@@ -69,13 +79,16 @@ export default function UserListPage() {
     const tableConfig = resource.getTableSchema()
 
     // Custom search handler for onBlur API calls
-    const handleSearchBlur = React.useCallback((query: string) => {
-      // Only hit API if the query is different from the last API query
-      if (query.trim() !== lastApiQuery) {
-        setLastApiQuery(query.trim())
-        performApiSearch(query.trim())
-      }
-    }, [lastApiQuery, performApiSearch])
+    const handleSearchBlur = React.useCallback(
+      (query: string) => {
+        // Only hit API if the query is different from the last API query
+        if (query.trim() !== lastApiQuery) {
+          setLastApiQuery(query.trim())
+          performApiSearch(query.trim())
+        }
+      },
+      [lastApiQuery, performApiSearch]
+    )
 
     // Enhanced table configuration with built-in search enabled
     const enhancedTableConfig = {
@@ -88,16 +101,19 @@ export default function UserListPage() {
     }
 
     return (
-      <BasePage config={pageConfig} resource={resource}>        
+      <BasePage config={pageConfig} resource={resource}>
         <TableRenderer config={enhancedTableConfig} />
       </BasePage>
     )
   } catch (err) {
     console.error('Error in UserListPage:', err)
     return (
-      <div className="container mx-auto p-6">
-        <div className="text-center">
-          <p className="text-red-600">Component Error: {err instanceof Error ? err.message : 'Unknown error'}</p>
+      <div className='container mx-auto p-6'>
+        <div className='text-center'>
+          <p className='text-red-600'>
+            Component Error:{' '}
+            {err instanceof Error ? err.message : 'Unknown error'}
+          </p>
         </div>
       </div>
     )

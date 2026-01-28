@@ -1,6 +1,6 @@
+import { ReactNode } from 'react'
 import { FormBuilderConfig } from '@/lib/builders/form-builder'
 import { TableBuilderConfig } from '@/lib/builders/table-builder'
-import { ReactNode } from 'react'
 
 export interface ResourceConfig<T = any> {
   name: string

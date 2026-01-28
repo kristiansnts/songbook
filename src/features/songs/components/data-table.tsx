@@ -68,8 +68,11 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className='space-y-4'>
-      <DataTableToolbar table={table} onBulkAddToPlaylist={onBulkAddToPlaylist} />
-      <div className='rounded-md border overflow-hidden'>
+      <DataTableToolbar
+        table={table}
+        onBulkAddToPlaylist={onBulkAddToPlaylist}
+      />
+      <div className='overflow-hidden rounded-md border'>
         <div className='overflow-x-auto'>
           <Table className='w-full table-fixed'>
             <TableHeader>
@@ -77,10 +80,10 @@ export function DataTable<TData, TValue>({
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
-                      <TableHead 
-                        key={header.id} 
+                      <TableHead
+                        key={header.id}
                         colSpan={header.colSpan}
-                        className='px-2 sm:px-4 py-2 text-xs sm:text-sm'
+                        className='px-2 py-2 text-xs sm:px-4 sm:text-sm'
                         style={{ width: `${header.column.columnDef.size}%` }}
                       >
                         {header.isPlaceholder
@@ -103,9 +106,9 @@ export function DataTable<TData, TValue>({
                     data-state={row.getIsSelected() && 'selected'}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell 
+                      <TableCell
                         key={cell.id}
-                        className='px-2 sm:px-4 py-2'
+                        className='px-2 py-2 sm:px-4'
                         style={{ width: `${cell.column.columnDef.size}%` }}
                       >
                         {flexRender(

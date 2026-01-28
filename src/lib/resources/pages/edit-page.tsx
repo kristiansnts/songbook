@@ -1,8 +1,8 @@
 import React from 'react'
-import { FormRenderer } from '@/components/builders'
-import { Resource } from '@/lib/resources/types'
-import { BasePage } from './base-page'
 import { useNavigate } from '@tanstack/react-router'
+import { Resource } from '@/lib/resources/types'
+import { FormRenderer } from '@/components/builders'
+import { BasePage } from './base-page'
 
 interface EditPageProps<T = any> {
   resource: Resource<T>
@@ -12,12 +12,12 @@ interface EditPageProps<T = any> {
   className?: string
 }
 
-export function EditPage<T = any>({ 
-  resource, 
+export function EditPage<T = any>({
+  resource,
   recordId,
   onSuccess,
   onCancel,
-  className 
+  className,
 }: EditPageProps<T>) {
   const navigate = useNavigate()
   const [record, setRecord] = React.useState<T | null>(null)
@@ -88,13 +88,9 @@ export function EditPage<T = any>({
 
   if (loading) {
     return (
-      <BasePage 
-        resource={resource} 
-        config={pageConfig} 
-        className={className}
-      >
-        <div className="flex items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <BasePage resource={resource} config={pageConfig} className={className}>
+        <div className='flex items-center justify-center p-8'>
+          <div className='border-primary h-8 w-8 animate-spin rounded-full border-b-2'></div>
         </div>
       </BasePage>
     )
@@ -102,13 +98,9 @@ export function EditPage<T = any>({
 
   if (error) {
     return (
-      <BasePage 
-        resource={resource} 
-        config={pageConfig} 
-        className={className}
-      >
-        <div className="text-center p-8">
-          <p className="text-red-600">{error}</p>
+      <BasePage resource={resource} config={pageConfig} className={className}>
+        <div className='p-8 text-center'>
+          <p className='text-red-600'>{error}</p>
         </div>
       </BasePage>
     )
@@ -116,13 +108,9 @@ export function EditPage<T = any>({
 
   if (!record) {
     return (
-      <BasePage 
-        resource={resource} 
-        config={pageConfig} 
-        className={className}
-      >
-        <div className="text-center p-8">
-          <p className="text-muted-foreground">Record not found</p>
+      <BasePage resource={resource} config={pageConfig} className={className}>
+        <div className='p-8 text-center'>
+          <p className='text-muted-foreground'>Record not found</p>
         </div>
       </BasePage>
     )
@@ -140,12 +128,8 @@ export function EditPage<T = any>({
   }
 
   return (
-    <BasePage 
-      resource={resource} 
-      config={pageConfig} 
-      className={className}
-    >
-      <div className="max-w-4xl">
+    <BasePage resource={resource} config={pageConfig} className={className}>
+      <div className='max-w-4xl'>
         <FormRenderer key={recordId} config={enhancedFormConfig} />
       </div>
     </BasePage>
@@ -179,35 +163,42 @@ export function useEditPage<T>(resource: Resource<T>, recordId: string) {
     loadRecord()
   }, [loadRecord])
 
-  const update = React.useCallback(async (data: Partial<T>) => {
-    try {
-      setSaving(true)
-      setError(null)
-      
-      // Apply beforeSave hook if available
-      let processedData = data
-      if (resource.beforeSave) {
-        processedData = await resource.beforeSave(data)
+  const update = React.useCallback(
+    async (data: Partial<T>) => {
+      try {
+        setSaving(true)
+        setError(null)
+
+        // Apply beforeSave hook if available
+        let processedData = data
+        if (resource.beforeSave) {
+          processedData = await resource.beforeSave(data)
+        }
+
+        // Update the record
+        const updatedRecord = await resource.updateRecord(
+          recordId,
+          processedData
+        )
+
+        // Apply afterSave hook if available
+        if (resource.afterSave) {
+          await resource.afterSave(updatedRecord)
+        }
+
+        setRecord(updatedRecord)
+        return updatedRecord
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to update record'
+        setError(errorMessage)
+        throw err
+      } finally {
+        setSaving(false)
       }
-
-      // Update the record
-      const updatedRecord = await resource.updateRecord(recordId, processedData)
-
-      // Apply afterSave hook if available
-      if (resource.afterSave) {
-        await resource.afterSave(updatedRecord)
-      }
-
-      setRecord(updatedRecord)
-      return updatedRecord
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update record'
-      setError(errorMessage)
-      throw err
-    } finally {
-      setSaving(false)
-    }
-  }, [resource, recordId])
+    },
+    [resource, recordId]
+  )
 
   return {
     record,

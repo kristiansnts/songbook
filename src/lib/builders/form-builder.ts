@@ -1,7 +1,20 @@
 import { z } from 'zod'
 import { FieldValues, UseFormProps } from 'react-hook-form'
 
-export type FieldType = 'text' | 'email' | 'password' | 'number' | 'select' | 'searchable-select' | 'checkbox' | 'textarea' | 'richtext' | 'chordtext' | 'date' | 'phone' | 'tags'
+export type FieldType =
+  | 'text'
+  | 'email'
+  | 'password'
+  | 'number'
+  | 'select'
+  | 'searchable-select'
+  | 'checkbox'
+  | 'textarea'
+  | 'richtext'
+  | 'chordtext'
+  | 'date'
+  | 'phone'
+  | 'tags'
 
 export interface SelectOption {
   label: string
@@ -84,13 +97,13 @@ export interface TagsFieldConfig extends BaseFieldConfig {
   autoAddOnKeys?: boolean // Control whether space and comma trigger auto-add
 }
 
-export type FieldConfig = 
-  | TextFieldConfig 
-  | NumberFieldConfig 
-  | SelectFieldConfig 
+export type FieldConfig =
+  | TextFieldConfig
+  | NumberFieldConfig
+  | SelectFieldConfig
   | SearchableSelectFieldConfig
-  | CheckboxFieldConfig 
-  | TextareaFieldConfig 
+  | CheckboxFieldConfig
+  | TextareaFieldConfig
   | RichtextFieldConfig
   | ChordTextFieldConfig
   | DateFieldConfig
@@ -286,108 +299,135 @@ export class FieldBuilder {
 
   options(options: SelectOption[]): FieldBuilder {
     if (this.field.type === 'select') {
-      (this.field as SelectFieldConfig).options = options
+      ;(this.field as SelectFieldConfig).options = options
     } else if (this.field.type === 'searchable-select') {
-      (this.field as SearchableSelectFieldConfig).options = options
+      ;(this.field as SearchableSelectFieldConfig).options = options
     }
     return this
   }
 
   multiple(multiple: boolean = true): FieldBuilder {
     if (this.field.type === 'select') {
-      (this.field as SelectFieldConfig).multiple = multiple
+      ;(this.field as SelectFieldConfig).multiple = multiple
     }
     return this
   }
 
   searchPlaceholder(placeholder: string): FieldBuilder {
     if (this.field.type === 'searchable-select') {
-      (this.field as SearchableSelectFieldConfig).searchPlaceholder = placeholder
+      ;(this.field as SearchableSelectFieldConfig).searchPlaceholder =
+        placeholder
     }
     return this
   }
 
   emptyMessage(message: string): FieldBuilder {
     if (this.field.type === 'searchable-select') {
-      (this.field as SearchableSelectFieldConfig).emptyMessage = message
+      ;(this.field as SearchableSelectFieldConfig).emptyMessage = message
     }
     return this
   }
 
   minLength(min: number): FieldBuilder {
-    if (this.field.type === 'text' || this.field.type === 'textarea' || this.field.type === 'richtext') {
-      (this.field as TextFieldConfig | TextareaFieldConfig | RichtextFieldConfig).minLength = min
+    if (
+      this.field.type === 'text' ||
+      this.field.type === 'textarea' ||
+      this.field.type === 'richtext'
+    ) {
+      ;(
+        this.field as
+          | TextFieldConfig
+          | TextareaFieldConfig
+          | RichtextFieldConfig
+      ).minLength = min
     }
     return this
   }
 
   maxLength(max: number): FieldBuilder {
-    if (this.field.type === 'text' || this.field.type === 'textarea' || this.field.type === 'richtext') {
-      (this.field as TextFieldConfig | TextareaFieldConfig | RichtextFieldConfig).maxLength = max
+    if (
+      this.field.type === 'text' ||
+      this.field.type === 'textarea' ||
+      this.field.type === 'richtext'
+    ) {
+      ;(
+        this.field as
+          | TextFieldConfig
+          | TextareaFieldConfig
+          | RichtextFieldConfig
+      ).maxLength = max
     }
     return this
   }
 
   min(min: number): FieldBuilder {
     if (this.field.type === 'number') {
-      (this.field as NumberFieldConfig).min = min
+      ;(this.field as NumberFieldConfig).min = min
     }
     return this
   }
 
   max(max: number): FieldBuilder {
     if (this.field.type === 'number') {
-      (this.field as NumberFieldConfig).max = max
+      ;(this.field as NumberFieldConfig).max = max
     }
     return this
   }
 
   step(step: number): FieldBuilder {
     if (this.field.type === 'number') {
-      (this.field as NumberFieldConfig).step = step
+      ;(this.field as NumberFieldConfig).step = step
     }
     return this
   }
 
   rows(rows: number): FieldBuilder {
-    if (this.field.type === 'textarea' || this.field.type === 'richtext' || this.field.type === 'chordtext') {
-      (this.field as TextareaFieldConfig | RichtextFieldConfig | ChordTextFieldConfig).rows = rows
+    if (
+      this.field.type === 'textarea' ||
+      this.field.type === 'richtext' ||
+      this.field.type === 'chordtext'
+    ) {
+      ;(
+        this.field as
+          | TextareaFieldConfig
+          | RichtextFieldConfig
+          | ChordTextFieldConfig
+      ).rows = rows
     }
     return this
   }
 
-
   description(description: string): FieldBuilder {
     if (this.field.type === 'checkbox') {
-      (this.field as CheckboxFieldConfig).description = description
+      ;(this.field as CheckboxFieldConfig).description = description
     }
     return this
   }
 
   minDate(date: Date): FieldBuilder {
     if (this.field.type === 'date') {
-      (this.field as DateFieldConfig).minDate = date
+      ;(this.field as DateFieldConfig).minDate = date
     }
     return this
   }
 
   maxDate(date: Date): FieldBuilder {
     if (this.field.type === 'date') {
-      (this.field as DateFieldConfig).maxDate = date
+      ;(this.field as DateFieldConfig).maxDate = date
     }
     return this
   }
 
   suggestions(suggestions: string[] | (() => Promise<string[]>)): FieldBuilder {
     if (this.field.type === 'tags') {
-      (this.field as TagsFieldConfig).suggestions = suggestions
+      ;(this.field as TagsFieldConfig).suggestions = suggestions
     }
     return this
   }
 
   autoAddOnKeys(enabled: boolean = true): FieldBuilder {
     if (this.field.type === 'tags') {
-      (this.field as TagsFieldConfig).autoAddOnKeys = enabled
+      ;(this.field as TagsFieldConfig).autoAddOnKeys = enabled
     }
     return this
   }
@@ -405,12 +445,16 @@ export class FieldBuilder {
 
 export const Text = (name: string) => new FieldBuilder(name).type('text')
 export const Email = (name: string) => new FieldBuilder(name).type('email')
-export const Password = (name: string) => new FieldBuilder(name).type('password')
+export const Password = (name: string) =>
+  new FieldBuilder(name).type('password')
 export const Number = (name: string) => new FieldBuilder(name).type('number')
 export const Select = (name: string) => new FieldBuilder(name).type('select')
-export const Checkbox = (name: string) => new FieldBuilder(name).type('checkbox')
-export const Textarea = (name: string) => new FieldBuilder(name).type('textarea')
-export const Richtext = (name: string) => new FieldBuilder(name).type('richtext')
+export const Checkbox = (name: string) =>
+  new FieldBuilder(name).type('checkbox')
+export const Textarea = (name: string) =>
+  new FieldBuilder(name).type('textarea')
+export const Richtext = (name: string) =>
+  new FieldBuilder(name).type('richtext')
 export const Date = (name: string) => new FieldBuilder(name).type('date')
 export const Phone = (name: string) => new FieldBuilder(name).type('phone')
 export const Tags = (name: string) => new FieldBuilder(name).type('tags')

@@ -1,24 +1,24 @@
-import * as React from "react"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import * as React from 'react'
 import {
   ClipboardCopyIcon,
   DotsHorizontalIcon,
   DownloadIcon,
   Link2Icon,
   SizeIcon,
-} from "@radix-ui/react-icons"
+} from '@radix-ui/react-icons'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 interface ImageActionsProps {
   shouldMerge?: boolean
@@ -29,7 +29,7 @@ interface ImageActionsProps {
   onCopyLink?: () => void
 }
 
-interface ActionButtonProps extends React.ComponentProps<"button"> {
+interface ActionButtonProps extends React.ComponentProps<'button'> {
   icon: React.ReactNode
   tooltip: string
 }
@@ -38,11 +38,11 @@ export const ActionWrapper = ({
   children,
   className,
   ...props
-}: React.ComponentProps<"div">) => (
+}: React.ComponentProps<'div'>) => (
   <div
     className={cn(
-      "absolute top-3 right-3 flex flex-row rounded px-0.5 opacity-0 group-hover/node-image:opacity-100",
-      "border-[0.5px] bg-[var(--mt-bg-secondary)] [backdrop-filter:saturate(1.8)_blur(20px)]",
+      'absolute top-3 right-3 flex flex-row rounded px-0.5 opacity-0 group-hover/node-image:opacity-100',
+      'border-[0.5px] bg-[var(--mt-bg-secondary)] [backdrop-filter:saturate(1.8)_blur(20px)]',
       className
     )}
     {...props}
@@ -51,7 +51,7 @@ export const ActionWrapper = ({
   </div>
 )
 
-ActionWrapper.displayName = "ActionWrapper"
+ActionWrapper.displayName = 'ActionWrapper'
 
 export const ActionButton = ({
   icon,
@@ -62,10 +62,10 @@ export const ActionButton = ({
   <Tooltip>
     <TooltipTrigger asChild>
       <Button
-        variant="ghost"
+        variant='ghost'
         className={cn(
-          "text-muted-foreground hover:text-foreground relative flex h-7 w-7 flex-row rounded-none p-0",
-          "bg-transparent hover:bg-transparent",
+          'text-muted-foreground hover:text-foreground relative flex h-7 w-7 flex-row rounded-none p-0',
+          'bg-transparent hover:bg-transparent',
           className
         )}
         {...props}
@@ -73,13 +73,13 @@ export const ActionButton = ({
         {icon}
       </Button>
     </TooltipTrigger>
-    <TooltipContent side="bottom">{tooltip}</TooltipContent>
+    <TooltipContent side='bottom'>{tooltip}</TooltipContent>
   </Tooltip>
 )
 
-ActionButton.displayName = "ActionButton"
+ActionButton.displayName = 'ActionButton'
 
-type ActionKey = "onView" | "onDownload" | "onCopy" | "onCopyLink"
+type ActionKey = 'onView' | 'onDownload' | 'onCopy' | 'onCopyLink'
 
 const ActionItems: Array<{
   key: ActionKey
@@ -88,24 +88,24 @@ const ActionItems: Array<{
   isLink?: boolean
 }> = [
   {
-    key: "onView",
+    key: 'onView',
     icon: <SizeIcon />,
-    tooltip: "View image",
+    tooltip: 'View image',
   },
   {
-    key: "onDownload",
+    key: 'onDownload',
     icon: <DownloadIcon />,
-    tooltip: "Download image",
+    tooltip: 'Download image',
   },
   {
-    key: "onCopy",
+    key: 'onCopy',
     icon: <ClipboardCopyIcon />,
-    tooltip: "Copy image to clipboard",
+    tooltip: 'Copy image to clipboard',
   },
   {
-    key: "onCopyLink",
+    key: 'onCopyLink',
     icon: <Link2Icon />,
-    tooltip: "Copy image link",
+    tooltip: 'Copy image link',
     isLink: true,
   },
 ]
@@ -132,23 +132,23 @@ export const ImageActions: React.FC<ImageActionsProps> = ({
   )
 
   return (
-    <ActionWrapper className={cn({ "opacity-100": isOpen })}>
+    <ActionWrapper className={cn({ 'opacity-100': isOpen })}>
       {shouldMerge ? (
         <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
           <DropdownMenuTrigger asChild>
             <ActionButton
               icon={<DotsHorizontalIcon />}
-              tooltip="Open menu"
+              tooltip='Open menu'
               onClick={(e) => e.preventDefault()}
             />
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end">
+          <DropdownMenuContent className='w-56' align='end'>
             {filteredActions.map(({ key, icon, tooltip }) => (
               <DropdownMenuItem
                 key={key}
                 onClick={(e) => handleAction(e, actions[key])}
               >
-                <div className="flex flex-row items-center gap-2">
+                <div className='flex flex-row items-center gap-2'>
                   {icon}
                   <span>{tooltip}</span>
                 </div>
@@ -170,4 +170,4 @@ export const ImageActions: React.FC<ImageActionsProps> = ({
   )
 }
 
-ImageActions.displayName = "ImageActions"
+ImageActions.displayName = 'ImageActions'

@@ -3,7 +3,7 @@ import { UserRoleEnum } from '@/enums/User/UserRoleEnum'
 import { UserStatusEnum } from '@/enums/User/UserStatusEnum'
 
 export const userSchema = z.object({
-  id: z.union([z.string(), z.number()]).transform(val => String(val)),
+  id: z.union([z.string(), z.number()]).transform((val) => String(val)),
   nama: z.string(),
   username: z.string().email(),
   email: z.string().email().optional(), // Keep for backward compatibility

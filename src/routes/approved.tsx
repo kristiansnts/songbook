@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { ApprovedPage } from '@/components/pages/ApprovedPage'
 import { useAuth } from '@/lib/auth'
+import { ApprovedPage } from '@/components/pages/ApprovedPage'
 
 function ApprovedRoute() {
   const { user } = useAuth()
-  
+
   if (!user) {
     return <div>Loading...</div>
   }

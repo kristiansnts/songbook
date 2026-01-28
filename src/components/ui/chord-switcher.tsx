@@ -1,7 +1,7 @@
 import React from 'react'
-import { Button } from '@/components/ui/button'
 import { Music } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 interface ChordSwitcherProps {
   showChords: boolean
@@ -9,16 +9,20 @@ interface ChordSwitcherProps {
   className?: string
 }
 
-export function ChordSwitcher({ showChords, onToggle, className }: ChordSwitcherProps) {
+export function ChordSwitcher({
+  showChords,
+  onToggle,
+  className,
+}: ChordSwitcherProps) {
   return (
     <Button
-      variant={showChords ? "default" : "outline"}
-      size="sm"
+      variant={showChords ? 'default' : 'outline'}
+      size='sm'
       onClick={() => onToggle(!showChords)}
-      className={cn("flex items-center gap-2", className)}
+      className={cn('flex items-center gap-2', className)}
     >
-      <Music className="h-4 w-4" />
-      {showChords ? "Hide Chords" : "Show Chords"}
+      <Music className='h-4 w-4' />
+      {showChords ? 'Hide Chords' : 'Show Chords'}
     </Button>
   )
 }

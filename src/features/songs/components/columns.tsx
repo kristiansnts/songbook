@@ -1,10 +1,13 @@
 import { ColumnDef } from '@tanstack/react-table'
+import {
+  parseLyricsAndChords,
+  richTextToPlainText,
+} from '@/utils/lyrics-parser'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Song } from '../data/schema'
 import { DataTableColumnHeader } from './data-table-column-header'
 import { DataTableRowActions } from './data-table-row-actions'
-import { parseLyricsAndChords, richTextToPlainText } from '@/utils/lyrics-parser'
 import { ViewButton } from './view-button'
-import { Checkbox } from '@/components/ui/checkbox'
 
 // Helper function to get base chord from lyrics
 function getBaseChord(song: Song): string {
@@ -12,19 +15,22 @@ function getBaseChord(song: Song): string {
   if (song.baseChord) {
     return song.baseChord
   }
-  
+
   // Second priority: get from stored chords string
   if (song.chords) {
-    const chordsArray = song.chords.split(',').map(c => c.trim()).filter(c => c)
+    const chordsArray = song.chords
+      .split(',')
+      .map((c) => c.trim())
+      .filter((c) => c)
     if (chordsArray.length > 0) return chordsArray[0]
   }
-  
+
   // Fallback to parsing lyricAndChords
   if (!song.lyricAndChords) return '-'
-  
+
   const plainText = richTextToPlainText(song.lyricAndChords)
   const parsed = parseLyricsAndChords(plainText)
-  
+
   return parsed.chords.length > 0 ? parsed.chords[0] : '-'
 }
 
@@ -59,7 +65,7 @@ export const columns: ColumnDef<Song>[] = [
     ),
     cell: ({ row }) => (
       <div className='min-w-0 flex-1'>
-        <div className='truncate font-medium text-sm sm:text-base max-w-[120px] sm:max-w-[200px] md:max-w-[300px]'>
+        <div className='max-w-[120px] truncate text-sm font-medium sm:max-w-[200px] sm:text-base md:max-w-[300px]'>
           {row.getValue('title')}
         </div>
       </div>
@@ -73,7 +79,7 @@ export const columns: ColumnDef<Song>[] = [
     ),
     cell: ({ row }) => (
       <div className='min-w-0 flex-1'>
-        <div className='truncate text-sm sm:text-base max-w-[100px] sm:max-w-[150px] md:max-w-[200px]'>
+        <div className='max-w-[100px] truncate text-sm sm:max-w-[150px] sm:text-base md:max-w-[200px]'>
           {row.getValue('artist') || '-'}
         </div>
       </div>
@@ -86,7 +92,7 @@ export const columns: ColumnDef<Song>[] = [
       <DataTableColumnHeader column={column} title='Key' />
     ),
     cell: ({ row }) => (
-      <span className='font-mono font-medium text-sm whitespace-nowrap'>
+      <span className='font-mono text-sm font-medium whitespace-nowrap'>
         {getBaseChord(row.original)}
       </span>
     ),
@@ -96,7 +102,7 @@ export const columns: ColumnDef<Song>[] = [
     id: 'actions',
     header: 'Actions',
     cell: ({ row }) => (
-      <div className="flex items-center gap-1 justify-end">
+      <div className='flex items-center justify-end gap-1'>
         <ViewButton song={row.original} />
         <DataTableRowActions row={row} />
       </div>

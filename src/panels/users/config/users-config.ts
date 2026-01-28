@@ -1,20 +1,20 @@
 export interface UsersPanelConfig {
-  name: string;
-  path: string;
-  id: string;
-  brandName: string;
-  brandLogo?: string;
+  name: string
+  path: string
+  id: string
+  brandName: string
+  brandLogo?: string
   colors: {
-    primary: string;
-    secondary: string;
-  };
+    primary: string
+    secondary: string
+  }
   navigation: {
     dashboard: {
-      label: string;
-      icon?: string;
-      url: string;
-    };
-  };
+      label: string
+      icon?: string
+      url: string
+    }
+  }
 }
 
 export const usersPanelConfig: UsersPanelConfig = {
@@ -32,4 +32,4 @@ export const usersPanelConfig: UsersPanelConfig = {
       url: '/users/dashboard',
     },
   },
-};
+}

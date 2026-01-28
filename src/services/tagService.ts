@@ -45,7 +45,7 @@ export class TagService {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      key
+      key,
     })
   }
 
@@ -63,7 +63,7 @@ export class TagService {
 
   static async searchTags(params: TagSearchParams = {}): Promise<Tag[]> {
     const cacheKey = this.getCacheKey('searchTags', params)
-    
+
     // Try cache first
     const cachedResult = this.getFromCache<Tag[]>(cacheKey)
     if (cachedResult) {
@@ -72,7 +72,7 @@ export class TagService {
 
     try {
       const url = new URL(`${this.BASE_URL}/tags`)
-      
+
       if (params.search && params.search.trim()) {
         url.searchParams.set('search', params.search.trim())
       }
@@ -83,17 +83,19 @@ export class TagService {
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: {
-          'accept': 'application/json',
+          accept: 'application/json',
         },
       })
 
       if (!response.ok) {
-        console.warn(`Tag search API request failed with status: ${response.status}`)
+        console.warn(
+          `Tag search API request failed with status: ${response.status}`
+        )
         return []
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200 && Array.isArray(result.data)) {
         const tags = result.data.map((tag: any) => ({
           id: tag.id,
@@ -101,10 +103,10 @@ export class TagService {
           created_at: tag.createdAt,
           updated_at: tag.updatedAt,
         }))
-        
+
         // Cache the result
         this.setCache(cacheKey, tags)
-        
+
         return tags
       } else {
         console.warn('Invalid tag search API response format:', result)
@@ -121,19 +123,21 @@ export class TagService {
       const response = await fetch(`${this.BASE_URL}/tags/get-or-create`, {
         method: 'POST',
         headers: {
-          'accept': 'application/json',
+          accept: 'application/json',
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ name }),
       })
 
       if (!response.ok) {
-        console.warn(`Get or create tag API request failed with status: ${response.status}`)
+        console.warn(
+          `Get or create tag API request failed with status: ${response.status}`
+        )
         return null
       }
 
       const result = await response.json()
-      
+
       if (result.code === 200 && result.data) {
         const tag = {
           id: result.data.id,
@@ -141,10 +145,10 @@ export class TagService {
           created_at: result.data.createdAt,
           updated_at: result.data.updatedAt,
         }
-        
+
         // Invalidate tag caches since we potentially created a new tag
         this.clearCacheByPattern('tags_')
-        
+
         return tag
       } else {
         console.warn('Invalid get or create tag API response format:', result)

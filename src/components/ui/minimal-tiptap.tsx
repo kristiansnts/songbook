@@ -9,7 +9,11 @@ interface MinimalTiptapProps {
   className?: string
 }
 
-export function MinimalTiptap({ content, editable = false, className }: MinimalTiptapProps) {
+export function MinimalTiptap({
+  content,
+  editable = false,
+  className,
+}: MinimalTiptapProps) {
   const editor = useEditor({
     extensions: [
       StarterKit.configure({

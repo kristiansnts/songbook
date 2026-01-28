@@ -1,8 +1,7 @@
-import { type SidebarData } from '../types'
-import { resourceRegistry } from '@/lib/resources/registry'
-
 // Auto-load all resources
 import '@/lib/resources/auto-loader'
+import { resourceRegistry } from '@/lib/resources/registry'
+import { type SidebarData } from '../types'
 
 // Generate sidebar data from auto-registered resources
 // Since this is now async, we need to handle it differently

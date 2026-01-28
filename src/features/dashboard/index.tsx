@@ -1,14 +1,9 @@
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Main } from '@/components/layout/main'
-import { Button } from '@/components/ui/button'
 import { RefreshCw } from 'lucide-react'
 import { useDashboardData } from '@/lib/dashboard-data-context'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Main } from '@/components/layout/main'
 
 export default function Dashboard() {
   const { stats, isLoading, refreshData } = useDashboardData()
@@ -20,13 +15,15 @@ export default function Dashboard() {
         <div className='mb-2 flex items-center justify-between space-y-2'>
           <h1 className='text-2xl font-bold tracking-tight'>Dashboard</h1>
           <Button
-            variant="outline"
-            size="sm"
+            variant='outline'
+            size='sm'
             onClick={refreshData}
             disabled={isLoading}
-            className="flex items-center gap-2"
+            className='flex items-center gap-2'
           >
-            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+            />
             {isLoading ? 'Refreshing...' : 'Refresh Data'}
           </Button>
         </div>
@@ -44,9 +41,7 @@ export default function Dashboard() {
             <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                  <CardTitle className='text-sm font-medium'>
-                    Songs
-                  </CardTitle>
+                  <CardTitle className='text-sm font-medium'>Songs</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className='text-2xl font-bold'>
@@ -59,9 +54,7 @@ export default function Dashboard() {
               </Card>
               <Card>
                 <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-                  <CardTitle className='text-sm font-medium'>
-                    Users
-                  </CardTitle>
+                  <CardTitle className='text-sm font-medium'>Users</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className='text-2xl font-bold'>
@@ -79,4 +72,3 @@ export default function Dashboard() {
     </>
   )
 }
-

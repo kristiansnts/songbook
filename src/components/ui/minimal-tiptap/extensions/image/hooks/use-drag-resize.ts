@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect } from 'react'
 
-type ResizeDirection = "left" | "right"
+type ResizeDirection = 'left' | 'right'
 export type ElementDimensions = { width: number; height: number }
 
 type HookParams = {
@@ -58,7 +58,7 @@ export function useDragResize({
     (event: PointerEvent) => {
       event.preventDefault()
       const movementDelta =
-        (resizeDirection === "left"
+        (resizeDirection === 'left'
           ? resizeOrigin - event.pageX
           : event.pageX - resizeOrigin) * 2
       const gridUnitWidth = (gridInterval / 100) * boundaryWidth
@@ -107,7 +107,7 @@ export function useDragResize({
 
   const handleKeydown = useCallback(
     (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         event.preventDefault()
         event.stopPropagation()
         updateDimensions({
@@ -149,14 +149,14 @@ export function useDragResize({
 
   useEffect(() => {
     if (resizeDirection) {
-      document.addEventListener("keydown", handleKeydown)
-      document.addEventListener("pointermove", handlePointerMove)
-      document.addEventListener("pointerup", handlePointerUp)
+      document.addEventListener('keydown', handleKeydown)
+      document.addEventListener('pointermove', handlePointerMove)
+      document.addEventListener('pointerup', handlePointerUp)
 
       return () => {
-        document.removeEventListener("keydown", handleKeydown)
-        document.removeEventListener("pointermove", handlePointerMove)
-        document.removeEventListener("pointerup", handlePointerUp)
+        document.removeEventListener('keydown', handleKeydown)
+        document.removeEventListener('pointermove', handlePointerMove)
+        document.removeEventListener('pointerup', handlePointerUp)
       }
     }
   }, [resizeDirection, handleKeydown, handlePointerMove, handlePointerUp])

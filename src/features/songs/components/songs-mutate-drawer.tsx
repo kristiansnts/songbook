@@ -1,21 +1,12 @@
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { parseLyricsAndChords, richTextToPlainText, getAvailableChords } from '@/utils/lyrics-parser'
-import { useSongs } from '../context/songs-context'
-import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { TagsInput } from '@/components/ui/tags-input'
-import { HtmlEditor } from '@/components/ui/html-editor'
+  parseLyricsAndChords,
+  richTextToPlainText,
+  getAvailableChords,
+} from '@/utils/lyrics-parser'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogClose,
@@ -25,6 +16,25 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { HtmlEditor } from '@/components/ui/html-editor'
+import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { TagsInput } from '@/components/ui/tags-input'
+import { useSongs } from '../context/songs-context'
 import { Song } from '../data/schema'
 
 interface Props {
@@ -57,17 +67,15 @@ export function SongsMutateDialog({ open, onOpenChange, currentRow }: Props) {
     },
   })
 
-
   const onSubmit = (data: SongsForm) => {
-    
     // Parse lyrics and chords if provided
     const lyricsAndChordsHtml = data.lyricAndChords || '' // Keep HTML from rich editor
-    
+
     // Convert HTML to plain text for parsing
     const plainText = richTextToPlainText(lyricsAndChordsHtml)
-    
+
     const parsed = parseLyricsAndChords(plainText)
-    
+
     // Create the processed data structure
     const processedData = {
       title: data.title,
@@ -78,7 +86,9 @@ export function SongsMutateDialog({ open, onOpenChange, currentRow }: Props) {
       lyric: parsed.lyrics,
       chords: parsed.chords.join(','), // Convert array to comma-separated string
       lyricAndChords: lyricsAndChordsHtml,
-      baseChord: data.baseChord || (parsed.chords.length > 0 ? parsed.chords[0] : undefined)
+      baseChord:
+        data.baseChord ||
+        (parsed.chords.length > 0 ? parsed.chords[0] : undefined),
     }
 
     try {
@@ -89,7 +99,7 @@ export function SongsMutateDialog({ open, onOpenChange, currentRow }: Props) {
         // TODO: Will implement add to database when backend is ready
         addSong(processedData)
       }
-      
+
       onOpenChange(false)
       form.reset()
     } catch (_error) {
@@ -106,7 +116,7 @@ export function SongsMutateDialog({ open, onOpenChange, currentRow }: Props) {
         form.reset()
       }}
     >
-      <DialogContent className="w-[98vw] sm:w-[95vw] sm:max-w-[600px] max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
+      <DialogContent className='max-h-[90vh] w-[98vw] overflow-y-auto sm:max-h-[80vh] sm:w-[95vw] sm:max-w-[600px]'>
         <DialogHeader>
           <DialogTitle>{isUpdate ? 'Update' : 'Create'} Song</DialogTitle>
           <DialogDescription>
@@ -135,14 +145,17 @@ export function SongsMutateDialog({ open, onOpenChange, currentRow }: Props) {
                 </FormItem>
               )}
             />
-             <FormField
+            <FormField
               control={form.control}
               name='artist'
               render={({ field }) => (
                 <FormItem className='space-y-1'>
                   <FormLabel>Artist</FormLabel>
                   <FormControl>
-                    <Input {...field} placeholder='Enter a Artist of the song' />
+                    <Input
+                      {...field}
+                      placeholder='Enter a Artist of the song'
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -150,7 +163,7 @@ export function SongsMutateDialog({ open, onOpenChange, currentRow }: Props) {
             />
             <FormField
               control={form.control}
-              name="tags"
+              name='tags'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Tags</FormLabel>
@@ -158,24 +171,24 @@ export function SongsMutateDialog({ open, onOpenChange, currentRow }: Props) {
                     <TagsInput
                       value={field.value ?? []}
                       onValueChange={field.onChange}
-                      placeholder="Enter tags (e.g., rock, pop)"
+                      placeholder='Enter tags (e.g., rock, pop)'
                     />
                   </FormControl>
-                  
+
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
               control={form.control}
-              name="baseChord"
+              name='baseChord'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Base Chord</FormLabel>
                   <FormControl>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select base chord (optional)" />
+                        <SelectValue placeholder='Select base chord (optional)' />
                       </SelectTrigger>
                       <SelectContent>
                         {getAvailableChords().map((chord) => (
@@ -200,7 +213,7 @@ export function SongsMutateDialog({ open, onOpenChange, currentRow }: Props) {
                     <HtmlEditor
                       value={field.value}
                       onChange={field.onChange}
-                      placeholder="Enter song lyrics and chords..."
+                      placeholder='Enter song lyrics and chords...'
                     />
                   </FormControl>
                   <FormMessage />

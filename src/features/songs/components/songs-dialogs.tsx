@@ -1,11 +1,19 @@
 import { showSubmittedData } from '@/utils/show-submitted-data'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { useSongs } from '../context/songs-context'
-import { SongsMutateDialog } from './songs-mutate-drawer'
 import { SongViewDialog } from './song-view-dialog'
+import { SongsMutateDialog } from './songs-mutate-drawer'
 
 export function SongsDialogs() {
-  const { open, setOpen, currentRow, setCurrentRow, viewDialogOpen, setViewDialogOpen, viewSong } = useSongs()
+  const {
+    open,
+    setOpen,
+    currentRow,
+    setCurrentRow,
+    viewDialogOpen,
+    setViewDialogOpen,
+    viewSong,
+  } = useSongs()
   return (
     <>
       <SongsMutateDialog

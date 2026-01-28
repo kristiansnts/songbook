@@ -35,18 +35,21 @@ This is a customized version of the Shadcn Admin Dashboard, tailored for songboo
 ## Installation & Development
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm, pnpm, or yarn
 
 ### Quick Start
 
 1. **Clone the project**
+
 ```bash
 git clone <your-repository-url>
 cd songbook
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 # or
@@ -56,6 +59,7 @@ yarn install
 ```
 
 3. **Start development server**
+
 ```bash
 npm run dev
 # or
@@ -66,19 +70,20 @@ The application will be available at `http://localhost:5173`
 
 ### Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server with Vite |
-| `npm run build` | Build for production (TypeScript + Vite) |
-| `npm run preview` | Preview production build |
-| `npm run lint` | Run ESLint for code linting |
-| `npm run format` | Format code with Prettier |
-| `npm run format:check` | Check code formatting |
-| `npm run knip` | Find unused dependencies and exports |
+| Command                | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `npm run dev`          | Start development server with Vite       |
+| `npm run build`        | Build for production (TypeScript + Vite) |
+| `npm run preview`      | Preview production build                 |
+| `npm run lint`         | Run ESLint for code linting              |
+| `npm run format`       | Format code with Prettier                |
+| `npm run format:check` | Check code formatting                    |
+| `npm run knip`         | Find unused dependencies and exports     |
 
 ### Build Process
 
 The build process involves two steps:
+
 1. **TypeScript Compilation**: `tsc -b` compiles TypeScript files
 2. **Vite Build**: Bundles the application and generates the route tree
 
@@ -91,10 +96,12 @@ The build artifacts will be in the `dist/` directory.
 ## Authentication
 
 For development, use these credentials:
+
 - **Email**: `admin@gmail.com`
 - **Password**: `password`
 
 The authentication system uses localStorage to persist user sessions and includes:
+
 - Custom auth context (`/src/lib/auth.tsx`)
 - Route protection with redirects
 - Automatic session restoration
@@ -103,6 +110,7 @@ The authentication system uses localStorage to persist user sessions and include
 ## Songbook Features
 
 ### Song Management
+
 - **CRUD Operations**: Create, read, update, and delete songs
 - **Data Table**: Sortable, filterable song listing
 - **Search**: Global search across song titles, artists, and lyrics
@@ -110,11 +118,13 @@ The authentication system uses localStorage to persist user sessions and include
 - **Categories**: Song categorization and filtering
 
 ### User Management
+
 - **User CRUD**: Complete user management system
 - **Role Management**: User roles and permissions
 - **User Profiles**: Individual user profile management
 
 ### Dashboard
+
 - **Overview**: Key metrics and statistics
 - **Recent Activity**: Latest songs and user actions
 - **Quick Actions**: Fast access to common operations
@@ -145,43 +155,43 @@ src/
 
 The project includes 24 pre-built UI components based on Radix UI primitives:
 
-| Component | Description | Usage |
-|-----------|-------------|-------|
-| `Button` | Interactive button with variants | Primary actions, forms |
-| `Card` | Container for grouped content | Dashboard widgets, forms |
-| `Dialog` | Modal dialog component | Confirmations, forms |
-| `Form` | Form wrapper with validation | All forms with React Hook Form |
-| `Input` | Text input with variants | Form fields |
-| `Table` | Data table component | Listing data with sorting/filtering |
-| `Select` | Dropdown select component | Form selections |
-| `Tabs` | Tab navigation component | Content organization |
-| `Avatar` | User avatar display | User profiles |
-| `Badge` | Status indicators | Labels, status |
-| `Dropdown Menu` | Context menu component | Actions, navigation |
-| `Popover` | Floating content | Tooltips, additional info |
-| `Sidebar` | Collapsible navigation | Main app navigation |
-| `Sheet` | Slide-out panel | Mobile navigation, forms |
-| `Alert` | Notification component | Messages, warnings |
-| `Checkbox` | Checkbox input | Multiple selections |
-| `Radio Group` | Radio button group | Single selections |
-| `Switch` | Toggle switch | Boolean settings |
-| `Textarea` | Multi-line text input | Long text entries |
-| `Tooltip` | Hover information | Help text |
-| `Calendar` | Date picker | Date selection |
-| `Command` | Command palette | Search, actions |
-| `Scroll Area` | Custom scrollbar | Long content areas |
-| `Skeleton` | Loading placeholder | Loading states |
+| Component       | Description                      | Usage                               |
+| --------------- | -------------------------------- | ----------------------------------- |
+| `Button`        | Interactive button with variants | Primary actions, forms              |
+| `Card`          | Container for grouped content    | Dashboard widgets, forms            |
+| `Dialog`        | Modal dialog component           | Confirmations, forms                |
+| `Form`          | Form wrapper with validation     | All forms with React Hook Form      |
+| `Input`         | Text input with variants         | Form fields                         |
+| `Table`         | Data table component             | Listing data with sorting/filtering |
+| `Select`        | Dropdown select component        | Form selections                     |
+| `Tabs`          | Tab navigation component         | Content organization                |
+| `Avatar`        | User avatar display              | User profiles                       |
+| `Badge`         | Status indicators                | Labels, status                      |
+| `Dropdown Menu` | Context menu component           | Actions, navigation                 |
+| `Popover`       | Floating content                 | Tooltips, additional info           |
+| `Sidebar`       | Collapsible navigation           | Main app navigation                 |
+| `Sheet`         | Slide-out panel                  | Mobile navigation, forms            |
+| `Alert`         | Notification component           | Messages, warnings                  |
+| `Checkbox`      | Checkbox input                   | Multiple selections                 |
+| `Radio Group`   | Radio button group               | Single selections                   |
+| `Switch`        | Toggle switch                    | Boolean settings                    |
+| `Textarea`      | Multi-line text input            | Long text entries                   |
+| `Tooltip`       | Hover information                | Help text                           |
+| `Calendar`      | Date picker                      | Date selection                      |
+| `Command`       | Command palette                  | Search, actions                     |
+| `Scroll Area`   | Custom scrollbar                 | Long content areas                  |
+| `Skeleton`      | Loading placeholder              | Loading states                      |
 
 ### Custom Components
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `AuthenticatedLayout` | `components/layout/` | Main app layout with sidebar |
-| `AppSidebar` | `components/layout/` | Navigation sidebar |
-| `DataTable` | `features/*/components/` | Advanced data tables with CRUD |
-| `SearchProvider` | `context/` | Global search functionality |
-| `ThemeSwitch` | `components/` | Dark/light mode toggle |
-| `ProfileDropdown` | `components/` | User profile menu |
+| Component             | Location                 | Purpose                        |
+| --------------------- | ------------------------ | ------------------------------ |
+| `AuthenticatedLayout` | `components/layout/`     | Main app layout with sidebar   |
+| `AppSidebar`          | `components/layout/`     | Navigation sidebar             |
+| `DataTable`           | `features/*/components/` | Advanced data tables with CRUD |
+| `SearchProvider`      | `context/`               | Global search functionality    |
+| `ThemeSwitch`         | `components/`            | Dark/light mode toggle         |
+| `ProfileDropdown`     | `components/`            | User profile menu              |
 
 ## CRUD Implementation Guide
 
@@ -287,23 +297,23 @@ Create dialog components for Create, Update, and Delete operations:
 // src/features/[entity]/components/[entity]-dialogs.tsx
 export function EntityDialogs() {
   const { open, setOpen, currentRow, setCurrentRow } = useEntity()
-  
+
   return (
     <>
-      <EntityCreateDialog 
-        open={open === 'add'} 
-        onOpenChange={() => setOpen('add')} 
+      <EntityCreateDialog
+        open={open === 'add'}
+        onOpenChange={() => setOpen('add')}
       />
-      
+
       {currentRow && (
         <>
-          <EntityEditDialog 
+          <EntityEditDialog
             open={open === 'edit'}
             onOpenChange={() => setOpen('edit')}
             currentRow={currentRow}
           />
-          
-          <EntityDeleteDialog 
+
+          <EntityDeleteDialog
             open={open === 'delete'}
             onOpenChange={() => setOpen('delete')}
             currentRow={currentRow}
@@ -370,25 +380,29 @@ Add to sidebar navigation:
 ## Key Features Implemented
 
 ### Data Tables
+
 - **Sorting**: Click column headers to sort
-- **Filtering**: Global search and column-specific filters  
+- **Filtering**: Global search and column-specific filters
 - **Pagination**: Navigate through large datasets
 - **Row Selection**: Bulk operations support
 - **Column Visibility**: Show/hide columns
 - **Responsive**: Mobile-friendly design
 
 ### Form Handling
+
 - **React Hook Form**: Form state management
 - **Zod Validation**: Runtime type checking
 - **Error Handling**: Field-level error messages
 - **Toast Notifications**: User feedback via Sonner
 
 ### State Management
+
 - **Zustand**: Global client state
 - **TanStack Query**: Server state and caching
 - **React Context**: Feature-specific state
 
 ### Routing
+
 - **File-based Routing**: Automatic route generation
 - **Route Protection**: Authentication guards
 - **Nested Layouts**: Shared layout components

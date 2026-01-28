@@ -1,4 +1,11 @@
-import { createContext, useContext, useState, ReactNode, useEffect, useRef } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useRef,
+} from 'react'
 
 interface DashboardStats {
   totalUsers: number
@@ -24,12 +31,14 @@ const initialStats: DashboardStats = {
   totalUsers: 0,
   totalSongs: 0,
   monthlySongs: 0,
-  lastUpdated: null
+  lastUpdated: null,
 }
 
 const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes in milliseconds
 
-const DashboardDataContext = createContext<DashboardDataContextType | undefined>(undefined)
+const DashboardDataContext = createContext<
+  DashboardDataContextType | undefined
+>(undefined)
 
 export function DashboardDataProvider({ children }: { children: ReactNode }) {
   const [stats, setStats] = useState<DashboardStats>(initialStats)
@@ -61,26 +70,29 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
       const [userResponse, songResponse] = await Promise.all([
         fetch('https://songbanks-v1-1.vercel.app/api/admin/user/', {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
           },
         }),
         fetch('https://songbanks-v1-1.vercel.app/api/songs', {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/json',
           },
-        })
+        }),
       ])
 
       const [userData, songData] = await Promise.all([
         userResponse.json(),
-        songResponse.json()
+        songResponse.json(),
       ])
 
       // Calculate monthly songs from createdAt field
       const currentDate = new Date()
-      const lastMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1)
+      const lastMonth = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - 1
+      )
       const songsThisMonth = songData.data.filter((song: any) => {
         const createdAt = new Date(song.createdAt)
         return createdAt >= lastMonth
@@ -90,13 +102,13 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
         totalUsers: userData.pagination.totalItems,
         totalSongs: songData.pagination.totalItems,
         monthlySongs: songsThisMonth.length,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       }
 
       // Update cache and state
       cacheRef.current = {
         stats: newStats,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       }
       setStats(newStats)
     } catch (error) {
@@ -117,7 +129,7 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
   // Auto-refresh with page visibility control
   const startAutoRefresh = () => {
     if (intervalRef.current) return // Already running
-    
+
     intervalRef.current = setInterval(() => {
       if (document.visibilityState === 'visible') {
         fetchDashboardData()
@@ -163,12 +175,18 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
     }
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('invalidate-dashboard-cache', handleCacheInvalidation)
+    window.addEventListener(
+      'invalidate-dashboard-cache',
+      handleCacheInvalidation
+    )
 
     return () => {
       stopAutoRefresh()
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('invalidate-dashboard-cache', handleCacheInvalidation)
+      window.removeEventListener(
+        'invalidate-dashboard-cache',
+        handleCacheInvalidation
+      )
     }
   }, [])
 
@@ -177,7 +195,7 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
     isLoading,
     fetchDashboardData,
     refreshData,
-    clearCache
+    clearCache,
   }
 
   return (
@@ -190,7 +208,9 @@ export function DashboardDataProvider({ children }: { children: ReactNode }) {
 export function useDashboardData() {
   const context = useContext(DashboardDataContext)
   if (context === undefined) {
-    throw new Error('useDashboardData must be used within a DashboardDataProvider')
+    throw new Error(
+      'useDashboardData must be used within a DashboardDataProvider'
+    )
   }
   return context
 }

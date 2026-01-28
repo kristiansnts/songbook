@@ -9,29 +9,30 @@ export const Route = createFileRoute('/unauthorized')({
 
 function UnauthorizedPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 text-destructive">
-            <AlertTriangle className="h-full w-full" />
+    <div className='bg-background flex min-h-screen items-center justify-center p-4'>
+      <Card className='w-full max-w-md'>
+        <CardHeader className='text-center'>
+          <div className='text-destructive mx-auto mb-4 h-12 w-12'>
+            <AlertTriangle className='h-full w-full' />
           </div>
-          <CardTitle className="text-2xl font-bold">Access Denied</CardTitle>
+          <CardTitle className='text-2xl font-bold'>Access Denied</CardTitle>
         </CardHeader>
-        <CardContent className="text-center space-y-4">
-          <p className="text-muted-foreground">
-            You don't have permission to access this page. Please contact an administrator if you believe this is an error.
+        <CardContent className='space-y-4 text-center'>
+          <p className='text-muted-foreground'>
+            You don't have permission to access this page. Please contact an
+            administrator if you believe this is an error.
           </p>
-          
-          <div className="flex flex-col sm:flex-row gap-2 justify-center">
-            <Button asChild variant="outline">
-              <Link to="/">
-                <Home className="mr-2 h-4 w-4" />
+
+          <div className='flex flex-col justify-center gap-2 sm:flex-row'>
+            <Button asChild variant='outline'>
+              <Link to='/'>
+                <Home className='mr-2 h-4 w-4' />
                 Go Home
               </Link>
             </Button>
             <Button asChild>
-              <Link to="/sign-in">
-                <ArrowLeft className="mr-2 h-4 w-4" />
+              <Link to='/sign-in'>
+                <ArrowLeft className='mr-2 h-4 w-4' />
                 Sign In
               </Link>
             </Button>

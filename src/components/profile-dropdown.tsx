@@ -1,3 +1,5 @@
+import { useAuth } from '@/lib/auth'
+import { getInitials } from '@/lib/utils/initials'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -9,8 +11,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { useAuth } from '@/lib/auth'
-import { getInitials } from '@/lib/utils/initials'
 
 export function ProfileDropdown() {
   const { logout, user } = useAuth()
@@ -28,7 +28,9 @@ export function ProfileDropdown() {
       <DropdownMenuContent className='w-56' align='end' forceMount>
         <DropdownMenuLabel className='font-normal'>
           <div className='flex flex-col space-y-1'>
-            <p className='text-sm leading-none font-medium'>{user?.nama || 'User'}</p>
+            <p className='text-sm leading-none font-medium'>
+              {user?.nama || 'User'}
+            </p>
             <p className='text-muted-foreground text-xs leading-none'>
               {user?.email || 'No email'}
             </p>
@@ -43,4 +45,3 @@ export function ProfileDropdown() {
     </DropdownMenu>
   )
 }
-

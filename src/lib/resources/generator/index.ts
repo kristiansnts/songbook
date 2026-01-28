@@ -1,16 +1,24 @@
-import { 
-  resourceTemplate, 
-  schemaTemplate, 
-  listPageTemplate, 
-  createPageTemplate, 
-  editPageTemplate, 
+import {
+  resourceTemplate,
+  schemaTemplate,
+  listPageTemplate,
+  createPageTemplate,
+  editPageTemplate,
   viewPageTemplate,
-  indexTemplate 
+  indexTemplate,
 } from './templates'
 
 export interface FieldDefinition {
   name: string
-  type: 'text' | 'email' | 'password' | 'number' | 'select' | 'checkbox' | 'textarea' | 'date'
+  type:
+    | 'text'
+    | 'email'
+    | 'password'
+    | 'number'
+    | 'select'
+    | 'checkbox'
+    | 'textarea'
+    | 'date'
   label?: string
   required?: boolean
   validation?: string
@@ -39,7 +47,7 @@ export class ResourceGenerator {
 
   generate(): GeneratedFiles {
     const templateVars = this.getTemplateVariables()
-    
+
     return {
       resource: {
         path: `${this.config.outputPath}/${this.config.name}Resource.ts`,
@@ -55,7 +63,10 @@ export class ResourceGenerator {
       },
       createPage: {
         path: `${this.config.outputPath}/pages/create.tsx`,
-        content: this.replaceTemplateVariables(createPageTemplate, templateVars),
+        content: this.replaceTemplateVariables(
+          createPageTemplate,
+          templateVars
+        ),
       },
       editPage: {
         path: `${this.config.outputPath}/pages/edit.tsx`,
@@ -90,7 +101,7 @@ export class ResourceGenerator {
 
   private generateFormFields(): string {
     return this.config.fields
-      .map(field => {
+      .map((field) => {
         const fieldBuilder = this.getFieldBuilder(field)
         return `          .field('${field.name}', field => 
             field
@@ -107,7 +118,7 @@ export class ResourceGenerator {
 
   private generateTableColumns(): string {
     return this.config.fields
-      .map(field => {
+      .map((field) => {
         const columnType = this.getColumnType(field.type)
         return `      .column('${field.name}', col => 
         col
@@ -123,7 +134,7 @@ export class ResourceGenerator {
 
   private generateSchemaFields(): string {
     return this.config.fields
-      .map(field => {
+      .map((field) => {
         const zodType = this.getZodType(field)
         return `  ${field.name}: ${zodType},`
       })
@@ -175,7 +186,10 @@ export class ResourceGenerator {
     return str.charAt(0).toUpperCase() + str.slice(1)
   }
 
-  private replaceTemplateVariables(template: string, variables: Record<string, string>): string {
+  private replaceTemplateVariables(
+    template: string,
+    variables: Record<string, string>
+  ): string {
     let result = template
     Object.entries(variables).forEach(([key, value]) => {
       result = result.replace(new RegExp(`{{${key}}}`, 'g'), value)
@@ -200,18 +214,52 @@ export interface GeneratedFiles {
 }
 
 // Helper function to generate a resource
-export function generateResource(config: ResourceGeneratorConfig): GeneratedFiles {
+export function generateResource(
+  config: ResourceGeneratorConfig
+): GeneratedFiles {
   const generator = new ResourceGenerator(config)
   return generator.generate()
 }
 
 // Common field definitions for easy reuse
 export const commonFields = {
-  id: (): FieldDefinition => ({ name: 'id', type: 'text', label: 'ID', required: true }),
-  title: (): FieldDefinition => ({ name: 'title', type: 'text', label: 'Title', required: true }),
-  name: (): FieldDefinition => ({ name: 'name', type: 'text', label: 'Name', required: true }),
-  description: (): FieldDefinition => ({ name: 'description', type: 'textarea', label: 'Description' }),
-  email: (): FieldDefinition => ({ name: 'email', type: 'email', label: 'Email', required: true }),
-  createdAt: (): FieldDefinition => ({ name: 'createdAt', type: 'date', label: 'Created At' }),
-  updatedAt: (): FieldDefinition => ({ name: 'updatedAt', type: 'date', label: 'Updated At' }),
+  id: (): FieldDefinition => ({
+    name: 'id',
+    type: 'text',
+    label: 'ID',
+    required: true,
+  }),
+  title: (): FieldDefinition => ({
+    name: 'title',
+    type: 'text',
+    label: 'Title',
+    required: true,
+  }),
+  name: (): FieldDefinition => ({
+    name: 'name',
+    type: 'text',
+    label: 'Name',
+    required: true,
+  }),
+  description: (): FieldDefinition => ({
+    name: 'description',
+    type: 'textarea',
+    label: 'Description',
+  }),
+  email: (): FieldDefinition => ({
+    name: 'email',
+    type: 'email',
+    label: 'Email',
+    required: true,
+  }),
+  createdAt: (): FieldDefinition => ({
+    name: 'createdAt',
+    type: 'date',
+    label: 'Created At',
+  }),
+  updatedAt: (): FieldDefinition => ({
+    name: 'updatedAt',
+    type: 'date',
+    label: 'Updated At',
+  }),
 }

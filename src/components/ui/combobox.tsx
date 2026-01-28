@@ -36,9 +36,9 @@ export function Combobox({
   value,
   onChange,
   options,
-  placeholder = "Select option...",
-  searchPlaceholder = "Search options...",
-  emptyMessage = "No option found.",
+  placeholder = 'Select option...',
+  searchPlaceholder = 'Search options...',
+  emptyMessage = 'No option found.',
   disabled = false,
   className,
 }: ComboboxProps) {
@@ -50,21 +50,21 @@ export function Combobox({
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
-          role="combobox"
+          variant='outline'
+          role='combobox'
           aria-expanded={open}
           className={cn(
-            "w-full justify-between font-normal",
-            !selectedOption && "text-muted-foreground",
+            'w-full justify-between font-normal',
+            !selectedOption && 'text-muted-foreground',
             className
           )}
           disabled={disabled}
         >
           {selectedOption ? selectedOption.label : placeholder}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
+      <PopoverContent className='w-full p-0' align='start'>
         <Command>
           <CommandInput placeholder={searchPlaceholder} />
           <CommandList>
@@ -75,15 +75,16 @@ export function Combobox({
                   key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
-                    const selectedValue = currentValue === value ? "" : currentValue
+                    const selectedValue =
+                      currentValue === value ? '' : currentValue
                     onChange?.(selectedValue)
                     setOpen(false)
                   }}
                 >
                   <Check
                     className={cn(
-                      "mr-2 h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
+                      'mr-2 h-4 w-4',
+                      value === option.value ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                   {option.label}

@@ -10,7 +10,7 @@ export const Route = createFileRoute('/_authenticated/user/song')({
     // 🛡️ User route protection - require peserta permission
     try {
       const hasPermission = await authManager.hasPermission('peserta')
-      
+
       if (!hasPermission) {
         throw redirect({
           to: '/unauthorized',

@@ -1,5 +1,6 @@
-import React from 'react';
-import { Link } from '@tanstack/react-router';
+import React from 'react'
+import { Link } from '@tanstack/react-router'
+import { LayoutDashboard, Settings, Users, Shield } from 'lucide-react'
 import {
   Sidebar,
   SidebarContent,
@@ -9,66 +10,65 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/sidebar';
-import { usersPanelConfig } from '../../config/users-config';
-import { LayoutDashboard, Settings, Users, Shield } from 'lucide-react';
+} from '@/components/ui/sidebar'
+import { usersPanelConfig } from '../../config/users-config'
 
 export function UsersSidebar() {
   return (
     <Sidebar collapsible='icon' variant='sidebar'>
-      <SidebarHeader className="p-4 border-b">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Shield className="h-4 w-4" />
+      <SidebarHeader className='border-b p-4'>
+        <div className='flex items-center gap-2'>
+          <div className='bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-lg'>
+            <Shield className='h-4 w-4' />
           </div>
-          <div className="flex flex-col">
-            <span className="font-semibold text-sm">{usersPanelConfig.brandName}</span>
-            <span className="text-xs text-muted-foreground">v1.0.0</span>
+          <div className='flex flex-col'>
+            <span className='text-sm font-semibold'>
+              {usersPanelConfig.brandName}
+            </span>
+            <span className='text-muted-foreground text-xs'>v1.0.0</span>
           </div>
         </div>
       </SidebarHeader>
-      
-      <SidebarContent className="p-2">
+
+      <SidebarContent className='p-2'>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
               <Link
                 to={usersPanelConfig.navigation.dashboard.url}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent"
+                className='hover:bg-accent flex items-center gap-3 rounded-lg px-3 py-2'
               >
-                <LayoutDashboard className="h-4 w-4" />
+                <LayoutDashboard className='h-4 w-4' />
                 <span>{usersPanelConfig.navigation.dashboard.label}</span>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          
+
           <SidebarMenuItem>
             <SidebarMenuButton>
-              <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent cursor-pointer">
-                <Users className="h-4 w-4" />
+              <div className='hover:bg-accent flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2'>
+                <Users className='h-4 w-4' />
                 <span>Users</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
-          
+
           <SidebarMenuItem>
             <SidebarMenuButton>
-              <div className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-accent cursor-pointer">
-                <Settings className="h-4 w-4" />
+              <div className='hover:bg-accent flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2'>
+                <Settings className='h-4 w-4' />
                 <span>Settings</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarContent>
-      
-      <SidebarFooter className="p-4 border-t">
-        <div className="text-xs text-muted-foreground">
-          © 2024 Users Panel
-        </div>
+
+      <SidebarFooter className='border-t p-4'>
+        <div className='text-muted-foreground text-xs'>© 2024 Users Panel</div>
       </SidebarFooter>
-      
+
       <SidebarRail />
     </Sidebar>
-  );
+  )
 }
