@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnauthorizedRouteImport } from './routes/unauthorized'
+import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
 import { Route as ApprovedRouteImport } from './routes/approved'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -45,6 +46,11 @@ import { Route as AuthenticatedAdminSongsEditIdRouteImport } from './routes/_aut
 const UnauthorizedRoute = UnauthorizedRouteImport.update({
   id: '/unauthorized',
   path: '/unauthorized',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
+  id: '/privacy-policy',
+  path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApprovedRoute = ApprovedRouteImport.update({
@@ -219,6 +225,7 @@ const AuthenticatedAdminSongsEditIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/approved': typeof ApprovedRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/sign-in': typeof authSignInRoute
@@ -252,6 +259,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/approved': typeof ApprovedRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/sign-in': typeof authSignInRoute
   '/401': typeof errors401Route
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/approved': typeof ApprovedRoute
+  '/privacy-policy': typeof PrivacyPolicyRoute
   '/unauthorized': typeof UnauthorizedRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/(auth)/sign-in': typeof authSignInRoute
@@ -320,6 +329,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/approved'
+    | '/privacy-policy'
     | '/unauthorized'
     | '/admin'
     | '/sign-in'
@@ -353,6 +363,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/approved'
+    | '/privacy-policy'
     | '/unauthorized'
     | '/sign-in'
     | '/401'
@@ -385,6 +396,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/approved'
+    | '/privacy-policy'
     | '/unauthorized'
     | '/_authenticated/admin'
     | '/(auth)/sign-in'
@@ -420,6 +432,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   ApprovedRoute: typeof ApprovedRoute
+  PrivacyPolicyRoute: typeof PrivacyPolicyRoute
   UnauthorizedRoute: typeof UnauthorizedRoute
   authSignInRoute: typeof authSignInRoute
   errors401Route: typeof errors401Route
@@ -436,6 +449,13 @@ declare module '@tanstack/react-router' {
       path: '/unauthorized'
       fullPath: '/unauthorized'
       preLoaderRoute: typeof UnauthorizedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy-policy': {
+      id: '/privacy-policy'
+      path: '/privacy-policy'
+      fullPath: '/privacy-policy'
+      preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/approved': {
@@ -751,6 +771,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   ApprovedRoute: ApprovedRoute,
+  PrivacyPolicyRoute: PrivacyPolicyRoute,
   UnauthorizedRoute: UnauthorizedRoute,
   authSignInRoute: authSignInRoute,
   errors401Route: errors401Route,
